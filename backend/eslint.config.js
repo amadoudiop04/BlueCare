@@ -12,5 +12,10 @@ export default defineConfig([
       sourceType: 'module',
       globals: globals.node,
     },
+    rules: {
+      // `const { passwordHash, ...safe } = user` sert a retirer un champ :
+      // la variable extraite n'a pas vocation a etre utilisee.
+      'no-unused-vars': ['error', { ignoreRestSiblings: true, argsIgnorePattern: '^_' }],
+    },
   },
 ])

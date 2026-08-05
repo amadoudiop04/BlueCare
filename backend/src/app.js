@@ -2,8 +2,9 @@ import express from 'express'
 import cors from 'cors'
 import morgan from 'morgan'
 
-import { env } from './config/env.js'
+import { env, isProduction } from './config/env.js'
 import routes from './routes/index.js'
+import { seedDemoData } from './models/seed.js'
 import { notFound } from './middlewares/notFound.js'
 import { errorHandler } from './middlewares/errorHandler.js'
 
@@ -13,6 +14,9 @@ import { errorHandler } from './middlewares/errorHandler.js'
  */
 export function createApp() {
   const app = express()
+
+  // Le stockage est en memoire : sans amorcage, l'application demarre vide.
+  if (env.seedDemoData && !isProduction) seedDemoData()
 
   app.use(cors({ origin: env.corsOrigin }))
   app.use(express.json())

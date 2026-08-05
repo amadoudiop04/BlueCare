@@ -1,0 +1,581 @@
+### =========================================================================
+### BlueCare - requetes d'exemple
+### =========================================================================
+### Ouvrir ce fichier dans VS Code avec l'extension « REST Client »
+### (humao.rest-client) et cliquer sur « Send Request » au-dessus de chaque
+### bloc. Fonctionne aussi avec le client HTTP de JetBrains.
+###
+### Prerequis : `npm run dev` a la racine (API sur le port 3000).
+###
+### IMPORTANT : les requetes se chainent. Executer « Connexion » en premier :
+### les suivantes reutilisent le jeton via {{login.response.body.$...}}.
+### =========================================================================
+
+@baseUrl = http://localhost:3000/api
+
+### -------------------------------------------------------------------------
+### 1. Sonde de sante (seule route ouverte sans jeton)
+### -------------------------------------------------------------------------
+
+GET {{baseUrl}}/health
+
+### -------------------------------------------------------------------------
+### 2. Authentification
+### -------------------------------------------------------------------------
+
+### Connexion directrice -> acces complet
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "directrice@papillonbleu.test",
+  "password": "Directrice2026!"
+}
+
+###
+@token = {{login.response.body.$.meta.accessToken}}
+@refreshToken = {{login.response.body.$.meta.refreshToken}}
+
+### Connexion educateur (perimetre : Les Coquelicots)
+# @name loginEducator
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "educateur.coquelicots@papillonbleu.test",
+  "password": "Educateur2026!"
+}
+
+###
+@educatorToken = {{loginEducator.response.body.$.meta.accessToken}}
+
+### Connexion infirmiere (donnees medicales)
+# @name loginNurse
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "infirmiere@papillonbleu.test",
+  "password": "Infirmiere2026!"
+}
+
+###
+@nurseToken = {{loginNurse.response.body.$.meta.accessToken}}
+
+### Connexion famille (lecture seule, son enfant)
+# @name loginFamily
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "famille.bakayoko@papillonbleu.test",
+  "password": "Famille2026!"
+}
+
+###
+@familyToken = {{loginFamily.response.body.$.meta.accessToken}}
+
+### Profil courant et perimetre
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{educatorToken}}
+
+### Renouveler l'access token
+POST {{baseUrl}}/auth/refresh
+Content-Type: application/json
+
+{ "refreshToken": "{{refreshToken}}" }
+
+### Changer son mot de passe
+POST {{baseUrl}}/auth/password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "Directrice2026!",
+  "newPassword": "NouveauSecret2026!"
+}
+
+### -------------------------------------------------------------------------
+### 3. Refus attendus (verifier le RBAC)
+### -------------------------------------------------------------------------
+
+### Sans jeton -> 401
+GET {{baseUrl}}/children
+
+### Jeton invalide -> 401
+GET {{baseUrl}}/children
+Authorization: Bearer pas.un.vrai.jeton
+
+### Educateur sur le tableau de bord direction -> 403
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{educatorToken}}
+
+### Famille sur les seances internes -> 403
+GET {{baseUrl}}/sessions
+Authorization: Bearer {{familyToken}}
+
+### -------------------------------------------------------------------------
+### 4. Referentiel (listes deroulantes du front)
+### -------------------------------------------------------------------------
+
+GET {{baseUrl}}/reference
+Authorization: Bearer {{token}}
+
+### -------------------------------------------------------------------------
+### 5. Fiches enfants
+### -------------------------------------------------------------------------
+
+### Liste (le perimetre du role s'applique)
+# @name children
+GET {{baseUrl}}/children?pageSize=50
+Authorization: Bearer {{token}}
+
+###
+@childId = {{children.response.body.$.data[0].id}}
+
+### Comparer le perimetre : l'educateur ne voit que ses groupes
+GET {{baseUrl}}/children
+Authorization: Bearer {{educatorToken}}
+
+### ... et la famille, uniquement son enfant
+GET {{baseUrl}}/children
+Authorization: Bearer {{familyToken}}
+
+### Filtres disponibles
+GET {{baseUrl}}/children?search=lina&group=Les Coquelicots&disabilityType=autism&status=all
+Authorization: Bearer {{token}}
+
+### Fiche individuelle
+### Note : `referringDoctor` est masque pour l'educateur et la famille.
+GET {{baseUrl}}/children/{{childId}}
+Authorization: Bearer {{token}}
+
+### Creer une fiche (directeur uniquement)
+# @name createChild
+POST {{baseUrl}}/children
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Nour",
+  "lastName": "Diallo",
+  "birthDate": "2018-03-14",
+  "gender": "female",
+  "group": "Les Coquelicots",
+  "address": "18 rue des Baobabs, Bobo-Dioulasso",
+  "disability": {
+    "type": "language",
+    "details": "Retard de langage, suivi orthophonique.",
+    "recognizedAt": "2023-05-10",
+    "supportPlan": "Supports visuels, consignes courtes."
+  },
+  "familyContacts": [
+    {
+      "firstName": "Awa",
+      "lastName": "Diallo",
+      "relationship": "mother",
+      "phone": "+226 70 55 44 33",
+      "email": "awa.diallo@example.org",
+      "isPrimary": true
+    }
+  ],
+  "referringDoctor": {
+    "lastName": "Kabore",
+    "firstName": "Paul",
+    "specialty": "Pediatrie",
+    "phone": "+226 20 96 33 33"
+  },
+  "notes": "Arrivee en septembre."
+}
+
+###
+@newChildId = {{createChild.response.body.$.data.id}}
+
+### Erreurs de validation : tous les champs fautifs en une reponse 400
+POST {{baseUrl}}/children
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "birthDate": "2050-01-01",
+  "disability": { "type": "inconnu" }
+}
+
+### Mise a jour partielle (infirmiere ou directeur)
+PATCH {{baseUrl}}/children/{{newChildId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "group": "Les Bleuets" }
+
+### Archiver (l'historique est conserve)
+DELETE {{baseUrl}}/children/{{newChildId}}
+Authorization: Bearer {{token}}
+
+### -------------------------------------------------------------------------
+### 6. Presences quotidiennes et alertes
+### -------------------------------------------------------------------------
+
+### Feuille du jour : les enfants sans saisie ont `record: null`
+GET {{baseUrl}}/attendance?group=Les Coquelicots
+Authorization: Bearer {{educatorToken}}
+
+### Saisir une presence (la reponse renvoie les alertes actives dans `meta`)
+POST {{baseUrl}}/attendance
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "childId": "{{childId}}",
+  "date": "2026-08-06",
+  "status": "present",
+  "arrivalTime": "08:45",
+  "departureTime": "16:30"
+}
+
+### Absence justifiee : le motif est obligatoire (sans lui -> 400)
+POST {{baseUrl}}/attendance
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "childId": "{{childId}}",
+  "date": "2026-08-06",
+  "status": "excused",
+  "reason": "Rendez-vous medical"
+}
+
+### Feuille d'appel d'un groupe en une requete (tout ou rien)
+POST {{baseUrl}}/attendance/bulk
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "date": "2026-08-06",
+  "records": [
+    { "childId": "{{childId}}", "status": "present" }
+  ]
+}
+
+### Alertes d'absences repetees (tableau de bord)
+GET {{baseUrl}}/attendance/alerts
+Authorization: Bearer {{token}}
+
+### Historique, compteurs et alertes d'un enfant
+GET {{baseUrl}}/children/{{childId}}/attendance
+Authorization: Bearer {{educatorToken}}
+
+### Annuler une saisie erronee
+DELETE {{baseUrl}}/attendance/{{childId}}/2026-08-06
+Authorization: Bearer {{educatorToken}}
+
+### -------------------------------------------------------------------------
+### 7. Galerie d'activites anonymisee
+### -------------------------------------------------------------------------
+
+### Vue interne : les participants sont nommes
+GET {{baseUrl}}/activities
+Authorization: Bearer {{educatorToken}}
+
+### Galerie d'un enfant : les AUTRES enfants deviennent « Enfant #A3F1 »,
+### y compris dans la description et les legendes de photos.
+GET {{baseUrl}}/children/{{childId}}/gallery
+Authorization: Bearer {{educatorToken}}
+
+### Creer une activite
+POST {{baseUrl}}/activities
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "title": "Atelier modelage",
+  "category": "arts",
+  "date": "2026-08-06",
+  "group": "Les Coquelicots",
+  "location": "Salle bleue",
+  "description": "Travail de la terre en petit groupe.",
+  "participantIds": ["{{childId}}"],
+  "media": [
+    { "url": "/media/2026/modelage.jpg", "caption": "Les sculptures terminees" }
+  ]
+}
+
+### -------------------------------------------------------------------------
+### 8. Objectifs pedagogiques
+### -------------------------------------------------------------------------
+
+### Objectifs d'un enfant + avancement moyen
+# @name goals
+GET {{baseUrl}}/children/{{childId}}/goals
+Authorization: Bearer {{educatorToken}}
+
+###
+@goalId = {{goals.response.body.$.data[0].id}}
+
+### Creer un objectif
+POST {{baseUrl}}/children/{{childId}}/goals
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "title": "Ranger son materiel en fin d atelier",
+  "domain": "autonomy",
+  "description": "Ranger seul, sans rappel de l adulte.",
+  "baseline": "Range sur demande repetee.",
+  "successCriteria": "Range spontanement trois seances de suite.",
+  "targetDate": "2026-12-31"
+}
+
+### Faire evoluer le taux d'avancement a la main
+PATCH {{baseUrl}}/goals/{{goalId}}
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{ "progress": 60 }
+
+### Serie d'evolution d'un seul objectif
+GET {{baseUrl}}/goals/{{goalId}}/progress?months=6
+Authorization: Bearer {{educatorToken}}
+
+### -------------------------------------------------------------------------
+### 9. Seances et comptes-rendus
+### -------------------------------------------------------------------------
+
+### Planifier / enregistrer une seance
+### (date future -> `planned`, date passee ou du jour -> `completed`)
+# @name session
+POST {{baseUrl}}/children/{{childId}}/sessions
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "date": "2026-08-06",
+  "type": "individual",
+  "title": "Atelier pictogrammes",
+  "startTime": "10:00",
+  "endTime": "10:45",
+  "location": "Salle bleue",
+  "goalIds": ["{{goalId}}"]
+}
+
+###
+@sessionId = {{session.response.body.$.data.id}}
+
+### Deposer le compte-rendu.
+### Deux effets : la seance passe en `completed`, et le taux d'avancement de
+### chaque objectif evalue est mis a jour (voir `meta.updatedGoals`).
+POST {{baseUrl}}/sessions/{{sessionId}}/report
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "mood": "very-good",
+  "observations": "Quatre demandes spontanees avec le classeur, sans guidance physique.",
+  "goalProgress": [
+    {
+      "goalId": "{{goalId}}",
+      "progress": 85,
+      "comment": "Nette progression sur les demandes spontanees."
+    }
+  ],
+  "attentionPoints": ["Fatigue apres 30 minutes"],
+  "nextSteps": "Reprendre le meme support la prochaine fois.",
+  "healthFlag": { "flagged": false }
+}
+
+### Signaler un point de sante -> alerte critique pour l'infirmiere
+POST {{baseUrl}}/sessions/{{sessionId}}/report
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "mood": "difficult",
+  "observations": "Seance ecourtee, l enfant se plaint de maux de ventre.",
+  "healthFlag": {
+    "flagged": true,
+    "description": "Douleurs abdominales a surveiller."
+  }
+}
+
+### Historique complet des seances d'un enfant (comptes-rendus inclus)
+GET {{baseUrl}}/children/{{childId}}/sessions
+Authorization: Bearer {{educatorToken}}
+
+### Comptes-rendus en attente, avec les retards
+GET {{baseUrl}}/reports/pending
+Authorization: Bearer {{educatorToken}}
+
+### Annuler une seance (impossible si elle a deja un compte-rendu)
+POST {{baseUrl}}/sessions/{{sessionId}}/cancel
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{ "reason": "Enfant absent" }
+
+### -------------------------------------------------------------------------
+### 10. Courbes d'evolution sur 6 mois
+### -------------------------------------------------------------------------
+
+### Une serie par objectif : `points` dates, `monthly` (moyenne par mois,
+### `null` sans seance) et `trend` (start / current / delta). Idem pour l'humeur.
+GET {{baseUrl}}/children/{{childId}}/progress?months=6
+Authorization: Bearer {{educatorToken}}
+
+### La famille y a acces pour son enfant
+GET {{baseUrl}}/children/{{childId}}/progress
+Authorization: Bearer {{familyToken}}
+
+### -------------------------------------------------------------------------
+### 11. Traitements et rappels de medicaments (infirmiere / directeur)
+### -------------------------------------------------------------------------
+
+### Prises attendues aujourd'hui, avec leur statut
+# @name doses
+GET {{baseUrl}}/medications/doses
+Authorization: Bearer {{nurseToken}}
+
+###
+@medicationId = {{doses.response.body.$.data[0].medicationId}}
+
+### Tracer une prise -> le rappel correspondant disparait du fil
+POST {{baseUrl}}/medications/{{medicationId}}/administrations
+Authorization: Bearer {{nurseToken}}
+Content-Type: application/json
+
+{
+  "scheduledTime": "12:00",
+  "status": "given",
+  "givenAt": "12:05",
+  "notes": "Pris sans difficulte pendant le repas."
+}
+
+### Traitements d'un enfant
+GET {{baseUrl}}/children/{{childId}}/medications
+Authorization: Bearer {{nurseToken}}
+
+### Nouveau traitement
+POST {{baseUrl}}/children/{{childId}}/medications
+Authorization: Bearer {{nurseToken}}
+Content-Type: application/json
+
+{
+  "name": "Doliprane",
+  "dosage": "150 mg",
+  "route": "oral",
+  "schedule": { "times": ["08:00", "16:00"], "days": [1, 2, 3, 4, 5] },
+  "startDate": "2026-08-01",
+  "prescribedBy": "Dr Marc Ouedraogo",
+  "instructions": "Uniquement en cas de fievre."
+}
+
+### Un educateur n'a pas acces au medical -> 403
+GET {{baseUrl}}/children/{{childId}}/medications
+Authorization: Bearer {{educatorToken}}
+
+### -------------------------------------------------------------------------
+### 12. Tableau de bord et notifications
+### -------------------------------------------------------------------------
+
+### Vue globale de la direction
+GET {{baseUrl}}/dashboard
+Authorization: Bearer {{token}}
+
+### Fil de notifications : chaque role ne voit que ce qui le concerne
+# @name notifications
+GET {{baseUrl}}/notifications
+Authorization: Bearer {{nurseToken}}
+
+### Filtres
+GET {{baseUrl}}/notifications?type=medication-reminder&unreadOnly=true
+Authorization: Bearer {{nurseToken}}
+
+### Comparer avec la vue educateur (ni medicaments, ni alertes de sante)
+GET {{baseUrl}}/notifications
+Authorization: Bearer {{educatorToken}}
+
+### Acquitter une notification
+POST {{baseUrl}}/notifications/{{notifications.response.body.$.data[0].id}}/read
+Authorization: Bearer {{nurseToken}}
+
+### Tout marquer comme lu
+POST {{baseUrl}}/notifications/read
+Authorization: Bearer {{nurseToken}}
+
+### Enregistrer un terminal pour le push
+POST {{baseUrl}}/notifications/subscriptions
+Authorization: Bearer {{nurseToken}}
+Content-Type: application/json
+
+{
+  "endpoint": "https://push.example.org/abc123",
+  "platform": "web"
+}
+
+### -------------------------------------------------------------------------
+### 13. Export PDF du rapport de progression
+### -------------------------------------------------------------------------
+
+### REST Client propose d'enregistrer la reponse (icone « Save Response »).
+GET {{baseUrl}}/children/{{childId}}/progress.pdf?months=6
+Authorization: Bearer {{token}}
+
+### -------------------------------------------------------------------------
+### 14. Lien de suivi famille (lecture seule, sans mot de passe)
+### -------------------------------------------------------------------------
+
+# @name shareLink
+POST {{baseUrl}}/children/{{childId}}/share-link
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{}
+
+###
+@shareToken = {{shareLink.response.body.$.data.token}}
+
+### Consultation sans aucun en-tete d'authentification
+GET {{baseUrl}}/share/{{shareToken}}/progress
+
+###
+GET {{baseUrl}}/share/{{shareToken}}/goals
+
+### Le meme jeton ailleurs -> 401 (sa portee s'arrete a cet enfant)
+GET {{baseUrl}}/children
+Authorization: Bearer {{shareToken}}
+
+### -------------------------------------------------------------------------
+### 15. Gestion des comptes (directeur uniquement)
+### -------------------------------------------------------------------------
+
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+### Creer un compte educateur avec ses groupes
+POST {{baseUrl}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "email": "nouvel.educateur@papillonbleu.test",
+  "role": "educator",
+  "firstName": "Ibrahim",
+  "lastName": "Ouattara",
+  "password": "MotDePasseSolide2026!",
+  "groups": ["Les Bleuets"]
+}
+
+### Creer un compte famille rattache a un enfant
+POST {{baseUrl}}/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "email": "famille.diallo@papillonbleu.test",
+  "role": "family",
+  "firstName": "Awa",
+  "lastName": "Diallo",
+  "password": "MotDePasseSolide2026!",
+  "childIds": ["{{childId}}"]
+}

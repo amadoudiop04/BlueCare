@@ -27,6 +27,10 @@ export class ApiError extends Error {
     return new ApiError(404, message)
   }
 
+  static conflict(message = 'Conflit avec l etat actuel de la ressource', details) {
+    return new ApiError(409, message, details)
+  }
+
   static internal(message = 'Erreur interne du serveur') {
     return new ApiError(500, message)
   }
