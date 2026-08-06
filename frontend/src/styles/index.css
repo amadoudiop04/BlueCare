@@ -1,3 +1,61 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+  }
+
+  /* Les transitions de la maquette, appliquees aux elements interactifs. */
+  button,
+  input,
+  textarea,
+  select,
+  a,
+  label,
+  [role='button'] {
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease,
+      border-color 0.18s ease,
+      box-shadow 0.22s ease,
+      transform 0.18s ease;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-lg border-[3px] border-canvas bg-line-strong;
+  }
+
+  /* Anneau de focus homogene, visible au clavier uniquement. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand/45 ring-offset-1 ring-offset-white;
+  }
+}
+
+@layer utilities {
+  /* Retards en cascade pour les listes animees. */
+  .delay-step-1 {
+    animation-delay: 0.05s;
+  }
+  .delay-step-2 {
+    animation-delay: 0.1s;
+  }
+  .delay-step-3 {
+    animation-delay: 0.15s;
+  }
+  .delay-step-4 {
+    animation-delay: 0.2s;
+  }
+}
