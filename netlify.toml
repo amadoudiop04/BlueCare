@@ -1,0 +1,55 @@
+# Deploiement Netlify du front BlueCare. Voir DEPLOIEMENT.md pour la procedure.
+#
+# Netlify sert l'interface (fichiers statiques). L'API Express, elle, tourne
+# ailleurs : c'est un serveur Node persistant, pas un site statique.
+
+[build]
+  # Le depot est un monorepo npm workspaces : on construit depuis la racine.
+  command = "npm run build"
+  publish = "frontend/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# --- Passerelle vers l'API ----------------------------------------------------
+# A REMPLACER par l'URL publique de votre backend avant le premier deploiement.
+#
+# Ce relais n'est pas un confort : le cookie de session est `SameSite=Strict`,
+# donc un navigateur ne l'enverrait JAMAIS a une API hebergee sur un autre
+# domaine. En passant par ici, tout se joue sur l'origine Netlify et le cookie
+# circule normalement. Sans ce bloc, la connexion echoue silencieusement.
+[[redirects]]
+  from = "/api/*"
+  to = "https://REMPLACER-PAR-VOTRE-BACKEND.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# --- Application monopage -----------------------------------------------------
+# Sans cette regle, ouvrir ou rafraichir une URL profonde renvoie un 404 :
+# `/reinitialisation/<jeton>` recu par courriel serait inutilisable.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# --- En-tetes -----------------------------------------------------------------
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+# Les fichiers produits par Vite portent un hachage dans leur nom : ils peuvent
+# etre caches indefiniment. `index.html`, lui, ne doit jamais l'etre, sinon un
+# deploiement ne serait pas vu par les navigateurs deja ouverts.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
