@@ -114,14 +114,24 @@ export const env = {
   anonymizationSalt: process.env.ANONYMIZATION_SALT ?? 'bluecare-dev-salt',
 
   /**
-   * Supabase. Les clés ne sont pas encore utilisées : la couche `models/`
-   * est en mémoire (voir README). Elles sont declarees ici pour que le
-   * branchement ne touche qu'aux modèles.
+   * Supabase.
+   *
+   * Deux nomenclatures coexistent selon l'âge du projet :
+   *   - récente : `sb_secret_...` et `sb_publishable_...`
+   *   - historique : clés `service_role` et `anon`
+   *
+   * Les deux sont acceptées et jouent le même rôle. La clé serveur est lue
+   * dans l'ordre nouveau puis ancien : un projet créé aujourd'hui fonctionne
+   * sans configuration particulière, et les projets existants continuent de
+   * marcher. Un nom inattendu ferait basculer l'application sur le stockage
+   * en mémoire sans rien signaler, ce qui est précisément le piège à éviter.
    */
   supabase: {
     url: process.env.SUPABASE_URL ?? null,
-    serviceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? null,
-    anonKey: process.env.SUPABASE_ANON_KEY ?? null,
+    secretKey:
+      process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? null,
+    publishableKey:
+      process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY ?? null,
   },
 
   /** Jeu de données de démonstration, jamais charge en production. */
