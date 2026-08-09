@@ -4,18 +4,18 @@ import { logger } from '../../utils/logger.js'
 import { newId, nowIso } from '../ids.js'
 
 /**
- * Socle commun aux modeles Supabase.
+ * Socle commun aux modèles Supabase.
  *
  * Deux conventions a traduire dans les deux sens :
  *  - Postgres nomme ses colonnes en `snake_case`, le code metier en `camelCase`
- *  - une colonne absente cote base ne doit pas devenir `undefined` cote objet,
- *    ni l'inverse : un PATCH ne transmet que les champs reellement fournis.
+ *  - une colonne absente côté base ne doit pas devenir `undefined` côté objet,
+ *    ni l'inverse : un PATCH ne transmet que les champs réellement fournis.
  */
 
 const toSnake = (key) => key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`)
 const toCamel = (key) => key.replace(/_([a-z0-9])/g, (_, letter) => letter.toUpperCase())
 
-/** Objet metier -> ligne Postgres. Les cles `undefined` sont ecartees. */
+/** Objet metier -> ligne Postgres. Les clés `undefined` sont ecartees. */
 function toRow(data = {}) {
   const row = {}
 
@@ -44,25 +44,25 @@ const fromRows = (rows = []) => rows.map(fromRow)
 /**
  * Traduit une erreur PostgREST en erreur applicative.
  *
- * Les contraintes posees dans `schema.sql` doublent des regles deja verifiees
- * par les services ; si l'une remonte quand meme, c est un conflit reel
- * (23505 = doublon, 23503 = reference manquante) et non un bug a 500.
+ * Les contraintes posees dans `schema.sql` doublent des règles déjà vérifiées
+ * par les services ; si l'une remonte quand même, c'est un conflit réel
+ * (23505 = doublon, 23503 = référence manquante) et non un bug a 500.
  */
 function raise(error, context) {
   if (!error) return
 
   if (error.code === '23505') {
-    throw ApiError.conflict('Cette donnee existe deja')
+    throw ApiError.conflict('Cette donnée existe déjà')
   }
   if (error.code === '23503') {
-    throw ApiError.badRequest('Reference introuvable')
+    throw ApiError.badRequest('Référence introuvable')
   }
 
   logger.error(`Supabase [${context}]`, error.message, error.details ?? '')
-  throw ApiError.internal("La base de donnees n a pas pu traiter la requete")
+  throw ApiError.internal("La base de données n'a pas pu traiter la requête")
 }
 
-/** Execute une requete PostgREST et rend les lignes converties. */
+/** Execute une requête PostgREST et rend les lignes converties. */
 export async function runMany(builder, context) {
   const { data, error } = await builder
   raise(error, context)
@@ -77,8 +77,8 @@ export async function runMaybeOne(builder, context) {
 }
 
 /**
- * Operations CRUD identiques d une table a l'autre.
- * Les modeles ajoutent par-dessus leurs filtres et leurs tris.
+ * Opérations CRUD identiques d'une table a l'autre.
+ * Les modèles ajoutent par-dessus leurs filtres et leurs tris.
  */
 export function createRepository({ table, prefix, immutable = [] }) {
   const from = () => supabase().from(table)
@@ -111,9 +111,9 @@ export function createRepository({ table, prefix, immutable = [] }) {
     },
 
     /**
-     * Mise a jour partielle. Les colonnes d'identite (`id`, `child_id`...) sont
-     * retirees du patch : un objectif ne change jamais d enfant, et une erreur
-     * d appel ne doit pas pouvoir le deplacer.
+     * Mise à jour partielle. Les colonnes d'identité (`id`, `child_id`...) sont
+     * retirées du patch : un objectif ne change jamais d'enfant, et une erreur
+     * d'appel ne doit pas pouvoir le déplacer.
      */
     async update(id, patch = {}) {
       const data = { ...patch }

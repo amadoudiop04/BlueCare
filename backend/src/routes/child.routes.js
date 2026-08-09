@@ -30,8 +30,8 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 const router = Router()
 
 /**
- * Toutes les routes enfants demandent un jeton. Le role ouvre la route,
- * le perimetre (services/access.service.js) decide de quel enfant il s'agit.
+ * Toutes les routes enfants demandent un jeton. Le rôle ouvre la route,
+ * le périmètre (services/access.service.js) decide de quel enfant il s'agit.
  */
 router.use(authenticate)
 
@@ -46,21 +46,21 @@ router.get('/:childId', asyncHandler(getChild))
 router.patch('/:childId', medical, asyncHandler(updateChild))
 router.delete('/:childId', authorize(...DIRECTION_ROLES), asyncHandler(deleteChild))
 
-// Presences
+// Présences
 router.get('/:childId/attendance', asyncHandler(getChildAttendance))
 router.get('/:childId/attendance/alerts', staff, asyncHandler(getChildAttendanceAlerts))
 
-// Galerie anonymisee
+// Galerie anonymisée
 router.get('/:childId/gallery', asyncHandler(getChildGallery))
 
-// Suivi pedagogique
+// Suivi pédagogique
 router.get('/:childId/goals', asyncHandler(listChildGoals))
 router.post('/:childId/goals', pedagogy, asyncHandler(createGoal))
 router.get('/:childId/progress', asyncHandler(getChildProgress))
 router.get('/:childId/sessions', staff, asyncHandler(getChildSessions))
 router.post('/:childId/sessions', pedagogy, asyncHandler(createSession))
 
-// Donnees medicales
+// Données médicales
 router.get('/:childId/medications', medical, asyncHandler(listChildMedications))
 router.post('/:childId/medications', medical, asyncHandler(createMedication))
 router.get('/:childId/administrations', medical, asyncHandler(listChildAdministrations))

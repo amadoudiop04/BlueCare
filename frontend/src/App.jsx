@@ -18,11 +18,11 @@ import SessionReportPage from '@/pages/SessionReportPage.jsx'
 import SharedProgressPage from '@/pages/SharedProgressPage.jsx'
 
 /**
- * Routage de l application.
+ * Routage de l'application.
  *
- * `RequireAuth` filtre par role pour eviter d'ouvrir un ecran vide ou un 403.
- * Ce n est pas la protection : le backend refuse de toute facon les requetes
- * hors perimetre, quel que soit ce que le front affiche.
+ * `RequireAuth` filtre par rôle pour éviter d'ouvrir un écran vide ou un 403.
+ * Ce n'est pas la protection : le backend refuse de toute façon les requêtes
+ * hors périmètre, quel que soit ce que le front affiche.
  */
 const STAFF = ['educator', 'nurse', 'director', 'admin']
 
@@ -33,11 +33,11 @@ function App() {
         <Routes>
           <Route path="/connexion" element={<LoginPage />} />
 
-          {/* Reinitialisation : accessible sans session, c'est tout l'objet. */}
+          {/* Réinitialisation : accessible sans session, c'est tout l'objet. */}
           <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
           <Route path="/reinitialisation/:token" element={<ResetPasswordPage />} />
 
-          {/* Lien famille : consultable sans compte, la portee est dans le jeton. */}
+          {/* Lien famille : consultable sans compte, la portée est dans le jeton. */}
           <Route path="/suivi/:token" element={<SharedProgressPage />} />
 
           <Route

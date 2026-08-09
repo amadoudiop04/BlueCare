@@ -1,6 +1,6 @@
 import { createRepository, runMany } from './repository.js'
 
-/** Objectifs pedagogiques (Postgres). */
+/** Objectifs pédagogiques (Postgres). */
 
 const repository = createRepository({ table: 'goals', prefix: 'goa', immutable: ['childId'] })
 

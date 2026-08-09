@@ -5,13 +5,13 @@ import { createSessionToken, hashSessionToken } from '../utils/sessionToken.js'
 /**
  * Cycle de vie des sessions de connexion.
  *
- * Le jeton n'existe en clair qu'a deux instants : quand il est cree (envoye
- * dans le cookie) et quand il revient dans une requete. En base, seul son
+ * Le jeton n'existe en clair qu'a deux instants : quand il est crée (envoyé
+ * dans le cookie) et quand il revient dans une requête. En base, seul son
  * hachage est conserve.
  *
- * Expiration glissante : chaque requete repousse l'echeance, une session
- * inactive s'eteint donc d'elle-meme. Une borne absolue evite qu un poste
- * jamais deconnecte reste ouvert indefiniment.
+ * Expiration glissante : chaque requête repousse l'échéance, une session
+ * inactive s'eteint donc d'elle-même. Une borne absolue évite qu'un poste
+ * jamais déconnecte reste ouvert indefiniment.
  */
 
 const minutes = (value) => value * 60_000
@@ -22,7 +22,7 @@ const shortUserAgent = (value) => (typeof value === 'string' ? value.slice(0, 20
 export const sessionAuthService = {
   /** Ouvre une session et rend le jeton en clair, une seule fois. */
   async open(user, request = {}) {
-    // Menage opportuniste : evite une tache planifiee pour si peu.
+    // Menage opportuniste : évite une tache planifiée pour si peu.
     await authSessionModel.removeExpired().catch(() => 0)
 
     const token = createSessionToken()
@@ -42,7 +42,7 @@ export const sessionAuthService = {
   },
 
   /**
-   * Retrouve la session d un jeton et repousse son echeance.
+   * Retrouve la session d'un jeton et repousse son échéance.
    * Rend `null` si le jeton est inconnu ou la session expiree.
    */
   async resolve(token) {
@@ -63,8 +63,8 @@ export const sessionAuthService = {
 
     const nextExpiry = new Date(now + minutes(env.session.idleMinutes)).toISOString()
 
-    // On n'ecrit que si l'echeance bouge vraiment : sans ce garde-fou, chaque
-    // requete de chaque utilisateur ferait un UPDATE.
+    // On n'écrit que si l'échéance bouge vraiment : sans ce garde-fou, chaque
+    // requête de chaque utilisateur ferait un UPDATE.
     const stale = new Date(session.lastSeenAt).getTime() < now - minutes(env.session.touchMinutes)
 
     if (stale) {

@@ -2,10 +2,10 @@ import { newId, nowIso } from '../ids.js'
 import { db, snapshot } from './store.js'
 
 /**
- * Acquittements et abonnements push (memoire).
+ * Acquittements et abonnements push (mémoire).
  *
- * Le fil de notifications n est pas stocke : il est recalcule a chaque lecture
- * a partir des donnees metier. Seuls l'acquittement et les abonnements le
+ * Le fil de notifications n'est pas stocke : il est recalcule à chaque lecture
+ * à partir des données metier. Seuls l'acquittement et les abonnements le
  * sont, parce qu'ils ne se deduisent de rien.
  */
 

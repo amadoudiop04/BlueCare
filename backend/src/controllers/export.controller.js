@@ -4,7 +4,7 @@ import { pdfReportService } from '../services/pdfReport.service.js'
  * Export PDF du rapport de progression.
  *
  * Les en-tetes sont poses avant le rendu : une fois le premier octet du PDF
- * ecrit, il est trop tard pour annoncer le nom du fichier.
+ * écrit, il est trop tard pour annoncer le nom du fichier.
  */
 export async function exportProgressReport(req, res) {
   const { data, filename } = await pdfReportService.prepareProgressReport(

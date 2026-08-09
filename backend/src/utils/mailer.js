@@ -5,14 +5,14 @@ import { logger } from './logger.js'
  * Envoi de courriels.
  *
  * Aucun fournisseur n'est branche : le centre n'en a pas encore choisi. Le
- * transport par defaut ECRIT dans les logs du serveur, ce qui suffit en
- * developpement pour recuperer un lien de reinitialisation.
+ * transport par défaut ECRIT dans les logs du serveur, ce qui suffit en
+ * développement pour récupérer un lien de réinitialisation.
  *
  * Brancher un vrai service (SMTP, Resend, Postmark) revient a remplacer
  * `transport` ci-dessous : rien d'autre dans l'application n'envoie de mail.
  *
- * En production, le transport console refuse d'agir plutot que de faire croire
- * qu'un message est parti — un lien de reinitialisation qui n'arrive jamais
+ * En production, le transport console refuse d'agir plutôt que de faire croire
+ * qu'un message est parti — un lien de réinitialisation qui n'arrive jamais
  * est pire qu'une erreur visible.
  */
 
@@ -50,24 +50,24 @@ export function sendMail(message) {
   return transport.send(message)
 }
 
-/** Lien de reinitialisation, adresse a une personne qui a perdu son acces. */
+/** Lien de réinitialisation, adresse a une personne qui a perdu son accès. */
 export function sendPasswordResetMail({ email, firstName, token, mfaRequired }) {
   const link = `${env.appUrl}/reinitialisation/${token}`
   const minutes = Math.round(env.auth.resetTtlMinutes)
 
   return sendMail({
     to: email,
-    subject: 'BlueCare - reinitialisation de votre mot de passe',
+    subject: 'BlueCare - réinitialisation de votre mot de passe',
     text:
       `Bonjour ${firstName},\n\n` +
-      `Une reinitialisation de mot de passe a ete demandee pour votre compte BlueCare.\n` +
+      `Une réinitialisation de mot de passe a été demandée pour votre compte BlueCare.\n` +
       `Ouvrez ce lien pour choisir un nouveau mot de passe :\n\n` +
       `${link}\n\n` +
       `Ce lien expire dans ${minutes} minutes et ne fonctionne qu'une fois.\n` +
       (mfaRequired
-        ? `Votre compte est protege par un code a usage unique : il vous sera demande.\n`
+        ? `Votre compte est protégé par un code à usage unique : il vous sera demandé.\n`
         : '') +
-      `\nSi vous n'etes pas a l'origine de cette demande, ignorez ce message : ` +
+      `\nSi vous n'êtes pas à l'origine de cette demande, ignorez ce message : ` +
       `votre mot de passe actuel reste valable.\n`,
   })
 }

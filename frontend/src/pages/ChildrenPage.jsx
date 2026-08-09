@@ -19,11 +19,11 @@ import { formatDate, initials, percent, progressTone } from '@/lib/format.js'
 import { cx } from '@/lib/ui.js'
 
 /**
- * Liste des enfants accompagnes.
+ * Liste des enfants accompagnés.
  *
- * La progression affichee sur chaque carte vient d un unique appel a `/goals`
- * (tous les objectifs du perimetre), regroupe cote client. Interroger
- * `/children/:id/goals` par carte ferait une requete par enfant.
+ * La progression affichée sur chaque carte vient d'un unique appel a `/goals`
+ * (tous les objectifs du périmètre), regroupe côté client. Interroger
+ * `/children/:id/goals` par carte ferait une requête par enfant.
  */
 
 async function loadChildren(status) {
@@ -59,8 +59,8 @@ async function loadChildren(status) {
 function ChildrenPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  // `active` par defaut : les fiches archivees ne polluent pas la liste, mais
-  // restent atteignables — sans ce filtre, archiver reviendrait a perdre l enfant.
+  // `active` par défaut : les fiches archivees ne polluent pas la liste, mais
+  // restent atteignables — sans ce filtre, archiver reviendrait a perdre l'enfant.
   const [status, setStatus] = useState('active')
   const { data, error, loading, reload } = useApi(() => loadChildren(status), [status])
 
@@ -84,10 +84,10 @@ function ChildrenPage() {
     <>
       <PageHeader
         crumb="Gestion des enfants"
-        title="Enfants accompagnes"
+        title="Enfants accompagnés"
         search={<HeaderSearch value={search} onChange={setSearch} />}
         action={
-          // La creation d une fiche appartient a la direction.
+          // La création d'une fiche appartient a la direction.
           ['director', 'admin'].includes(user.role) ? (
             <Button onClick={() => navigate('/enfants/nouveau')}>+ Nouvel enfant</Button>
           ) : null
@@ -119,7 +119,7 @@ function ChildrenPage() {
           <div className="flex-1" />
           <span className="text-[12.5px] text-muted">
             {loading ? '…' : `${visible.length} enfant${visible.length > 1 ? 's' : ''}`}
-            {user.role === 'educator' ? ' dans vos groupes' : ' accompagnes'}
+            {user.role === 'educator' ? ' dans vos groupes' : ' accompagnés'}
           </span>
         </div>
 
@@ -137,7 +137,7 @@ function ChildrenPage() {
                 ? 'Les fiches des enfants sortis du centre apparaitront ici.'
                 : search || group
                   ? 'Aucun enfant ne correspond a ce filtre.'
-                  : "Votre perimetre ne contient aucun enfant pour l instant."
+                  : "Votre périmètre ne contient aucun enfant pour l'instant."
             }
           />
         ) : (

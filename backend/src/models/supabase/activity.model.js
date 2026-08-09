@@ -1,6 +1,6 @@
 import { createRepository, runMany } from './repository.js'
 
-/** Activites (Postgres). Une activite est collective : elle porte plusieurs participants. */
+/** Activités (Postgres). Une activité est collective : elle porte plusieurs participants. */
 
 const repository = createRepository({ table: 'activities', prefix: 'act' })
 
@@ -12,7 +12,7 @@ export const activityModel = {
     if (filter.group) builder = builder.eq('group', filter.group)
     if (filter.from) builder = builder.gte('date', filter.from)
     if (filter.to) builder = builder.lte('date', filter.to)
-    // `participant_ids` est un tableau : l index GIN rend ce test peu couteux.
+    // `participant_ids` est un tableau : l'index GIN rend ce test peu couteux.
     if (filter.childId) builder = builder.contains('participant_ids', [filter.childId])
 
     return runMany(builder.order('date', { ascending: false }), 'activities.findAll')
@@ -23,7 +23,7 @@ export const activityModel = {
   update: (id, patch) => repository.update(id, patch),
   remove: (id) => repository.remove(id),
 
-  /** Retire un enfant de toutes les activites, quand sa fiche est effacee. */
+  /** Retire un enfant de toutes les activités, quand sa fiche est effacee. */
   async removeParticipant(childId) {
     const activities = await runMany(
       repository.select().contains('participant_ids', [childId]),

@@ -1,6 +1,6 @@
-/** Formatage partage par les ecrans. Aucune dependance, aucun React. */
+/** Formatage partage par les écrans. Aucune dépendance, aucun React. */
 
-const MONTHS_SHORT = ['Janv', 'Fevr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Aout', 'Sept', 'Oct', 'Nov', 'Dec']
+const MONTHS_SHORT = ['Janv', 'Févr', 'Mars', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sept', 'Oct', 'Nov', 'Déc']
 
 /** `2026-08-06` -> `06/08/2026`. */
 export function formatDate(isoDate) {
@@ -9,7 +9,7 @@ export function formatDate(isoDate) {
   return `${day}/${month}/${year}`
 }
 
-/** `2026-08-06` -> `{ day: '06', month: 'Aout' }`, pour les pastilles de date. */
+/** `2026-08-06` -> `{ day: '06', month: 'Août' }`, pour les pastilles de date. */
 export function splitDate(isoDate) {
   if (typeof isoDate !== 'string' || isoDate.length < 10) return { day: '--', month: '' }
   const [, month, day] = isoDate.slice(0, 10).split('-')
@@ -29,7 +29,7 @@ export function initials(firstName = '', lastName = '') {
 
 export const percent = (value) => (value === null || value === undefined ? '—' : `${Math.round(value)}%`)
 
-/** Couleur d une barre de progression selon le niveau atteint. */
+/** Couleur d'une barre de progression selon le niveau atteint. */
 export function progressTone(value = 0) {
   if (value > 70) return { bar: '#14866B', avatar: '#14866B' }
   if (value > 45) return { bar: '#1E5FD8', avatar: '#1E5FD8' }

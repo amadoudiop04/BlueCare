@@ -20,11 +20,11 @@ import {
 import { requireChildAccess, scopedChildIds } from './access.service.js'
 
 /**
- * Traitements et rappels de medicaments.
+ * Traitements et rappels de médicaments.
  *
- * Donnee medicale : les routes sont reservees a l infirmiere et a la
- * direction. Chaque prise prevue est tracee, ce qui fait disparaitre le
- * rappel correspondant une fois le medicament donne.
+ * Donnée médicale : les routes sont réservées a l'infirmière et a la
+ * direction. Chaque prise prévue est tracée, ce qui fait disparaître le
+ * rappel correspondant une fois le médicament donne.
  */
 
 const ROUTE_KEYS = keysOf(MEDICATION_ROUTES)
@@ -65,7 +65,7 @@ function readSchedule(value, errors, { required }) {
 
 function normalizeMedicationPayload(payload = {}, { partial = false } = {}) {
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
-    throw ApiError.badRequest('Corps de requete invalide')
+    throw ApiError.badRequest('Corps de requête invalide')
   }
 
   const errors = createErrors()
@@ -98,7 +98,7 @@ function normalizeMedicationPayload(payload = {}, { partial = false } = {}) {
   if (provided('active')) data.active = readBoolean(payload.active, 'active', errors)
 
   if (data.endDate && data.startDate && data.endDate < data.startDate) {
-    errors.add('endDate', 'La fin du traitement precede son debut')
+    errors.add('endDate', 'La fin du traitement précède son debut')
   }
 
   errors.throwIfAny('Traitement invalide')
@@ -106,7 +106,7 @@ function normalizeMedicationPayload(payload = {}, { partial = false } = {}) {
   return compact(data)
 }
 
-/** Le traitement est-il prevu ce jour-la ? */
+/** Le traitement est-il prévu ce jour-la ? */
 function isScheduledOn(medication, date) {
   if (!medication.active) return false
   if (medication.startDate > date) return false
@@ -158,13 +158,13 @@ export const medicationService = {
     const medication = await requireMedication(medicationId)
     await requireChildAccess(user, medication.childId, { write: true })
 
-    // On desactive : l historique des prises garde son sens.
+    // On désactive : l'historique des prises garde son sens.
     return medicationModel.update(medicationId, { active: false })
   },
 
   /**
    * Prises attendues pour une journee, avec leur statut.
-   * C est la source des rappels de medicaments du fil de notifications.
+   * C'est la source des rappels de médicaments du fil de notifications.
    */
   async getDoses(query = {}, user) {
     const errors = createErrors()
@@ -228,7 +228,7 @@ export const medicationService = {
     }
   },
 
-  /** Trace une prise (donnee, refusee ou manquee). */
+  /** Trace une prise (donnée, refusee ou manquee). */
   async recordAdministration(medicationId, payload = {}, user) {
     const medication = await requireMedication(medicationId)
     await requireChildAccess(user, medication.childId, { write: true })
@@ -271,7 +271,7 @@ export const medicationService = {
     const errors = createErrors()
     const from = readDate(query.from, 'from', errors)
     const to = readDate(query.to, 'to', errors)
-    errors.throwIfAny('Periode invalide')
+    errors.throwIfAny('Période invalide')
 
     return administrationModel.findAll(compact({ childId, from, to }))
   },

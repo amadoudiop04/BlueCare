@@ -5,13 +5,13 @@ import { cx, inputClass } from '@/lib/ui.js'
 /**
  * Champ mot de passe avec bouton d'affichage.
  *
- * Deux details tiennent au contexte : l application tourne sur des postes
+ * Deux détails tiennent au contexte : l'application tourne sur des postes
  * partages (salle Baobab, tablettes du centre), donc le mot de passe revient
  * masque tout seul au bout de quelques secondes, et le bouton porte
  * `type="button"` pour ne jamais soumettre le formulaire par erreur.
  */
 
-/** Duree avant re-masquage automatique. Assez pour relire une saisie. */
+/** Durée avant re-masquage automatique. Assez pour relire une saisie. */
 const AUTO_HIDE_MS = 10000
 
 function EyeIcon({ crossed }) {
@@ -38,7 +38,7 @@ function PasswordInput({ className, ...props }) {
   const [visible, setVisible] = useState(false)
   const timer = useRef(null)
 
-  // Le mot de passe ne reste pas lisible indefiniment sur un ecran partage.
+  // Le mot de passe ne reste pas lisible indefiniment sur un écran partage.
   useEffect(() => {
     if (!visible) return undefined
 

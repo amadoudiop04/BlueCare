@@ -5,6 +5,6 @@ import { AuthContext } from '@/features/auth/authContext.js'
 export function useAuth() {
   const context = useContext(AuthContext)
 
-  if (!context) throw new Error('useAuth doit etre utilise dans <AuthProvider>')
+  if (!context) throw new Error('useAuth doit être utilise dans <AuthProvider>')
   return context
 }

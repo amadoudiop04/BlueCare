@@ -33,7 +33,7 @@ import {
 
 /**
  * Fiches individuelles des enfants : informations personnelles, type de
- * handicap, groupe, contacts famille et medecin referent.
+ * handicap, groupe, contacts famille et médecin référent.
  */
 
 const DISABILITY_KEYS = keysOf(DISABILITY_TYPES)
@@ -100,7 +100,7 @@ function readFamilyContacts(value, errors, { required }) {
 
   if (errors.count > 0) return undefined
 
-  // Un seul contact principal : a defaut d'indication, c est le premier.
+  // Un seul contact principal : à défaut d'indication, c'est le premier.
   const primaryIndex = contacts.findIndex((contact) => contact.isPrimary)
   return contacts.map((contact, index) => ({
     ...contact,
@@ -110,7 +110,7 @@ function readFamilyContacts(value, errors, { required }) {
 
 function readReferringDoctor(value, errors) {
   if (value === undefined) return undefined
-  if (value === null) return null // permet de detacher le medecin referent
+  if (value === null) return null // permet de detacher le médecin référent
   if (typeof value !== 'object' || Array.isArray(value)) {
     return errors.add('referringDoctor', 'Objet attendu')
   }
@@ -131,13 +131,13 @@ function readReferringDoctor(value, errors) {
 }
 
 /**
- * Valide et normalise le corps de la requete.
- * En mode `partial` (PATCH), seuls les champs presents sont controles :
- * un champ absent n est pas efface.
+ * Valide et normalise le corps de la requête.
+ * En mode `partial` (PATCH), seuls les champs présents sont contrôles :
+ * un champ absent n'est pas efface.
  */
 function normalizeChildPayload(payload = {}, { partial = false } = {}) {
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
-    throw ApiError.badRequest('Corps de requete invalide')
+    throw ApiError.badRequest('Corps de requête invalide')
   }
 
   const errors = createErrors()
@@ -199,7 +199,7 @@ function withComputed(child) {
   }
 }
 
-/** Recupere un enfant ou leve un 404 : mutualise entre les trois domaines. */
+/** Récupère un enfant ou lève un 404 : mutualise entre les trois domaines. */
 async function requireChild(childId) {
   const child = await childModel.findById(childId)
   if (!child) throw ApiError.notFound('Enfant introuvable')
@@ -210,7 +210,7 @@ export const childService = {
   async list(query = {}, user) {
     const errors = createErrors()
 
-    // Par defaut on masque les fiches archivees ; `?status=all` les fait revenir.
+    // Par défaut on masque les fiches archivees ; `?status=all` les fait revenir.
     const status =
       query.status === 'all'
         ? undefined
@@ -221,7 +221,7 @@ export const childService = {
       search: readString(query.search, 'search', errors, { max: 80 }),
       group: readString(query.group, 'group', errors, { max: 80 }),
       disabilityType: readEnum(query.disabilityType, DISABILITY_KEYS, 'disabilityType', errors),
-      // Le perimetre de l'appelant s'ajoute aux filtres demandes, il ne s y substitue pas.
+      // Le périmètre de l'appelant s'ajoute aux filtres demandes, il ne s'y substitue pas.
       ...scopeFilter(user),
     })
     errors.throwIfAny('Filtres invalides')
@@ -250,7 +250,7 @@ export const childService = {
 
     const duplicate = await childModel.findDuplicate(data)
     if (duplicate) {
-      throw ApiError.conflict('Une fiche existe deja pour cet enfant', {
+      throw ApiError.conflict('Une fiche existe déjà pour cet enfant', {
         childId: duplicate.id,
       })
     }
@@ -276,7 +276,7 @@ export const childService = {
     }
     const duplicate = await childModel.findDuplicate(identity, { excludeId: childId })
     if (duplicate) {
-      throw ApiError.conflict('Une autre fiche porte deja cette identite', {
+      throw ApiError.conflict('Une autre fiche porte déjà cette identité', {
         childId: duplicate.id,
       })
     }
@@ -285,8 +285,8 @@ export const childService = {
   },
 
   /**
-   * Sortie d un enfant : on archive au lieu de supprimer, pour conserver
-   * l historique de presences et de suivi.
+   * Sortie d'un enfant : on archive au lieu de supprimer, pour conserver
+   * l'historique de présences et de suivi.
    */
   async archive(childId) {
     await requireChild(childId)
@@ -294,8 +294,8 @@ export const childService = {
   },
 
   /**
-   * Effacement definitif (droit a l effacement) : la fiche, ses presences
-   * et sa participation aux activites disparaissent. Irreversible.
+   * Effacement definitif (droit a l'effacement) : la fiche, ses présences
+   * et sa participation aux activités disparaissent. Irreversible.
    */
   async purge(childId) {
     await requireChild(childId)

@@ -5,12 +5,12 @@ import { logger } from '../utils/logger.js'
 /**
  * Choix du pilote de stockage.
  *
- * Les clefs Supabase presentes -> Postgres. Sinon -> stockage en memoire.
- * Ce basculement par la configuration permet aux tests de tourner sans reseau
- * ni base a provisionner, tout en faisant tourner exactement le meme code
- * metier : seuls les `*.model.js` different.
+ * Les clefs Supabase présentes -> Postgres. Sinon -> stockage en mémoire.
+ * Ce basculement par la configuration permet aux tests de tourner sans réseau
+ * ni base a provisionner, tout en faisant tourner exactement le même code
+ * metier : seuls les `*.model.js` différent.
  *
- * Le stockage en memoire ne sort PAS du developpement : voir ci-dessous.
+ * Le stockage en mémoire ne sort PAS du développement : voir ci-dessous.
  */
 export const usesSupabase = isSupabaseConfigured()
 
@@ -21,20 +21,20 @@ export const pick = (supabaseModel, memoryModel) => (usesSupabase ? supabaseMode
 
 if (!usesSupabase) {
   /*
-   * En production, demarrer sur le stockage en memoire serait le pire des
-   * scenarios : l application repondrait normalement, les equipes saisiraient
-   * des comptes-rendus et des presences, et tout disparaitrait au premier
-   * redemarrage — sans le moindre message d erreur. On refuse de demarrer.
+   * En production, démarrer sur le stockage en mémoire serait le pire des
+   * scénarios : l'application répondrait normalement, les équipes saisiraient
+   * des comptes-rendus et des présences, et tout disparaîtrait au premier
+   * redemarrage — sans le moindre message d'erreur. On refuse de démarrer.
    */
   if (isProduction) {
     throw new Error(
       'SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont obligatoires en production : ' +
-        'sans elles les donnees ne seraient conservees nulle part (voir DEPLOIEMENT.md).',
+        'sans elles les données ne seraient conservées nulle part (voir DEPLOIEMENT.md).',
     )
   }
 
   logger.warn(
-    'Stockage en memoire : les donnees disparaissent au redemarrage. ' +
+    'Stockage en mémoire : les données disparaissent au redemarrage. ' +
       'Renseignez SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY pour persister.',
   )
 }

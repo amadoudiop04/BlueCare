@@ -14,10 +14,10 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 
 const router = Router()
 
-// Donnees medicales : infirmiere et direction uniquement.
+// Données médicales : infirmière et direction uniquement.
 router.use(authenticate, authorize(...MEDICAL_ROLES))
 
-// Prises attendues du jour, source des rappels de medicaments.
+// Prises attendues du jour, source des rappels de médicaments.
 router.get('/doses', asyncHandler(listDoses))
 
 router.patch('/:medicationId', asyncHandler(updateMedication))

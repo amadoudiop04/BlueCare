@@ -23,9 +23,9 @@ import { cx, inputClass } from '@/lib/ui.js'
 /**
  * Activation de la double authentification depuis le profil.
  *
- * Trois etats : inactive, enrolement en cours (secret genere, code a
- * confirmer), active. Les codes de secours ne sont affiches qu une fois, juste
- * apres l activation — ensuite le serveur n'en garde que les hachages.
+ * Trois états : inactive, enrôlement en cours (secret génère, code a
+ * confirmer), active. Les codes de secours ne sont affichés qu'une fois, juste
+ * après l'activation — ensuite le serveur n'en garde que les hachages.
  */
 function MfaCard() {
   const { data: status, loading, reload } = useApi(fetchMfaStatus, [])
@@ -77,7 +77,7 @@ function MfaCard() {
       <CardHeader
         className="mb-4"
         title="Double authentification"
-        subtitle="Code a usage unique, en plus du mot de passe"
+        subtitle="Code à usage unique, en plus du mot de passe"
         action={
           <Badge tone={status.enabled ? 'success' : status.required ? 'warn' : 'neutral'}>
             {status.enabled ? 'ACTIVE' : status.required ? 'OBLIGATOIRE' : 'INACTIVE'}
@@ -103,9 +103,9 @@ function MfaCard() {
       ) : (
         <div className="flex flex-col gap-3.5">
           <p className="text-[13px] leading-relaxed text-muted-strong">
-            Un code a 6 chiffres, genere par votre telephone, sera demande a chaque connexion.
+            Un code à 6 chiffres, génère par votre téléphone, sera demandé à chaque connexion.
             Compatible avec Google Authenticator, Authy, 1Password ou FreeOTP.
-            {status.required ? ' Votre role l impose : ce compte voit tout le centre.' : ''}
+            {status.required ? ' Votre rôle l\'impose : ce compte voit tout le centre.' : ''}
           </p>
           <Button onClick={begin} disabled={busy} className="self-start">
             {busy ? 'Preparation…' : 'Activer'}
@@ -122,9 +122,9 @@ function EnrollmentState({ enrollment, code, setCode, busy, onConfirm, onCancel 
   return (
     <div className="flex flex-col gap-4">
       <ol className="flex list-inside list-decimal flex-col gap-1.5 text-[13px] text-muted-strong">
-        <li>Ouvrez votre application d authentification.</li>
+        <li>Ouvrez votre application d'authentification.</li>
         <li>Ajoutez un compte, puis collez le lien ci-dessous (ou saisissez la clef).</li>
-        <li>Entrez le code a 6 chiffres qu elle affiche.</li>
+        <li>Entrez le code à 6 chiffres qu'elle affiche.</li>
       </ol>
 
       <div className="rounded-xl bg-canvas px-3.5 py-3">
@@ -151,7 +151,7 @@ function EnrollmentState({ enrollment, code, setCode, busy, onConfirm, onCancel 
       </div>
 
       <div>
-        <div className="mb-2 text-xs font-bold text-ink">Code affiche par l application</div>
+        <div className="mb-2 text-xs font-bold text-ink">Code affiché par l'application</div>
         <OtpInput
           value={code}
           onChange={setCode}
@@ -162,7 +162,7 @@ function EnrollmentState({ enrollment, code, setCode, busy, onConfirm, onCancel 
 
       <div className="flex gap-2.5">
         <Button onClick={() => onConfirm()} disabled={busy || code.length < 6}>
-          {busy ? 'Verification…' : 'Confirmer'}
+          {busy ? 'Vérification…' : 'Confirmer'}
         </Button>
         <Button variant="secondary" onClick={onCancel} disabled={busy}>
           Annuler
@@ -199,7 +199,7 @@ function ActiveState({ status, onDisabled, setError }) {
   return (
     <div className="flex flex-col gap-3.5">
       <div className="rounded-xl bg-success-bg px-3.5 py-3 text-[12.5px] font-semibold text-success">
-        Un code sera demande a chaque connexion.
+        Un code sera demandé à chaque connexion.
       </div>
 
       <div className="flex justify-between text-[13px]">
@@ -216,8 +216,8 @@ function ActiveState({ status, onDisabled, setError }) {
 
       {status.required ? (
         <p className="text-[12.5px] leading-relaxed text-muted">
-          Votre role impose la double authentification : elle ne peut pas etre retiree. En cas de
-          telephone perdu, la direction peut la reinitialiser.
+          Votre rôle impose la double authentification : elle ne peut pas être retirée. En cas de
+          téléphone perdu, la direction peut la réinitialiser.
         </p>
       ) : open ? (
         <form onSubmit={submit} className="flex flex-col gap-3 border-t border-line-soft pt-3.5">
@@ -229,7 +229,7 @@ function ActiveState({ status, onDisabled, setError }) {
               onChange={(event) => setPassword(event.target.value)}
             />
           </Field>
-          <Field label="Code de verification">
+          <Field label="Code de vérification">
             <input
               required
               inputMode="numeric"
@@ -241,7 +241,7 @@ function ActiveState({ status, onDisabled, setError }) {
           </Field>
           <div className="flex gap-2.5">
             <Button type="submit" variant="danger" disabled={busy}>
-              {busy ? 'Desactivation…' : 'Confirmer la desactivation'}
+              {busy ? 'Désactivation…' : 'Confirmer la désactivation'}
             </Button>
             <Button variant="secondary" onClick={() => setOpen(false)} disabled={busy}>
               Annuler
@@ -250,7 +250,7 @@ function ActiveState({ status, onDisabled, setError }) {
         </form>
       ) : (
         <Button variant="danger" onClick={() => setOpen(true)} className="self-start">
-          Desactiver
+          Désactiver
         </Button>
       )}
     </div>
@@ -261,8 +261,8 @@ function RecoveryCodes({ codes, onDone }) {
   return (
     <div className="flex flex-col gap-3.5">
       <div className="rounded-xl border border-warn/30 bg-warn-bg px-3.5 py-3 text-[12.5px] leading-relaxed text-warn-ink">
-        <strong>Notez ces codes maintenant.</strong> Ils ne seront plus jamais affiches. Chacun
-        remplace une fois le code du telephone, si vous n y avez pas acces.
+        <strong>Notez ces codes maintenant.</strong> Ils ne seront plus jamais affichés. Chacun
+        remplace une fois le code du téléphone, si vous n'y avez pas accès.
       </div>
 
       <div className="grid grid-cols-2 gap-2">

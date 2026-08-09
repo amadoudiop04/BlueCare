@@ -12,17 +12,17 @@ import { addDays, addMonths, isWeekend, today } from '../utils/dates.js'
 import { hashPasswordSync } from '../utils/password.js'
 
 /**
- * Jeu de donnees de demonstration.
+ * Jeu de données de démonstration.
  *
- * Il passe par les modeles, donc il alimente indifferemment le stockage en
- * memoire ou Supabase — c est ce qui permet de peupler une vraie base avec
+ * Il passe par les modèles, donc il alimente indifferemment le stockage en
+ * mémoire ou Supabase — c'est ce qui permet de peupler une vraie base avec
  * `npm run seed`.
  *
- * Les dates sont calculees a partir du jour courant : les alertes et les
+ * Les dates sont calculees à partir du jour courant : les alertes et les
  * courbes restent visibles quelle que soit la date de lancement.
  */
 
-/** Jours d accueil (hors week-end) des sept dernieres semaines. */
+/** Jours d'accueil (hors week-end) des sept dernières semaines. */
 function openingDays(count = 35) {
   const days = []
 
@@ -55,9 +55,9 @@ const CHILDREN = [
     address: '12 rue des Lilas, Bobo-Dioulasso',
     disability: {
       type: 'autism',
-      details: 'Trouble du spectre autistique, communication verbale limitee.',
+      details: 'Trouble du spectre autistique, communication verbale limitée.',
       recognizedAt: '2021-09-01',
-      supportPlan: 'Pictogrammes PECS, temps calme apres le repas.',
+      supportPlan: 'Pictogrammes PECS, temps calme après le repas.',
     },
     familyContacts: [
       contact({
@@ -73,13 +73,13 @@ const CHILDREN = [
     referringDoctor: {
       firstName: 'Claire',
       lastName: 'Dupont',
-      specialty: 'Pedopsychiatrie',
+      specialty: 'Pédopsychiatrie',
       facility: 'CHU Souro Sanou',
       phone: '+226 20 97 00 00',
       email: null,
       address: null,
     },
-    notes: 'Progres nets sur les temps de groupe depuis mars.',
+    notes: 'Progrès nets sur les temps de groupe depuis mars.',
   },
   {
     key: 'malik',
@@ -93,7 +93,7 @@ const CHILDREN = [
       type: 'language',
       details: 'Dysphasie expressive, suivi orthophonique hebdomadaire.',
       recognizedAt: '2022-01-15',
-      supportPlan: 'Seances orthophonie le mardi, supports visuels en atelier.',
+      supportPlan: 'Séances orthophonie le mardi, supports visuels en atelier.',
     },
     familyContacts: [
       contact({
@@ -190,7 +190,7 @@ const CHILDREN = [
       type: 'hearing',
       details: 'Surdite bilaterale appareillee.',
       recognizedAt: '2018-11-20',
-      supportPlan: 'Langue des signes, se placer face a elle pour parler.',
+      supportPlan: 'Langue des signes, se placer face à elle pour parler.',
     },
     familyContacts: [
       contact({
@@ -215,15 +215,15 @@ const CHILDREN = [
 ]
 
 /**
- * Comptes de demonstration, un par role.
- * Mots de passe en clair ici parce qu'ils ne servent qu'en developpement :
- * `SEED_DEMO_DATA=false` ou `NODE_ENV=production` empeche leur creation.
+ * Comptes de démonstration, un par rôle.
+ * Mots de passe en clair ici parce qu'ils ne servent qu'en développement :
+ * `SEED_DEMO_DATA=false` ou `NODE_ENV=production` empêche leur création.
  */
 const USERS = [
   {
-    // Compte de recette : perimetre complet, tous les ecrans, toutes les
-    // ecritures. La double authentification n est pas activee d'office pour
-    // qu une premiere connexion reste possible sans telephone ; l ecran
+    // Compte de recette : périmètre complet, tous les écrans, toutes les
+    // écritures. La double authentification n'est pas activée d'office pour
+    // qu'une première connexion reste possible sans téléphone ; l'écran
     // « Mon profil » permet de l'activer et de tester le parcours complet.
     key: 'admin',
     email: 'admin@papillonbleu.test',
@@ -277,15 +277,15 @@ const USERS = [
   },
 ]
 
-/** Objectifs suivis, avec la progression relevee seance apres seance. */
+/** Objectifs suivis, avec la progression relevee séance après séance. */
 const GOALS = [
   {
     childKey: 'lina',
     title: 'Formuler une demande avec un pictogramme',
     domain: 'communication',
-    description: 'Utiliser le classeur PECS pour demander un objet ou une activite.',
-    baseline: 'Prend la main de l adulte sans support visuel.',
-    successCriteria: 'Trois demandes spontanees par seance, sans guidance.',
+    description: 'Utiliser le classeur PECS pour demander un objet ou une activité.',
+    baseline: 'Prend la main de l\'adulte sans support visuel.',
+    successCriteria: 'Trois demandes spontanées par séance, sans guidance.',
     progression: [15, 25, 30, 40, 45, 55, 60, 70, 75],
   },
   {
@@ -301,9 +301,9 @@ const GOALS = [
     childKey: 'malik',
     title: 'Produire des phrases de trois mots',
     domain: 'communication',
-    description: 'Enchainer sujet, verbe et complement a l oral.',
+    description: 'Enchainer sujet, verbe et complement a l\'oral.',
     baseline: 'Mots isoles, parfois deux mots.',
-    successCriteria: 'Cinq phrases de trois mots dans une seance.',
+    successCriteria: 'Cinq phrases de trois mots dans une séance.',
     progression: [20, 30, 35, 45, 50, 55, 65, 70, 80],
   },
   {
@@ -320,14 +320,14 @@ const GOALS = [
 const MOOD_CYCLE = ['good', 'neutral', 'very-good', 'good', 'difficult', 'good', 'very-good']
 
 /**
- * Statut de presence par enfant, selon le rang du jour depuis la fin
- * (`0` = dernier jour d accueil). Deux situations declenchent volontairement
- * le moteur d alertes : Malik enchaine 4 absences non justifiees, Sofia en
+ * Statut de présence par enfant, selon le rang du jour depuis la fin
+ * (`0` = dernier jour d'accueil). Deux situations declenchent volontairement
+ * le moteur d'alertes : Malik enchaine 4 absences non justifiées, Sofia en
  * cumule 5 dispersees.
  */
 const ATTENDANCE_RULES = {
   lina: (fromEnd) =>
-    fromEnd === 8 ? { status: 'excused', reason: 'Rendez-vous medical' } : { status: 'present' },
+    fromEnd === 8 ? { status: 'excused', reason: 'Rendez-vous médical' } : { status: 'present' },
   malik: (fromEnd) => (fromEnd < 4 ? { status: 'absent' } : { status: 'present' }),
   sofia: (fromEnd) =>
     [1, 4, 7, 11, 15].includes(fromEnd) ? { status: 'absent' } : { status: 'present' },
@@ -347,7 +347,7 @@ const ACTIVITIES = [
     group: 'Les Coquelicots',
     location: 'Salle bleue',
     description:
-      "Grande fresque collective sur le theme de la savane. Lina a choisi les couleurs chaudes, Malik a peint l arbre central et Elsa a signe la fresque en langue des signes.",
+      "Grande fresque collective sur le thème de la savane. Lina a choisi les couleurs chaudes, Malik a peint l'arbre central et Elsa a signe la fresque en langue des signes.",
     participants: ['lina', 'malik', 'elsa'],
     media: [
       { url: '/media/2026/fresque-savane-1.jpg', caption: 'La fresque terminee' },
@@ -370,7 +370,7 @@ const ACTIVITIES = [
     title: 'Atelier cuisine : galettes de mil',
     category: 'cooking',
     group: null,
-    location: 'Cuisine pedagogique',
+    location: 'Cuisine pédagogique',
     description:
       'Preparation en binomes. Adam a dose la farine, Lina a petri la pate, Sofia a decore les galettes et Elsa a mis la table.',
     participants: ['lina', 'sofia', 'adam', 'elsa'],
@@ -386,7 +386,7 @@ const ACTIVITIES = [
     group: 'Les Coquelicots',
     location: 'Salle de motricite',
     description:
-      'Decouverte du djembe et du balafon. Malik a tenu le rythme sur tout le morceau, Elsa a suivi les vibrations au sol.',
+      'Découverte du djembe et du balafon. Malik a tenu le rythme sur tout le morceau, Elsa a suivi les vibrations au sol.',
     participants: ['malik', 'elsa'],
     media: [{ url: '/media/2026/eveil-musical.jpg', caption: 'Cercle de percussions' }],
   },
@@ -409,22 +409,22 @@ const MEDICATIONS = [
     route: 'inhaled',
     schedule: { times: ['08:30', '16:00'], days: [] },
     prescribedBy: 'Dr Marc Ouedraogo',
-    instructions: "En cas d effort ou de gene respiratoire.",
+    instructions: "En cas d'effort ou de gene respiratoire.",
   },
 ]
 
 /**
- * Cree le jeu de demonstration s il n'existe pas deja.
+ * Crée le jeu de démonstration s'il n'existe pas déjà.
  * Idempotent : relancer la commande ne duplique rien.
  */
 export async function seedDemoData() {
   const existing = await childModel.findAll({})
-  if (existing.length > 0) return { skipped: true, reason: 'des enfants existent deja' }
+  if (existing.length > 0) return { skipped: true, reason: 'des enfants existent déjà' }
 
   const childIds = new Map()
   const userIds = new Map()
 
-  // 1. Les enfants d'abord : les comptes famille s y rattachent.
+  // 1. Les enfants d'abord : les comptes famille s'y rattachent.
   for (const { key, ...data } of CHILDREN) {
     const child = await childModel.create({
       ...data,
@@ -434,7 +434,7 @@ export async function seedDemoData() {
     childIds.set(key, child.id)
   }
 
-  // 2. Les comptes : tout le reste reference leur identifiant.
+  // 2. Les comptes : tout le reste référence leur identifiant.
   for (const { key, password, childKeys = [], groups = [], ...data } of USERS) {
     const user = await userModel.create({
       ...data,
@@ -452,7 +452,7 @@ export async function seedDemoData() {
       ? userIds.get('educatorBleuets')
       : userIds.get('educatorCoquelicots')
 
-  // 3. Presences.
+  // 3. Présences.
   const days = openingDays()
 
   for (const [childKey, rule] of Object.entries(ATTENDANCE_RULES)) {
@@ -475,7 +475,7 @@ export async function seedDemoData() {
     }
   }
 
-  // 4. Objectifs, seances et comptes-rendus sur six mois.
+  // 4. Objectifs, séances et comptes-rendus sur six mois.
   const start = addMonths(today(), -6)
 
   for (const { childKey, progression, ...goalData } of GOALS) {
@@ -493,7 +493,7 @@ export async function seedDemoData() {
       createdBy: userIds.get('director'),
     })
 
-    // Une seance tous les ~20 jours, la derniere il y a une semaine.
+    // Une séance tous les ~20 jours, la dernière il y a une semaine.
     for (const [index, progress] of progression.entries()) {
       const date = addDays(today(), -(progression.length - index) * 20 + 13)
       if (date > today()) continue
@@ -528,22 +528,22 @@ export async function seedDemoData() {
             worked: true,
             comment:
               index === progression.length - 1
-                ? 'Belle seance, l objectif se stabilise.'
-                : 'Progression reguliere, supports visuels maintenus.',
+                ? 'Belle séance, l\'objectif se stabilise.'
+                : 'Progression régulière, supports visuels maintenus.',
           },
         ],
         observations:
-          'Seance menee dans le calme. L enfant a participe aux consignes proposees ' +
+          'Séance menee dans le calme. L\'enfant a participé aux consignes proposées ' +
           'et a accepte les temps de transition.',
-        attentionPoints: index % 4 === 0 ? ['Fatigue en fin de seance'] : [],
-        nextSteps: 'Reprendre le meme support la prochaine fois.',
+        attentionPoints: index % 4 === 0 ? ['Fatigue en fin de séance'] : [],
+        nextSteps: 'Reprendre le même support la prochaine fois.',
         healthFlag: { flagged: false, description: null },
         submittedAt: new Date().toISOString(),
       })
     }
   }
 
-  // Une seance a venir : elle alimente les rappels de seances planifiees.
+  // Une séance a venir : elle alimente les rappels de séances planifiées.
   await sessionModel.create({
     childId: childIds.get('lina'),
     educatorId: userIds.get('educatorCoquelicots'),
@@ -560,7 +560,7 @@ export async function seedDemoData() {
     createdBy: userIds.get('educatorCoquelicots'),
   })
 
-  // 5. Activites.
+  // 5. Activités.
   for (const activity of ACTIVITIES) {
     await activityModel.create({
       title: activity.title,

@@ -14,8 +14,8 @@ import { hashPassword } from '../src/utils/password.js'
 const PASSWORD = 'MotDePasse2026!'
 
 export async function startTestServer() {
-  // Les tests tournent sur le pilote memoire : ils ne demandent ni base ni
-  // reseau. `createApp` n'amorce plus rien, on repart simplement d un stock vide.
+  // Les tests tournent sur le pilote mémoire : ils ne demandent ni base ni
+  // réseau. `createApp` n'amorce plus rien, on repart simplement d'un stock vide.
   resetStore()
   const app = createApp()
 
@@ -30,7 +30,7 @@ export async function startTestServer() {
       method,
       headers: {
         ...(body ? { 'Content-Type': 'application/json' } : {}),
-        // Les tests envoient le jeton de session en Bearer : `fetch` n a pas
+        // Les tests envoient le jeton de session en Bearer : `fetch` n'a pas
         // de gestionnaire de cookies, contrairement au navigateur.
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...headers,
@@ -48,7 +48,7 @@ export async function startTestServer() {
   return { server, baseUrl, api, close: () => server.close() }
 }
 
-/** Cree un compte et renvoie son jeton d acces, pret a l'emploi. */
+/** Crée un compte et renvoie son jeton d'accès, prêt'à l'emploi. */
 export async function createUserWithToken(api, { role, groups = [], childIds = [], email }) {
   const address = email ?? `${role}.${Math.random().toString(36).slice(2, 8)}@test.local`
 
@@ -89,7 +89,7 @@ export const childPayload = (overrides = {}) => ({
   ...overrides,
 })
 
-/** Cree un enfant sans passer par l API : evite d'avoir besoin d un directeur. */
+/** Crée un enfant sans passer par l API : évite d'avoir besoin d'un directeur. */
 export async function createChildDirect(overrides = {}) {
   const { familyContacts, ...rest } = childPayload(overrides)
 

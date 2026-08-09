@@ -2,12 +2,12 @@ import { ApiError } from './ApiError.js'
 import { isIsoDate, isTime } from './dates.js'
 
 /**
- * Validation des donnees entrantes, sans dependance externe.
+ * Validation des données entrantes, sans dépendance externe.
  *
  * Chaque lecteur (`readString`, `readDate`...) renvoie la valeur nettoyee,
- * ou `undefined` s il a signale une erreur. On accumule toutes les erreurs
+ * ou `undefined` s'il a signale une erreur. On accumule toutes les erreurs
  * avant de lancer, pour que le formulaire recoive l'ensemble des champs
- * fautifs en une seule reponse 400 :
+ * fautifs en une seule réponse 400 :
  *
  *   const errors = createErrors()
  *   const firstName = readString(body.firstName, 'firstName', errors, { required: true })
@@ -29,7 +29,7 @@ export function createErrors(prefix = '') {
       return undefined
     },
 
-    /** Collecteur pour un sous-objet ou un element de tableau : `familyContacts.0.phone`. */
+    /** Collecteur pour un sous-objet ou un élément de tableau : `familyContacts.0.phone`. */
     nested(field) {
       return createErrors(path(field))
     },
@@ -49,7 +49,7 @@ export function createErrors(prefix = '') {
       return fields
     },
 
-    throwIfAny(message = 'Donnees invalides') {
+    throwIfAny(message = 'Données invalides') {
       if (Object.keys(fields).length > 0) throw ApiError.badRequest(message, fields)
     },
   }
@@ -63,11 +63,11 @@ export function readString(value, field, errors, { required = false, min = 1, ma
     if (required) errors.add(field, 'Champ obligatoire')
     return undefined
   }
-  if (typeof value !== 'string') return errors.add(field, 'Doit etre une chaine de caracteres')
+  if (typeof value !== 'string') return errors.add(field, 'Doit être une chaîne de caractères')
 
   const trimmed = value.trim()
-  if (trimmed.length < min) return errors.add(field, `Minimum ${min} caracteres`)
-  if (trimmed.length > max) return errors.add(field, `Maximum ${max} caracteres`)
+  if (trimmed.length < min) return errors.add(field, `Minimum ${min} caractères`)
+  if (trimmed.length > max) return errors.add(field, `Maximum ${max} caractères`)
 
   return trimmed
 }
@@ -121,7 +121,7 @@ export function readPhone(value, field, errors, { required = false } = {}) {
     return undefined
   }
   const trimmed = String(value).trim()
-  if (!PHONE_PATTERN.test(trimmed)) return errors.add(field, 'Numero de telephone invalide')
+  if (!PHONE_PATTERN.test(trimmed)) return errors.add(field, 'Numéro de téléphone invalide')
   return trimmed
 }
 
@@ -141,7 +141,7 @@ export function readInteger(value, field, errors, { required = false, min, max }
   return parsed
 }
 
-/** Liste de chaines courtes : points d attention, groupes, horaires... */
+/** Liste de chaînes courtes : points d'attention, groupes, horaires... */
 export function readStringArray(value, field, errors, { required = false, max = 20, itemMax = 300 } = {}) {
   const list = readArray(value, field, errors, { required, max })
   if (!list) return undefined
@@ -171,9 +171,9 @@ export function readArray(value, field, errors, { required = false, min = 0, max
   }
   if (!Array.isArray(value)) return errors.add(field, 'Liste attendue')
   if (value.length < min) {
-    return errors.add(field, min === 1 ? 'Au moins un element requis' : `Minimum ${min} elements`)
+    return errors.add(field, min === 1 ? 'Au moins un élément requis' : `Minimum ${min} éléments`)
   }
-  if (value.length > max) return errors.add(field, `Maximum ${max} elements`)
+  if (value.length > max) return errors.add(field, `Maximum ${max} éléments`)
   return value
 }
 
@@ -187,7 +187,7 @@ export function readPagination(query = {}, { defaultPageSize = 20, maxPageSize =
   return { page, pageSize }
 }
 
-/** Retire les cles `undefined` : un PATCH ne doit pas ecraser un champ absent. */
+/** Retire les clés `undefined` : un PATCH ne doit pas ecraser un champ absent. */
 export function compact(object) {
   return Object.fromEntries(Object.entries(object).filter(([, value]) => value !== undefined))
 }

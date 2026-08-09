@@ -1,9 +1,9 @@
 import { createRepository, runMany, runMaybeOne } from './repository.js'
 
 /**
- * Comptes-rendus de seance (Postgres).
- * Un compte-rendu par seance : la contrainte unique sur `session_id` porte
- * la regle, en plus du controle fait par le service.
+ * Comptes-rendus de séance (Postgres).
+ * Un compte-rendu par séance : la contrainte unique sur `session_id` porte
+ * la règle, en plus du contrôle fait par le service.
  */
 
 const repository = createRepository({
@@ -26,7 +26,7 @@ export const reportModel = {
     if (filter.from) builder = builder.gte('date', filter.from)
     if (filter.to) builder = builder.lte('date', filter.to)
     if (filter.healthFlagged) builder = builder.eq('health_flag->>flagged', 'true')
-    // `goal_progress` est un tableau JSONB : on teste l'inclusion d un element.
+    // `goal_progress` est un tableau JSONB : on teste l'inclusion d'un élément.
     if (filter.goalId) builder = builder.contains('goal_progress', [{ goalId: filter.goalId }])
 
     return runMany(builder.order('date', { ascending: false }), 'reports.findAll')

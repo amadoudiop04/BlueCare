@@ -21,7 +21,7 @@ router.get('/', asyncHandler(listGoals))
 router.get('/:goalId', asyncHandler(getGoal))
 router.get('/:goalId/progress', asyncHandler(getGoalProgress))
 
-// Definir et faire evoluer un objectif releve de l equipe pedagogique.
+// Définir et faire evoluer un objectif releve de l'équipe pédagogique.
 router.patch('/:goalId', authorize(...PEDAGOGY_ROLES), asyncHandler(updateGoal))
 router.delete('/:goalId', authorize(...DIRECTION_ROLES), asyncHandler(deleteGoal))
 

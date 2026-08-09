@@ -1,6 +1,6 @@
 import { createRepository, runMany, runMaybeOne } from './repository.js'
 
-/** Presences quotidiennes (Postgres). Une ligne = un enfant, un jour. */
+/** Présences quotidiennes (Postgres). Une ligne = un enfant, un jour. */
 
 const repository = createRepository({ table: 'attendance', prefix: 'att', immutable: ['childId', 'date'] })
 
@@ -33,12 +33,12 @@ export const attendanceModel = {
   },
 
   /**
-   * Cree la presence du jour ou met a jour celle qui existe.
+   * Crée la présence du jour ou met à jour celle qui existe.
    *
-   * On lit avant d'ecrire plutot que d'utiliser `upsert` : la contrainte
+   * On lit avant d'écrire plutôt que d'utiliser `upsert` : la contrainte
    * unique porte sur (child_id, date), pas sur l'identifiant. Un upsert
-   * remplacerait l'`id` de la ligne existante, alors qu une correction de
-   * saisie doit conserver le meme enregistrement.
+   * remplacerait l'`id` de la ligne existante, alors qu'une correction de
+   * saisie doit conserver le même enregistrement.
    */
   async upsert({ childId, date, ...data }) {
     const existing = await this.findOne(childId, date)

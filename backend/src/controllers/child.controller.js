@@ -1,8 +1,8 @@
 import { childService } from '../services/child.service.js'
 
 /**
- * Fiches enfants. Le controller lit la requete, appelle le service, repond.
- * `req.user` est transmis au service, qui applique le perimetre du role.
+ * Fiches enfants. Le controller lit la requête, appelle le service, répond.
+ * `req.user` est transmis au service, qui applique le périmètre du rôle.
  */
 
 export async function listChildren(req, res) {
@@ -26,8 +26,8 @@ export async function updateChild(req, res) {
 }
 
 /**
- * Par defaut on archive (l historique est conserve).
- * `?purge=true` efface definitivement l enfant et ses donnees liees.
+ * Par défaut on archive (l'historique est conserve).
+ * `?purge=true` efface définitivement l'enfant et ses données liées.
  */
 export async function deleteChild(req, res) {
   if (req.query.purge === 'true') {

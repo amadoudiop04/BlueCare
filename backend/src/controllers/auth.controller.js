@@ -8,11 +8,11 @@ import { verifyPassword } from '../utils/password.js'
 const requestContext = (req) => ({ userAgent: req.get('user-agent'), ip: req.ip })
 
 /**
- * Pose le cookie de session et repond.
+ * Pose le cookie de session et répond.
  *
  * Le jeton est aussi rendu dans `meta.sessionToken` : le navigateur n'en fait
  * rien (il a le cookie), mais les clients sans gestionnaire de cookies —
- * tests, Postman, scripts — en ont besoin pour l'en-tete `Authorization`.
+ * tests, Postman, scripts — en ont besoin pour l'en-tête `Authorization`.
  */
 function respondWithSession(res, { user, token, session, mfaSetupRequired }) {
   setSessionCookie(res, token, session.expiresAt)
@@ -31,7 +31,7 @@ function respondWithSession(res, { user, token, session, mfaSetupRequired }) {
 export async function login(req, res) {
   const result = await authService.login(req.body, requestContext(req))
 
-  // Second facteur actif : pas encore de session, seulement un defi.
+  // Second facteur actif : pas encore de session, seulement un défi.
   if (result.mfaRequired) {
     res.json({
       status: 'ok',
@@ -52,10 +52,10 @@ export async function verifyMfa(req, res) {
 }
 
 /**
- * Deconnexion.
+ * Déconnexion.
  *
- * Volontairement sans middleware d authentification : sur un poste partage,
- * se deconnecter doit toujours aboutir, y compris si la session a deja expire.
+ * Volontairement sans middleware d'authentification : sur un poste partagé,
+ * se déconnecter doit toujours aboutir, y compris si la session a déjà expire.
  * Le jeton est donc relu ici, et la session fermee si elle existe encore.
  */
 export async function logout(req, res) {
@@ -74,9 +74,9 @@ export async function changePassword(req, res) {
   res.json({ status: 'ok', data })
 }
 
-// --- Mot de passe oublie ----------------------------------------------------
+// --- Mot de passe oublié ----------------------------------------------------
 
-/** Toujours 200 : la reponse ne dit pas si l'adresse existe. */
+/** Toujours 200 : la réponse ne dit pas si l'adresse existe. */
 export async function forgotPassword(req, res) {
   const data = await authService.requestPasswordReset(req.body, requestContext(req))
   res.json({ status: 'ok', data })
@@ -88,7 +88,7 @@ export async function checkResetToken(req, res) {
 
 export async function resetPassword(req, res) {
   const data = await authService.resetPassword({ ...req.body, token: req.params.token })
-  // La reinitialisation ferme toutes les sessions : le cookie local aussi.
+  // La réinitialisation ferme toutes les sessions : le cookie local aussi.
   clearSessionCookie(res)
 
   res.json({ status: 'ok', data })
@@ -123,7 +123,7 @@ export async function revokeOtherSessions(req, res) {
   res.json({ status: 'ok', data: await authService.revokeOtherSessions(req.user, req.session) })
 }
 
-// --- Enrolement du second facteur -------------------------------------------
+// --- Enrôlement du second facteur -------------------------------------------
 
 export async function getMfaStatus(req, res) {
   res.json({ status: 'ok', data: await mfaService.status(req.user) })

@@ -4,9 +4,9 @@ import { sanitizeUser } from '../sanitize.js'
 /**
  * Comptes utilisateurs (Postgres).
  *
- * `passwordHash` ne sort du modele que par les deux lectures `...WithSecret`,
- * reservees a la connexion et au changement de mot de passe. Toutes les autres
- * passent par `sanitizeUser` : le hachage ne peut pas fuir dans une reponse HTTP.
+ * `passwordHash` ne sort du modèle que par les deux lectures `...WithSecret`,
+ * réservées a la connexion et au changement de mot de passe. Toutes les autres
+ * passent par `sanitizeUser` : le hachage ne peut pas fuir dans une réponse HTTP.
  */
 
 const repository = createRepository({ table: 'users', prefix: 'usr' })
@@ -52,7 +52,7 @@ export const userModel = {
     )
   },
 
-  /** Retrouve le compte d'un lien de reinitialisation. Le jeton n'est jamais stocke en clair. */
+  /** Retrouve le compte d'un lien de réinitialisation. Le jeton n'est jamais stocke en clair. */
   async findByResetTokenHash(tokenHash) {
     if (!tokenHash) return undefined
 

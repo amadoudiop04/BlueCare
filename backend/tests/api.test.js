@@ -5,9 +5,9 @@ import { childPayload, createUserWithToken, startTestServer } from './helpers.js
 import { addDays, today } from '../src/utils/dates.js'
 
 /**
- * Tests de bout en bout des fiches enfants, presences et galerie.
- * On demarre l'app sur un port libre et on l'appelle en HTTP : aucune
- * dependance de test supplementaire, `fetch` suffit.
+ * Tests de bout en bout des fiches enfants, présences et galerie.
+ * On démarre l'app sur un port libre et on l'appelle en HTTP : aucune
+ * dépendance de test supplementaire, `fetch` suffit.
  */
 
 let context
@@ -113,7 +113,7 @@ describe('Fiches enfants', () => {
     assert.equal(status, 200)
     assert.equal(body.data.status, 'archived')
 
-    // La fiche existe toujours, elle sort seulement de la liste par defaut.
+    // La fiche existe toujours, elle sort seulement de la liste par défaut.
     assert.equal((await asDirector(`/children/${child.id}`)).status, 200)
 
     const listed = await asDirector('/children?pageSize=100')
@@ -201,7 +201,7 @@ describe('Presences quotidiennes', () => {
       )
     }
 
-    // Deux absences ne suffisent pas, la troisieme declenche l'alerte.
+    // Deux absences ne suffisent pas, la troisième déclenche l'alerte.
     assert.deepEqual(responses[1].body.meta.alerts, [])
 
     const rules = responses[2].body.meta.alerts.map((alert) => alert.rule)
@@ -312,7 +312,7 @@ describe('Galerie d activites anonymisee', () => {
         category: 'arts',
         date: today(),
         group: 'Les Coquelicots',
-        description: 'Lina a choisi les couleurs et Malik Ferrand a peint l arbre.',
+        description: 'Lina a choisi les couleurs et Malik Ferrand a peint l\'arbre.',
         participantIds: [lina.id, malik.id],
         media: [{ url: '/media/fresque.jpg', caption: 'Malik devant son arbre' }],
         createdBy: 'Educateur referent',
@@ -378,7 +378,7 @@ describe('Galerie d activites anonymisee', () => {
     const created = await asDirector('/activities', {
       method: 'POST',
       body: {
-        title: 'Atelier reserve',
+        title: 'Atelier réserve',
         category: 'arts',
         date: today(),
         participantIds: [child.id],

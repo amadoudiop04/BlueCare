@@ -1,6 +1,6 @@
 /**
  * Erreur applicative portant un code HTTP.
- * Les controllers la lancent, `errorHandler` la transforme en reponse JSON.
+ * Les controllers la lancent, `errorHandler` la transforme en réponse JSON.
  */
 export class ApiError extends Error {
   constructor(statusCode, message, details) {
@@ -11,7 +11,7 @@ export class ApiError extends Error {
     this.isOperational = true
   }
 
-  static badRequest(message = 'Requete invalide', details) {
+  static badRequest(message = 'Requête invalide', details) {
     return new ApiError(400, message, details)
   }
 
@@ -19,7 +19,7 @@ export class ApiError extends Error {
     return new ApiError(401, message)
   }
 
-  static forbidden(message = 'Acces refuse') {
+  static forbidden(message = 'Accès refuse') {
     return new ApiError(403, message)
   }
 
@@ -27,11 +27,11 @@ export class ApiError extends Error {
     return new ApiError(404, message)
   }
 
-  static conflict(message = 'Conflit avec l etat actuel de la ressource', details) {
+  static conflict(message = 'Conflit avec l\'état actuel de la ressource', details) {
     return new ApiError(409, message, details)
   }
 
-  static tooManyRequests(message = 'Trop de requetes') {
+  static tooManyRequests(message = 'Trop de requêtes') {
     return new ApiError(429, message)
   }
 

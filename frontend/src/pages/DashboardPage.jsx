@@ -30,10 +30,10 @@ import { apiClient, query } from '@/api/client.js'
 /**
  * Tableau de bord.
  *
- * La maquette montre un seul ecran decline par role. Le backend n'expose
- * `/dashboard` qu'a la direction : les autres roles composent la meme vue a
+ * La maquette montre un seul écran decline par rôle. Le backend n'expose
+ * `/dashboard` qu'a la direction : les autres rôles composent la même vue a
  * partir des ressources auxquelles ils ont droit. Chaque bloc affiche donc de
- * vraies donnees, ou rien.
+ * vraies données, ou rien.
  */
 
 const SEVERITY_TONE = { critical: 'danger', warning: 'warn', info: 'neutral' }
@@ -46,9 +46,9 @@ const STATUS_TONE = {
 }
 
 const STATUS_LABEL = {
-  completed: 'Realisee',
-  planned: 'Planifiee',
-  cancelled: 'Annulee',
+  completed: 'Réalisée',
+  planned: 'Planifiée',
+  cancelled: 'Annulée',
 }
 
 async function loadDashboard(role) {
@@ -65,7 +65,7 @@ async function loadDashboard(role) {
       .catch(() => []),
   ])
 
-  // La direction dispose d un endpoint d'agregation ; les autres non.
+  // La direction dispose d'un endpoint d'agregation ; les autres non.
   const overview = role === 'director' ? await fetchDashboard().catch(() => null) : null
   const sheet = await fetchAttendanceSheet({ date: today }).catch(() => null)
   const doses = role === 'nurse' || role === 'director'
@@ -75,7 +75,7 @@ async function loadDashboard(role) {
   return { notifications, pending, sessions, overview, sheet, doses }
 }
 
-/** Message de priorite du jour, calcule sur les chiffres reellement charges. */
+/** Message de priorité du jour, calcule sur les chiffres réellement charges. */
 function focusFor(role, data) {
   const pending = data.pending.summary?.total ?? 0
   const pendingDoses = data.doses?.summary?.pending ?? 0
@@ -83,12 +83,12 @@ function focusFor(role, data) {
 
   if (role === 'nurse') {
     return {
-      title: pendingDoses > 0 ? `${pendingDoses} prise${pendingDoses > 1 ? 's' : ''} de medicament a tracer` : 'Aucune prise en attente',
+      title: pendingDoses > 0 ? `${pendingDoses} prise${pendingDoses > 1 ? 's' : ''} de médicament a tracer` : 'Aucune prise en attente',
       text:
         pendingDoses > 0
-          ? 'Les rappels disparaissent des que la prise est enregistree. Les absences repetees demandent aussi un avis sante.'
-          : 'Toutes les prises prevues aujourd hui sont tracees.',
-      cta: 'Ouvrir les medicaments',
+          ? 'Les rappels disparaissent des que la prise est enregistrée. Les absences répétées demandent aussi un avis santé.'
+          : 'Toutes les prises prévues aujourd\'hui sont tracées.',
+      cta: 'Ouvrir les médicaments',
       to: '/medicaments',
     }
   }
@@ -97,18 +97,18 @@ function focusFor(role, data) {
     return {
       title: pending > 0 ? `${pending} compte${pending > 1 ? 's' : ''}-rendu${pending > 1 ? 's' : ''} en attente` : 'Aucun compte-rendu en retard',
       text:
-        'Vue globale du centre : presences, progression moyenne et rapports a exporter pour les familles.',
+        'Vue globale du centre : présences, progression moyenne et rapports a exporter pour les familles.',
       cta: 'Voir les enfants',
       to: '/enfants',
     }
   }
 
   return {
-    title: pending > 0 ? `${pending} compte${pending > 1 ? 's' : ''}-rendu${pending > 1 ? 's' : ''} a saisir` : 'Vos comptes-rendus sont a jour',
+    title: pending > 0 ? `${pending} compte${pending > 1 ? 's' : ''}-rendu${pending > 1 ? 's' : ''} a saisir` : 'Vos comptes-rendus sont à jour',
     text:
       missing > 0
-        ? `${missing} enfant${missing > 1 ? 's' : ''} sans saisie de presence aujourd hui. Les observations manquantes bloquent le recalcul des taux d avancement.`
-        : 'Les observations manquantes bloquent le recalcul des taux d avancement.',
+        ? `${missing} enfant${missing > 1 ? 's' : ''} sans saisie de présence aujourd'hui. Les observations manquantes bloquent le recalcul des taux d'avancement.`
+        : 'Les observations manquantes bloquent le recalcul des taux d\'avancement.',
     cta: 'Saisir un compte-rendu',
     to: '/comptes-rendus',
   }
@@ -124,7 +124,7 @@ function kpisFor(role, data) {
 
   const kpis = [
     {
-      label: role === 'director' ? 'Taux de presence (30 j)' : 'Presence du jour',
+      label: role === 'director' ? 'Taux de présence (30 j)' : 'Présence du jour',
       value: role === 'director' ? percent(overview?.attendance?.presenceRate) : percent(todayRate),
       delta: sheet ? `${recorded}/${sheet.total} saisis` : '—',
       bar: role === 'director' ? (overview?.attendance?.presenceRate ?? 0) : (todayRate ?? 0),
@@ -138,9 +138,9 @@ function kpisFor(role, data) {
       color: '#14866B',
     },
     {
-      label: 'Seances du jour',
+      label: 'Séances du jour',
       value: String(data.sessions.length),
-      delta: `${data.sessions.filter((session) => session.status === 'completed').length} realisees`,
+      delta: `${data.sessions.filter((session) => session.status === 'completed').length} réalisées`,
       bar: data.sessions.length === 0 ? 0 : (data.sessions.filter((s) => s.status === 'completed').length / data.sessions.length) * 100,
       color: '#6C9BF0',
     },
@@ -153,19 +153,19 @@ function kpisFor(role, data) {
     },
   ]
 
-  // L infirmiere n a pas acces a la progression pedagogique agregee.
+  // L'infirmière n'a pas accès'a la progression pédagogique agregee.
   if (role === 'nurse') {
     kpis[1] = {
       label: 'Prises a tracer',
       value: String(data.doses?.summary?.pending ?? 0),
-      delta: `sur ${data.doses?.summary?.total ?? 0} prevues`,
+      delta: `sur ${data.doses?.summary?.total ?? 0} prévues`,
       bar: data.doses?.summary?.total
         ? ((data.doses.summary.total - data.doses.summary.pending) / data.doses.summary.total) * 100
         : 0,
       color: '#14866B',
     }
     kpis[3] = {
-      label: 'Alertes de sante',
+      label: 'Alertes de santé',
       value: String(data.notifications.summary?.byType?.['health-alert'] ?? 0),
       delta: 'sur 7 jours',
       bar: Math.min(100, (data.notifications.summary?.byType?.['health-alert'] ?? 0) * 20),
@@ -181,8 +181,8 @@ function DashboardPage() {
   const navigate = useNavigate()
   const { data, error, loading, reload } = useApi(() => loadDashboard(user.role), [user.role])
 
-  const crumb = { educator: 'Mes seances', nurse: 'Suivi sante', director: 'Vue direction' }[user.role]
-  const title = { educator: 'Ma journee', nurse: 'Tableau de bord sante', director: 'Tableau de bord' }[user.role]
+  const crumb = { educator: 'Mes séances', nurse: 'Suivi santé', director: 'Vue direction' }[user.role]
+  const title = { educator: 'Ma journee', nurse: 'Tableau de bord santé', director: 'Tableau de bord' }[user.role]
 
   return (
     <>
@@ -237,7 +237,7 @@ function DashboardContent({ data, role, navigate }) {
     <>
       <Card className="flex animate-up items-center gap-[26px] px-6 py-[22px]">
         <div className="min-w-0 flex-1">
-          <SectionLabel className="mb-2">Votre priorite du jour · {roleLabel(role)}</SectionLabel>
+          <SectionLabel className="mb-2">Votre priorité du jour · {roleLabel(role)}</SectionLabel>
           <div className="mb-1.5 text-[19px] font-bold tracking-[-0.02em]">{focus.title}</div>
           <div className="max-w-[620px] text-[13.5px] leading-relaxed text-muted-strong">{focus.text}</div>
         </div>
@@ -267,11 +267,11 @@ function DashboardContent({ data, role, navigate }) {
         <Card className="px-6 py-[22px]">
           <CardHeader
             className="mb-[22px]"
-            title={role === 'director' ? 'Progression moyenne par groupe' : 'Seances du jour'}
+            title={role === 'director' ? 'Progression moyenne par groupe' : 'Séances du jour'}
             subtitle={
               role === 'director'
-                ? 'Taux d avancement des objectifs, par groupe educatif'
-                : `${data.sessions.length} seance${data.sessions.length > 1 ? 's' : ''} programmee${data.sessions.length > 1 ? 's' : ''}`
+                ? "Taux d'avancement des objectifs, par groupe éducatif"
+                : `${data.sessions.length} séance${data.sessions.length > 1 ? 's' : ''} programmee${data.sessions.length > 1 ? 's' : ''}`
             }
           />
 
@@ -327,7 +327,7 @@ function DashboardContent({ data, role, navigate }) {
           <Card className="border-0 bg-navy px-[22px] py-5 text-white">
             <div className="mb-1 text-[14.5px] font-bold">Comptes-rendus en attente</div>
             <div className="mb-[18px] text-xs text-onnavy-soft">
-              Seances passees sans compte-rendu depose
+              Séances passees sans compte-rendu dépose
             </div>
             <div className="mb-[18px] flex items-end gap-2.5">
               <div className="text-[40px] font-bold leading-none tracking-[-0.03em]">
@@ -350,8 +350,8 @@ function DashboardContent({ data, role, navigate }) {
         <Card className="overflow-hidden">
           <div className="flex items-center justify-between border-b border-line-soft px-6 pb-4 pt-5">
             <CardHeader
-              title="Seances du jour"
-              subtitle={`${data.sessions.length} seance${data.sessions.length > 1 ? 's' : ''} programmee${data.sessions.length > 1 ? 's' : ''}`}
+              title="Séances du jour"
+              subtitle={`${data.sessions.length} séance${data.sessions.length > 1 ? 's' : ''} programmee${data.sessions.length > 1 ? 's' : ''}`}
             />
           </div>
           <SessionsTable sessions={data.sessions} navigate={navigate} flush />
@@ -365,8 +365,8 @@ function SessionsTable({ sessions, navigate, flush = false }) {
   if (sessions.length === 0) {
     return (
       <EmptyState
-        title="Aucune seance aujourd hui"
-        description="Les seances planifiees apparaitront ici le jour venu."
+        title="Aucune séance aujourd'hui"
+        description="Les séances planifiées apparaitront ici le jour venu."
       />
     )
   }
@@ -390,7 +390,7 @@ function SessionsTable({ sessions, navigate, flush = false }) {
           <div className="flex items-center gap-[11px]">
             <Avatar color="#1E5FD8">{session.title?.slice(0, 2).toUpperCase() ?? 'SE'}</Avatar>
             <div className="min-w-0">
-              <div className="truncate text-[13.5px] font-semibold">{session.title ?? 'Seance'}</div>
+              <div className="truncate text-[13.5px] font-semibold">{session.title ?? 'Séance'}</div>
               <div className="font-mono text-[11px] text-muted-light">
                 {session.startTime ?? '—'}
               </div>

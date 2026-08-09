@@ -1,7 +1,7 @@
 import { compareIsoDates } from '../../utils/dates.js'
 import { db, newId, nowIso, snapshot } from './store.js'
 
-/** Seances : planifiees, realisees ou annulees. */
+/** Séances : planifiées, réalisées ou annulées. */
 
 function matches(session, filter) {
   if (filter.childId && session.childId !== filter.childId) return false

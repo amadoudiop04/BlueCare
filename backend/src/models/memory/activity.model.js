@@ -1,7 +1,7 @@
 import { compareIsoDates } from '../../utils/dates.js'
 import { db, newId, nowIso, snapshot } from './store.js'
 
-/** Acces aux activites. Une activite est collective : elle porte plusieurs participants. */
+/** Accès'aux activités. Une activité est collective : elle porte plusieurs participants. */
 
 function matches(activity, filter) {
   if (filter.category && activity.category !== filter.category) return false
@@ -17,7 +17,7 @@ export const activityModel = {
   async findAll(filter = {}) {
     return [...db.activities.values()]
       .filter((activity) => matches(activity, filter))
-      .sort((a, b) => compareIsoDates(b.date, a.date)) // la plus recente en premier
+      .sort((a, b) => compareIsoDates(b.date, a.date)) // la plus récente en premier
       .map(snapshot)
   },
 
@@ -53,7 +53,7 @@ export const activityModel = {
     return db.activities.delete(id)
   },
 
-  /** Retire un enfant de toutes les activites, quand sa fiche est supprimee. */
+  /** Retire un enfant de toutes les activités, quand sa fiche est supprimée. */
   async removeParticipant(childId) {
     let updated = 0
 

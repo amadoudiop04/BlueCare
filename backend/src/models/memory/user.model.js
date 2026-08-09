@@ -4,9 +4,9 @@ import { sanitizeUser } from '../sanitize.js'
 /**
  * Comptes utilisateurs.
  *
- * `passwordHash` ne sort jamais du modele autrement que par `findByEmail`,
+ * `passwordHash` ne sort jamais du modèle autrement que par `findByEmail`,
  * qui sert uniquement a la connexion. Toutes les autres lectures passent par
- * `sanitize` : le hachage ne peut donc pas fuir dans une reponse HTTP.
+ * `sanitize` : le hachage ne peut donc pas fuir dans une réponse HTTP.
  */
 
 const byName = (a, b) =>
@@ -38,7 +38,7 @@ export const userModel = {
     return sanitizeUser(snapshot(db.users.get(id)))
   },
 
-  /** Acces au hachage, reserve a l'authentification et au changement de mot de passe. */
+  /** Accès'au hachage, réserve a l'authentification et au changement de mot de passe. */
   async findByIdWithSecret(id) {
     return snapshot(db.users.get(id))
   },
@@ -50,7 +50,7 @@ export const userModel = {
     return snapshot(user)
   },
 
-  /** Retrouve le compte d'un lien de reinitialisation. Le jeton n'est jamais stocke en clair. */
+  /** Retrouve le compte d'un lien de réinitialisation. Le jeton n'est jamais stocke en clair. */
   async findByResetTokenHash(tokenHash) {
     if (!tokenHash) return undefined
 
@@ -75,7 +75,7 @@ export const userModel = {
       groups: [],
       childIds: [],
       lastLoginAt: null,
-      // Double authentification : les memes valeurs par defaut que le schema SQL.
+      // Double authentification : les mêmes valeurs par défaut que le schéma SQL.
       totpSecret: null,
       totpEnabled: false,
       totpConfirmedAt: null,

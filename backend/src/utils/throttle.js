@@ -1,13 +1,13 @@
 /**
- * Limiteur de cadence minimal, en memoire.
+ * Limiteur de cadence minimal, en mémoire.
  *
- * Il protege la demande de reinitialisation : sans lui, n'importe qui pourrait
- * declencher un envoi en boucle vers l'adresse d'un collegue. Ce n'est pas une
- * defense contre un attaquant distribue — la memoire n'est pas partagee entre
- * plusieurs processus — mais cela suffit a empecher le harcelement par courriel
+ * Il protege la demande de réinitialisation : sans lui, n'importe qui pourrait
+ * déclencher un envoi en boucle vers l'adresse d'un collegue. Ce n'est pas une
+ * defense contre un attaquant distribue — la mémoire n'est pas partagee entre
+ * plusieurs processus — mais cela suffit a empêcher le harcelement par courriel
  * et l'exploration systematique du formulaire.
  *
- * Le jour ou l'application tournera derriere plusieurs instances, ce compteur
+ * Le jour ou l'application tournera derrière plusieurs instances, ce compteur
  * devra passer en base ou dans un cache partage.
  */
 
@@ -25,7 +25,7 @@ export function createThrottle({ max, windowMs }) {
     accept(key) {
       const now = Date.now()
 
-      // La table reste petite : on la nettoie a chaque appel plutot que
+      // La table reste petite : on la nettoie à chaque appel plutôt que
       // d'entretenir un minuteur qui empecherait le processus de s'arreter.
       prune(now)
 

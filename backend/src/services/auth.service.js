@@ -20,15 +20,15 @@ import { sessionAuthService } from './session.auth.service.js'
 const isDirectionRole = (role) => DIRECTION_ROLES.includes(role)
 
 /*
- * Quotas de la demande de reinitialisation.
+ * Quotas de la demande de réinitialisation.
  *
- * Par adresse, le seuil est bas : cinq liens en un quart d heure couvrent
- * largement une personne qui s y reprend a plusieurs fois, et empechent
- * d'inonder la boite d un collegue.
+ * Par adresse, le seuil est bas : cinq liens en un quart d'heure couvrent
+ * largement une personne qui s'y reprend a plusieurs fois, et empêchent
+ * d'inonder la boite d'un collegue.
  *
- * Par origine, il est plus large : tout un centre peut partager la meme sortie
+ * Par origine, il est plus large : tout un centre peut partager la même sortie
  * internet, et une limite trop basse bloquerait des demandes legitimes. Il
- * reste assez bas pour rendre penible un balayage de l annuaire.
+ * reste assez bas pour rendre penible un balayage de l'annuaire.
  */
 const RESET_WINDOW_MS = 15 * 60_000
 const resetByEmail = createThrottle({ max: 5, windowMs: RESET_WINDOW_MS })
@@ -44,9 +44,9 @@ async function countOtherActiveDirection(excludeId) {
 }
 
 /**
- * Le mot de passe doit resister a une attaque par dictionnaire : on impose
- * une longueur minimale plutot qu une composition exotique, plus efficace
- * et moins pousse-a-la-faute pour les equipes.
+ * Le mot de passe doit résister a une attaque par dictionnaire : on impose
+ * une longueur minimale plutôt qu'une composition exotique, plus efficace
+ * et moins pousse-a-la-faute pour les équipes.
  */
 export function assertPasswordPolicy(password, field, errors) {
   const value = readString(password, field, errors, {
@@ -64,9 +64,9 @@ export function assertPasswordPolicy(password, field, errors) {
 
 export const authService = {
   /**
-   * Connexion. Le message d erreur est identique que l'e-mail soit inconnu
-   * ou le mot de passe faux, et le temps de reponse est aligne : rien ne
-   * permet de decouvrir quels comptes existent.
+   * Connexion. Le message d'erreur est identique que l'e-mail soit inconnu
+   * ou le mot de passe faux, et le temps de réponse est aligne : rien ne
+   * permet de découvrir quels comptes existent.
    */
   async login({ email, password } = {}, request = {}) {
     const errors = createErrors()
@@ -83,11 +83,11 @@ export const authService = {
 
     const passwordMatches = await verifyPassword(password, user.passwordHash)
     if (!passwordMatches) throw ApiError.unauthorized('Identifiants incorrects')
-    if (user.status !== 'active') throw ApiError.forbidden('Compte desactive')
+    if (user.status !== 'active') throw ApiError.forbidden('Compte désactivé')
 
     /*
      * Second facteur actif : aucune session n'est ouverte a ce stade, seulement
-     * un jeton de defi de courte duree. Le mot de passe seul ne donne rien.
+     * un jeton de défi de courte durée. Le mot de passe seul ne donne rien.
      */
     if (user.totpEnabled) {
       return {
@@ -101,11 +101,11 @@ export const authService = {
   },
 
   /**
-   * Seconde etape de la connexion : le code a usage unique.
-   * Le jeton de defi identifie le compte, le code prouve la possession.
+   * Seconde étape de la connexion : le code à usage unique.
+   * Le jeton de défi identifie le compte, le code prouve la possession.
    */
   async verifyMfa({ challengeToken, code } = {}, request = {}) {
-    if (!challengeToken) throw ApiError.badRequest('Jeton de verification absent')
+    if (!challengeToken) throw ApiError.badRequest('Jeton de vérification absent')
 
     const errors = createErrors()
     readString(code, 'code', errors, { required: true, min: 6, max: 10 })
@@ -115,7 +115,7 @@ export const authService = {
     const user = await userModel.findByIdWithSecret(payload.sub)
 
     if (!user) throw ApiError.unauthorized('Compte introuvable')
-    if (user.status !== 'active') throw ApiError.forbidden('Compte desactive')
+    if (user.status !== 'active') throw ApiError.forbidden('Compte désactivé')
 
     await verifySecondFactor(user, code)
 
@@ -131,12 +131,12 @@ export const authService = {
       user: sanitizeUser(user),
       token,
       session,
-      // Le front sait ainsi qu il doit inviter a activer la 2FA.
+      // Le front sait ainsi qu'il doit inviter a activer la 2FA.
       mfaSetupRequired: isMfaRequiredFor(user.role) && !user.totpEnabled,
     }
   },
 
-  /** Ferme la session portee par ce jeton. Silencieux si elle n'existe plus. */
+  /** Ferme la session portée par ce jeton. Silencieux si elle n'existe plus. */
   async logout(token) {
     const session = await sessionAuthService.resolve(token)
     if (session) await sessionAuthService.close(session.id)
@@ -164,7 +164,7 @@ export const authService = {
 
   listSessions: (user, session) => sessionAuthService.list(user.id, session?.id),
 
-  /** Deconnexion d un autre appareil, depuis la page profil. */
+  /** Déconnexion d'un autre appareil, depuis la page profil. */
   async revokeSession(user, sessionId, current) {
     const sessions = await sessionAuthService.list(user.id, current?.id)
     if (!sessions.some((entry) => entry.id === sessionId)) {
@@ -196,7 +196,7 @@ export const authService = {
     if (!matches) throw ApiError.unauthorized('Mot de passe actuel incorrect')
 
     if (currentPassword === newPassword) {
-      throw ApiError.badRequest('Le nouveau mot de passe doit differer de l ancien')
+      throw ApiError.badRequest('Le nouveau mot de passe doit différer de l\'ancien')
     }
 
     await userModel.update(user.id, { passwordHash: await hashPassword(newPassword) })
@@ -206,11 +206,11 @@ export const authService = {
   },
 
   /**
-   * Demande de reinitialisation.
+   * Demande de réinitialisation.
    *
-   * La reponse est toujours la meme, que l'adresse existe ou non : sinon,
-   * ce formulaire deviendrait un moyen de decouvrir qui travaille au centre.
-   * Le temps de reponse est aligne pour la meme raison.
+   * La réponse est toujours la même, que l'adresse existe ou non : sinon,
+   * ce formulaire deviendrait un moyen de découvrir qui travaille au centre.
+   * Le temps de réponse est aligne pour la même raison.
    */
   async requestPasswordReset({ email } = {}, request = {}) {
     const errors = createErrors()
@@ -218,15 +218,15 @@ export const authService = {
     errors.throwIfAny('Adresse invalide')
 
     // Le quota s'applique avant toute lecture en base : il ne doit pas
-    // dependre de l'existence du compte, sinon il la revelerait.
+    // dépendre de l'existence du compte, sinon il la revelerait.
     // Les deux compteurs sont evalues, sans court-circuit : chacun doit
-    // enregistrer la tentative, meme si l'autre a deja refuse.
+    // enregistrer la tentative, même si l'autre a déjà refuse.
     const emailAccepted = resetByEmail.accept(normalizedEmail)
     const originAccepted = resetByOrigin.accept(request.ip ?? 'origine-inconnue')
 
     if (!emailAccepted || !originAccepted) {
       throw ApiError.tooManyRequests(
-        'Trop de demandes de reinitialisation. Reessayez dans quelques minutes.',
+        'Trop de demandes de réinitialisation. Réessayez dans quelques minutes.',
       )
     }
 
@@ -239,7 +239,7 @@ export const authService = {
 
     const token = createSessionToken()
 
-    // Un seul lien actif : en redemander un invalide le precedent.
+    // Un seul lien actif : en redemander un invalide le précédent.
     await userModel.update(user.id, {
       resetTokenHash: hashSessionToken(token),
       resetExpiresAt: new Date(Date.now() + env.auth.resetTtlMinutes * 60_000).toISOString(),
@@ -251,15 +251,15 @@ export const authService = {
       token,
       mfaRequired: Boolean(user.totpEnabled),
     }).catch((error) => {
-      // L'echec d'envoi ne doit pas reveler l'existence du compte : on le
-      // journalise, la reponse reste identique.
-      logger.error('Envoi du lien de reinitialisation impossible', error.message)
+      // L'échec d'envoi ne doit pas reveler l'existence du compte : on le
+      // journalise, la réponse reste identique.
+      logger.error('Envoi du lien de réinitialisation impossible', error.message)
     })
 
     return { requested: true }
   },
 
-  /** Retrouve le compte d'un lien, en verifiant qu'il est encore valable. */
+  /** Retrouve le compte d'un lien, en vérifiant qu'il est encore valable. */
   async resolveResetToken(token) {
     if (!token) return null
 
@@ -274,25 +274,25 @@ export const authService = {
     return user
   },
 
-  /** Ce que l'ecran de reinitialisation doit savoir avant d'afficher son formulaire. */
+  /** Ce que l'écran de réinitialisation doit savoir avant d'afficher son formulaire. */
   async describeResetToken(token) {
     const user = await this.resolveResetToken(token)
     if (!user) return { valid: false }
 
     return {
       valid: true,
-      // On ne renvoie ni le nom ni l'adresse : le lien peut avoir ete
+      // On ne renvoie ni le nom ni l'adresse : le lien peut avoir été
       // transfere ou intercepte, il ne doit rien apprendre sur le compte.
       mfaRequired: Boolean(user.totpEnabled),
     }
   },
 
   /**
-   * Reinitialisation effective.
+   * Réinitialisation effective.
    *
-   * Le second facteur reste exige quand il est actif. Sans cela, l'acces a la
+   * Le second facteur reste exige quand il est actif. Sans cela, l'accès'a la
    * boite mail suffirait a prendre le compte, ce qui viderait la double
-   * authentification de son sens — c'est precisement contre ce scenario
+   * authentification de son sens — c'est précisément contre ce scénario
    * qu'elle protege.
    */
   async resetPassword({ token, password, code } = {}) {
@@ -302,13 +302,13 @@ export const authService = {
 
     const user = await this.resolveResetToken(token)
     if (!user) {
-      throw ApiError.badRequest('Ce lien est expire ou a deja ete utilise')
+      throw ApiError.badRequest('Ce lien est expire ou a déjà été utilise')
     }
 
     if (user.totpEnabled) {
       const withCode = createErrors()
       readString(code, 'code', withCode, { required: true, min: 6, max: 10 })
-      withCode.throwIfAny('Code de verification requis')
+      withCode.throwIfAny('Code de vérification requis')
 
       await verifySecondFactor(user, code)
     }
@@ -321,7 +321,7 @@ export const authService = {
     })
 
     // Toutes les sessions tombent : si le compte etait compromis, changer le
-    // mot de passe sans deconnecter l'intrus ne servirait a rien.
+    // mot de passe sans déconnecter l'intrus ne servirait a rien.
     const revoked = await sessionAuthService.closeAll(user.id)
 
     return { reset: true, sessionsClosed: revoked }
@@ -329,7 +329,7 @@ export const authService = {
 
   /**
    * Ce que la suppression du compte entrainerait, avant de la demander.
-   * Affiche dans la boite de confirmation : personne ne doit decouvrir apres
+   * Affiche dans la boite de confirmation : personne ne doit découvrir après
    * coup que son nom restera attache a des comptes-rendus.
    */
   async describeAccountDeletion(user) {
@@ -345,7 +345,7 @@ export const authService = {
       authoredRecords: authored,
       reports: reports.length,
       sessions: sessions.length,
-      // Sans travail rattache, la ligne peut disparaitre entierement.
+      // Sans travail rattache, la ligne peut disparaître entièrement.
       mode: authored === 0 ? 'erase' : 'anonymise',
       lastAdministrator: remainingAdmins === 0,
     }
@@ -354,18 +354,18 @@ export const authService = {
   /**
    * Suppression de son propre compte.
    *
-   * Deux issues, selon ce que le compte laisse derriere lui :
+   * Deux issues, selon ce que le compte laisse derrière lui :
    *
-   *   erase     — aucun compte-rendu ni seance a son nom : la ligne est
-   *               supprimee, il n'en reste rien.
-   *   anonymise — du travail lui est rattache. Les donnees personnelles sont
-   *               effacees (nom, e-mail, telephone, mot de passe, second
+   *   erase     — aucun compte-rendu ni séance a son nom : la ligne est
+   *               supprimée, il n'en reste rien.
+   *   anonymise — du travail lui est rattache. Les données personnelles sont
+   *               effacees (nom, e-mail, téléphone, mot de passe, second
    *               facteur), mais la ligne survit pour que les comptes-rendus
    *               gardent un auteur identifiable. Supprimer purement casserait
-   *               la tracabilite d un dossier medical et pedagogique, ce qu'on
-   *               n a pas le droit de faire.
+   *               la tracabilite d'un dossier médical et pédagogique, ce qu'on
+   *               n'a pas le droit de faire.
    *
-   * Le mot de passe est exige, et le second facteur s il est actif : un jeton
+   * Le mot de passe est exige, et le second facteur s'il est actif : un jeton
    * vole ne doit pas suffire a effacer un compte.
    */
   async deleteOwnAccount(user, { password, code } = {}) {
@@ -381,18 +381,18 @@ export const authService = {
     if (account.totpEnabled) {
       const withCode = createErrors()
       readString(code, 'code', withCode, { required: true, min: 6, max: 10 })
-      withCode.throwIfAny('Code de verification requis')
+      withCode.throwIfAny('Code de vérification requis')
 
       await verifySecondFactor(account, code)
     }
 
     const summary = await this.describeAccountDeletion(user)
 
-    // Un centre sans administrateur actif ne peut plus creer de comptes ni
-    // reinitialiser une double authentification : personne ne pourrait rouvrir.
+    // Un centre sans administrateur actif ne peut plus créer de comptes ni
+    // réinitialiser une double authentification : personne ne pourrait rouvrir.
     if (summary.lastAdministrator) {
       throw ApiError.conflict(
-        'Vous etes le dernier compte de direction actif. Nommez un remplacant avant de supprimer le votre.',
+        'Vous êtes le dernier compte de direction actif. Nommez un remplacant avant de supprimer le votre.',
       )
     }
 
@@ -404,7 +404,7 @@ export const authService = {
     }
 
     await userModel.update(user.id, {
-      // `.invalid` est un domaine reserve : cette adresse ne peut jamais exister.
+      // `.invalid` est un domaine réserve : cette adresse ne peut jamais exister.
       email: `supprime.${user.id}@compte-supprime.invalid`,
       firstName: 'Compte',
       lastName: 'supprime',
@@ -427,9 +427,9 @@ export const authService = {
   },
 
   /**
-   * Genere un lien de suivi pour une famille : jeton signe, un seul enfant,
+   * Génère un lien de suivi pour une famille : jeton signe, un seul enfant,
    * lecture seule, expiration courte. Il circule par e-mail ou SMS, donc il
-   * ne donne acces qu'a la progression, jamais aux donnees medicales.
+   * ne donne accès qu'a la progression, jamais aux données médicales.
    */
   async createFamilyLink(user, childId, { expiresIn } = {}) {
     const child = await childModel.findById(childId)

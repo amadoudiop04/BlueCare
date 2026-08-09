@@ -14,15 +14,15 @@ import {
 } from '../utils/validate.js'
 import { assertPasswordPolicy } from './auth.service.js'
 
-/** Gestion des comptes. Reservee au directeur (voir `user.routes.js`). */
+/** Gestion des comptes. Réservée au directeur (voir `user.routes.js`). */
 
 const STATUS_KEYS = Object.keys(USER_STATUSES)
 
 async function readScope(payload, role, errors, { partial }) {
   const scope = {}
 
-  // Un educateur travaille sur des groupes, une famille sur des enfants
-  // nommes. Les deux autres roles voient tout le centre : pas de perimetre.
+  // Un éducateur travaille sur des groupes, une famille sur des enfants
+  // nommes. Les deux autres rôles voient tout le centre : pas de périmètre.
   if (role === 'educator' && (!partial || payload.groups !== undefined)) {
     const groups = readArray(payload.groups, 'groups', errors, { max: 20 }) ?? []
     scope.groups = groups
@@ -100,7 +100,7 @@ export const userService = {
     errors.throwIfAny('Compte invalide')
 
     if (await userModel.emailExists(email)) {
-      throw ApiError.conflict('Cette adresse e-mail est deja utilisee')
+      throw ApiError.conflict('Cette adresse e-mail est déjà utilisée')
     }
 
     return userModel.create(
@@ -135,13 +135,13 @@ export const userService = {
     errors.throwIfAny('Compte invalide')
 
     if (email && (await userModel.emailExists(email, { excludeId: userId }))) {
-      throw ApiError.conflict('Cette adresse e-mail est deja utilisee')
+      throw ApiError.conflict('Cette adresse e-mail est déjà utilisée')
     }
 
     return userModel.update(userId, { ...data, ...scope })
   },
 
-  /** Reinitialisation par le directeur : l ancien mot de passe n est pas demande. */
+  /** Réinitialisation par le directeur : l'ancien mot de passe n'est pas demande. */
   async resetPassword(userId, payload = {}) {
     await this.getById(userId)
 
@@ -155,12 +155,12 @@ export const userService = {
   },
 
   /**
-   * Desactivation plutot que suppression : les comptes-rendus deja signes
+   * Désactivation plutôt que suppression : les comptes-rendus déjà signes
    * gardent un auteur identifiable.
    */
   async disable(userId, currentUser) {
     if (userId === currentUser.id) {
-      throw ApiError.conflict('Vous ne pouvez pas desactiver votre propre compte')
+      throw ApiError.conflict('Vous ne pouvez pas désactiver votre propre compte')
     }
 
     await this.getById(userId)

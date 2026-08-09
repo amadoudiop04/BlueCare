@@ -1,11 +1,11 @@
 import { cx } from '@/lib/ui.js'
 
 /**
- * Mention de l auteur, en pied d'application.
+ * Mention de l'auteur, en pied d'application.
  *
- * Deux tonalites : `light` pour les fonds bleu nuit (barre laterale, ecran de
- * connexion), `dark` pour les fonds clairs. Le texte reste discret — c est une
- * signature, pas un element d'interface.
+ * Deux tonalites : `light` pour les fonds bleu nuit (barre laterale, écran de
+ * connexion), `dark` pour les fonds clairs. Le texte reste discret — c'est une
+ * signature, pas un élément d'interface.
  */
 function DeveloperCredit({ tone = 'dark', className }) {
   return (

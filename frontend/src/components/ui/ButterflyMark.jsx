@@ -3,13 +3,13 @@ import logo from '/logoPapillonBleu.png'
 /**
  * Logo du centre.
  *
- * L image porte ses propres couleurs et sa transparence : le fond colore
- * n'est donc plus pose par defaut, contrairement au papillon dessine en CSS
- * qu elle remplace. Les emplacements qui ont besoin d un cadre — un logo bleu
+ * L'image porte ses propres couleurs et sa transparence : le fond colore
+ * n'est donc plus pose par défaut, contrairement au papillon dessine en CSS
+ * qu'elle remplace. Les emplacements qui ont besoin d'un cadre — un logo bleu
  * sur un degrade bleu se lit mal — passent explicitement `background`.
  *
- * Sans rapport avec le papillon ASCII de l ecran de connexion, qui reste
- * genere en Three.js (`AsciiButterfly.jsx`).
+ * Sans rapport avec le papillon ASCII de l'écran de connexion, qui reste
+ * génère en Three.js (`AsciiButterfly.jsx`).
  */
 function ButterflyMark({ size = 38, radius = 11, background, className }) {
   return (
@@ -24,7 +24,7 @@ function ButterflyMark({ size = 38, radius = 11, background, className }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        // Un cadre colore a besoin d'air autour du motif ; sans cadre, l image
+        // Un cadre colore a besoin d'air autour du motif ; sans cadre, l'image
         // occupe toute la place disponible.
         padding: background ? size * 0.14 : 0,
       }}
@@ -32,7 +32,7 @@ function ButterflyMark({ size = 38, radius = 11, background, className }) {
       <img
         src={logo}
         // Le nom « BlueCare » accompagne toujours le logo en toutes lettres :
-        // le decrire une seconde fois n'apporterait rien a un lecteur d'ecran.
+        // le decrire une seconde fois n'apporterait rien a un lecteur d'écran.
         alt=""
         aria-hidden="true"
         style={{ width: '100%', height: '100%', objectFit: 'contain' }}

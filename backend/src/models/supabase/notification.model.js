@@ -5,15 +5,15 @@ import { createRepository, raise, runMany, runMaybeOne } from './repository.js'
 /**
  * Acquittements et abonnements push (Postgres).
  *
- * Le fil de notifications lui-meme n est pas stocke : il est recalcule a
- * chaque lecture a partir des donnees metier. Seuls l'acquittement et les
+ * Le fil de notifications lui-même n'est pas stocke : il est recalcule a
+ * chaque lecture à partir des données metier. Seuls l'acquittement et les
  * abonnements le sont, parce qu'ils ne se deduisent de rien.
  */
 
 const subscriptions = createRepository({ table: 'push_subscriptions', prefix: 'sub' })
 
 export const notificationModel = {
-  /** Identifiants deja acquittes par cet utilisateur, parmi ceux proposes. */
+  /** Identifiants déjà acquittes par cet utilisateur, parmi ceux proposes. */
   async readIdsFor(userId, notificationIds = []) {
     if (notificationIds.length === 0) return new Set()
 

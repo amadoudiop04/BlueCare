@@ -10,16 +10,16 @@ import { setSessionExpiredHandler } from '@/api/client.js'
 import { AuthContext } from '@/features/auth/authContext.js'
 
 /**
- * Session de l utilisateur connecte.
+ * Session de l'utilisateur connecte.
  *
- * L application ne detient aucun jeton : la session vit dans un cookie
- * `httpOnly` et dans la base. La seule facon de savoir si l'on est connecte
- * est donc de le demander au serveur — c est ce que fait `GET /auth/me` au
- * demarrage.
+ * L'application ne detient aucun jeton : la session vit dans un cookie
+ * `httpOnly` et dans la base. La seule façon de savoir si l'on est connecte
+ * est donc de le demander au serveur — c'est ce que fait `GET /auth/me` au
+ * démarrage.
  *
- * Le role et le perimetre viennent de la meme reponse, jamais d une deduction
- * cote client : le front s en sert pour afficher ou masquer des ecrans, c'est
- * le serveur qui refuse reellement l acces.
+ * Le rôle et le périmètre viennent de la même réponse, jamais d'une deduction
+ * côté client : le front s'en sert pour afficher ou masquer des écrans, c'est
+ * le serveur qui refuse réellement l'accès.
  */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -32,13 +32,13 @@ export function AuthProvider({ children }) {
     setStatus('anonymous')
   }, [])
 
-  // Le client HTTP previent quand le serveur a refuse la session.
+  // Le client HTTP prévient quand le serveur a refuse la session.
   useEffect(() => {
     setSessionExpiredHandler(forgetSession)
     return () => setSessionExpiredHandler(() => {})
   }, [forgetSession])
 
-  /** Restaure la session au chargement, a partir du cookie deja pose. */
+  /** Restaure la session au chargement, à partir du cookie déjà pose. */
   useEffect(() => {
     let cancelled = false
 
@@ -62,7 +62,7 @@ export function AuthProvider({ children }) {
     setUser(account)
     setStatus('authenticated')
 
-    // Le perimetre arrive juste apres : il ne bloque pas l'affichage.
+    // Le périmètre arrive juste après : il ne bloque pas l'affichage.
     fetchMe()
       .then((data) => setScope(data.scope))
       .catch(() => setScope(null))
@@ -71,8 +71,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   /**
-   * Premiere etape. Si le compte est protege par un second facteur, rend
-   * `{ mfaRequired, challengeToken }` sans ouvrir de session : c est l ecran
+   * Première étape. Si le compte est protégé par un second facteur, rend
+   * `{ mfaRequired, challengeToken }` sans ouvrir de session : c'est l'écran
    * de connexion qui enchaine sur la saisie du code.
    */
   const login = useCallback(
@@ -93,7 +93,7 @@ export function AuthProvider({ children }) {
     [openSession],
   )
 
-  /** La deconnexion supprime la session en base ; le cookie tombe avec elle. */
+  /** La déconnexion supprime la session en base ; le cookie tombe avec elle. */
   const logout = useCallback(async () => {
     await logoutRequest().catch(() => {})
     forgetSession()

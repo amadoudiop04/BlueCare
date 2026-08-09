@@ -4,7 +4,7 @@ import { after, before, describe, it } from 'node:test'
 import { PASSWORD, createChildDirect, createUserWithToken, startTestServer } from './helpers.js'
 import { generateCode, stepFor } from '../src/utils/totp.js'
 
-/** Double authentification : enrolement, connexion en deux temps, codes de secours. */
+/** Double authentification : enrôlement, connexion en deux temps, codes de secours. */
 
 let context
 let api
@@ -12,14 +12,14 @@ let api
 /**
  * Code du pas suivant.
  *
- * Le code qui a servi a activer la 2FA est marque consomme : le rejouer pour
- * se connecter est refuse. En usage reel la connexion suivante arrive bien
- * plus tard ; dans un test tout se joue dans la meme fenetre de 30 secondes,
- * d ou ce decalage d un pas — accepte par la tolerance d horloge.
+ * Le code qui a servi a activer la 2FA est marque consommé : le rejouer pour
+ * se connecter est refuse. En usage réel la connexion suivante arrive bien
+ * plus tard ; dans un test tout se joue dans la même fenêtre de 30 secondes,
+ * d'ou ce décalage d'un pas — accepte par la tolérance d'horloge.
  */
 const freshCode = (secret) => generateCode(secret, stepFor() + 1)
 
-/** Enrole un compte et rend son secret + ses codes de secours. */
+/** Enrôle un compte et rend son secret + ses codes de secours. */
 async function enableMfa(account) {
   const setup = await api('/auth/mfa/setup', { method: 'POST', token: account.token })
   assert.equal(setup.status, 201, JSON.stringify(setup.body))
@@ -56,7 +56,7 @@ describe('Enrolement', () => {
     assert.match(setup.body.data.otpauthUri, /^otpauth:\/\/totp\//)
     assert.ok(setup.body.data.otpauthUri.includes(encodeURIComponent(account.email)))
 
-    // Tant que le code n est pas confirme, la connexion reste a un facteur.
+    // Tant que le code n'est pas confirme, la connexion reste à un facteur.
     const login = await loginWith(account.email)
     assert.equal(login.status, 200)
     assert.ok(login.body.meta.sessionToken)
@@ -167,8 +167,8 @@ describe('Connexion en deux temps', () => {
     })
     assert.equal(ok.status, 200)
 
-    // Le code reste mathematiquement valable pendant sa fenetre : c est le
-    // suivi du dernier pas consomme qui bloque la relecture.
+    // Le code reste mathematiquement valable pendant sa fenêtre : c'est le
+    // suivi du dernier pas consommé qui bloque la relecture.
     const second = await loginWith(account.email)
     const replay = await api('/auth/mfa/verify', {
       method: 'POST',
@@ -176,7 +176,7 @@ describe('Connexion en deux temps', () => {
     })
 
     assert.equal(replay.status, 401)
-    assert.match(replay.body.message, /deja ete utilise/)
+    assert.match(replay.body.message, /déjà été utilisé/)
   })
 
   it('refuse que le code d activation serve aussi a se connecter', async () => {
@@ -198,7 +198,7 @@ describe('Connexion en deux temps', () => {
     })
 
     assert.equal(status, 401)
-    assert.match(body.message, /deja ete utilise/)
+    assert.match(body.message, /déjà été utilisé/)
   })
 })
 
@@ -218,7 +218,7 @@ describe('Codes de secours', () => {
     const status = await api('/auth/mfa', { token: used.body.meta.sessionToken })
     assert.equal(status.body.data.recoveryCodesLeft, 7)
 
-    // Le meme code ne doit plus fonctionner.
+    // Le même code ne doit plus fonctionner.
     const again = await loginWith(account.email)
     const replay = await api('/auth/mfa/verify', {
       method: 'POST',
@@ -250,7 +250,7 @@ describe('Protection contre le forcage', () => {
     assert.deepEqual(statuses.slice(0, 4), [401, 401, 401, 401])
     assert.equal(statuses[4], 403, 'la cinquieme tentative doit verrouiller')
 
-    // Meme un code valide est refuse tant que le verrou court.
+    // Même un code valide est refuse tant que le verrou court.
     const { status } = await api('/auth/mfa/verify', {
       method: 'POST',
       body: { challengeToken, code: '999999' },
@@ -354,7 +354,7 @@ describe('Role administrateur', () => {
     const { status, body } = await api(`/children/${child.id}`, { token: admin.token })
 
     assert.equal(status, 200)
-    // Perimetre complet ET acces medical : le medecin referent reste visible.
+    // Périmètre complet ET accès médical : le médecin référent reste visible.
     assert.notEqual(body.data.referringDoctor, null)
   })
 
@@ -365,7 +365,7 @@ describe('Role administrateur', () => {
     const goal = await api(`/children/${child.id}/goals`, {
       method: 'POST',
       token: admin.token,
-      body: { title: 'Objectif cree par l administrateur', domain: 'social' },
+      body: { title: 'Objectif crée par l\'administrateur', domain: 'social' },
     })
     assert.equal(goal.status, 201, JSON.stringify(goal.body))
 

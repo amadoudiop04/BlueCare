@@ -1,7 +1,7 @@
 import { compareIsoDates } from '../../utils/dates.js'
 import { attendanceKey, db, newId, nowIso, snapshot } from './store.js'
 
-/** Acces aux presences quotidiennes. Une ligne = un enfant, un jour. */
+/** Accès'aux présences quotidiennes. Une ligne = un enfant, un jour. */
 
 function matches(record, filter) {
   if (filter.date && record.date !== filter.date) return false
@@ -27,8 +27,8 @@ export const attendanceModel = {
   },
 
   /**
-   * Cree la presence du jour ou met a jour celle qui existe : un educateur
-   * qui corrige une saisie ne doit pas creer un doublon pour la meme date.
+   * Crée la présence du jour ou met à jour celle qui existe : un éducateur
+   * qui corrige une saisie ne doit pas créer un doublon pour la même date.
    */
   async upsert({ childId, date, ...data }) {
     const key = attendanceKey(childId, date)

@@ -1,11 +1,11 @@
 import { ApiError } from '../utils/ApiError.js'
 
 /**
- * Controle d acces par role (RBAC).
+ * Contrôle d'accès par rôle (RBAC).
  *
  *   router.post('/', authenticate, authorize('director'), asyncHandler(createUser))
  *
- * A placer systematiquement apres `authenticate`, qui renseigne `req.user`.
+ * A placer systematiquement après `authenticate`, qui renseigne `req.user`.
  */
 export const authorize =
   (...roles) =>
@@ -16,7 +16,7 @@ export const authorize =
     }
 
     if (roles.length > 0 && !roles.includes(req.user.role)) {
-      next(ApiError.forbidden('Votre role ne permet pas cette action'))
+      next(ApiError.forbidden('Votre rôle ne permet pas cette action'))
       return
     }
 

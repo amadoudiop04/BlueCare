@@ -6,7 +6,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 
 const router = Router()
 
-// Le referentiel expose la liste des groupes du centre : il reste derriere le jeton.
+// Le référentiel expose la liste des groupes du centre : il reste derrière le jeton.
 router.get('/', authenticate, asyncHandler(getReference))
 
 export default router

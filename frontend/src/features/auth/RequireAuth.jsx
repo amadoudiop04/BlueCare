@@ -6,9 +6,9 @@ import { homePathFor } from '@/lib/navigation.js'
 /**
  * Garde de route.
  *
- * Elle evite d'afficher un ecran vide ou un 403 a un utilisateur qui n'a rien
- * a y faire — ce n est pas une mesure de securite : le serveur refuse de
- * toute facon les requetes hors perimetre.
+ * Elle évite d'afficher un écran vide ou un 403 a un utilisateur qui n'a rien
+ * a y faire — ce n'est pas une mesure de sécurité : le serveur refuse de
+ * toute façon les requêtes hors périmètre.
  */
 function RequireAuth({ roles, children }) {
   const { status, user } = useAuth()

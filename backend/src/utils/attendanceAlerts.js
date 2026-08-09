@@ -2,18 +2,18 @@ import { ABSENCE_STATUSES } from '../constants/domain.js'
 import { addDays, compareIsoDates, daysBetween, formatFrench, today } from './dates.js'
 
 /**
- * Moteur d alertes sur les absences repetees.
+ * Moteur d'alertes sur les absences répétées.
  *
- * Fonction pure : elle recoit des enregistrements de presence et rend des
- * alertes. Aucune alerte n'est stockee en base — elles sont recalculees a
- * chaque lecture, ce qui evite les alertes fantomes quand un educateur
- * corrige une saisie apres coup.
+ * Fonction pure : elle reçoit des enregistrements de présence et rend des
+ * alertes. Aucune alerte n'est stockée en base — elles sont recalculees a
+ * chaque lecture, ce qui évite les alertes fantomes quand un éducateur
+ * corrige une saisie après coup.
  *
- * Deux regles :
- *  - `consecutive-absences`  : l enfant enchaine les absences (justifiees ou non),
- *                              signe d une rupture d accueil a traiter vite.
- *  - `repeated-absences`     : trop d absences NON justifiees sur une fenetre
- *                              glissante, meme si elles sont dispersees.
+ * Deux règles :
+ *  - `consecutive-absences`  : l'enfant enchaine les absences (justifiées ou non),
+ *                              signe d'une rupture d'accueil a traiter vite.
+ *  - `repeated-absences`     : trop d'absences NON justifiées sur une fenêtre
+ *                              glissante, même si elles sont dispersees.
  */
 
 const ABSENCE = new Set(ABSENCE_STATUSES)
@@ -24,8 +24,8 @@ const byDateAsc = (a, b) => compareIsoDates(a.date, b.date)
 const severityFor = (count, threshold) => (count >= threshold * 2 ? 'critical' : 'warning')
 
 /**
- * Serie d absences en fin d'historique, c'est-a-dire celle qui est encore
- * en cours. Une serie ancienne, deja suivie et cloturee, n'a plus a alerter.
+ * Série d'absences en fin d'historique, c'est-a-dire celle qui est encore
+ * en cours. Une série ancienne, déjà suivie et cloturee, n'a plus a alerter.
  */
 function trailingAbsenceStreak(sortedRecords) {
   const streak = []
@@ -52,7 +52,7 @@ export function evaluateAttendanceAlerts(records = [], options = {}) {
   const streak = trailingAbsenceStreak(sorted)
   const lastAbsence = streak.at(-1)
 
-  // La serie doit toucher la periode courante : un enfant parti il y a six mois
+  // La série doit toucher la période courante : un enfant parti il y a six mois
   // ne doit pas remonter indefiniment dans les alertes du jour.
   const streakIsCurrent = lastAbsence && daysBetween(lastAbsence.date, referenceDate) <= windowDays
 
@@ -94,7 +94,7 @@ export function evaluateAttendanceAlerts(records = [], options = {}) {
   return alerts
 }
 
-/** Compteurs affiches sur la fiche de l enfant, a cote de son historique. */
+/** Compteurs affichés sur la fiche de l'enfant, a côté de son historique. */
 export function summarizeAttendance(records = []) {
   const counters = { present: 0, late: 0, absent: 0, excused: 0 }
 

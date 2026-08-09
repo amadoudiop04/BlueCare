@@ -1,5 +1,5 @@
 /**
- * En-tete d'ecran : fil d'ariane, titre, recherche optionnelle et action principale.
+ * En-tête d'écran : fil d'ariane, titre, recherche optionnelle et action principale.
  * Colle en haut du defilement, comme dans la maquette.
  */
 function PageHeader({ crumb, title, search, action }) {
@@ -20,7 +20,7 @@ function PageHeader({ crumb, title, search, action }) {
   )
 }
 
-/** Champ de recherche de l'en-tete, avec sa loupe dessinee en CSS. */
+/** Champ de recherche de l'en-tête, avec sa loupe dessinee en CSS. */
 export function HeaderSearch({ value, onChange, placeholder = 'Rechercher un enfant…' }) {
   return (
     <div className="flex w-[240px] items-center gap-2 rounded-[9px] border border-line bg-canvas px-3 py-2.5">
@@ -36,7 +36,7 @@ export function HeaderSearch({ value, onChange, placeholder = 'Rechercher un enf
   )
 }
 
-/** Zone de contenu d un ecran, avec les marges de la maquette. */
+/** Zone de contenu d'un écran, avec les marges de la maquette. */
 export function PageBody({ children, className = '' }) {
   return (
     <div className={`flex flex-col gap-[22px] px-[34px] pb-11 pt-7 ${className}`}>{children}</div>

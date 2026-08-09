@@ -4,15 +4,15 @@ import { env } from '../config/env.js'
 import { ApiError } from './ApiError.js'
 
 /**
- * Jetons SANS etat, pour les deux seuls cas ou une session en base ne convient pas :
+ * Jetons SANS état, pour les deux seuls cas ou une session en base ne convient pas :
  *
- *  - `family-link`   : lien de suivi envoye par e-mail ou SMS. Il doit
+ *  - `family-link`   : lien de suivi envoyé par e-mail ou SMS. Il doit
  *                      fonctionner sans compte, donc sans session prealable.
  *  - `mfa-challenge` : jeton intermediaire entre le mot de passe et le code a
  *                      usage unique. Il ne vit que quelques minutes et n'ouvre
  *                      aucune route metier.
  *
- * Les sessions de connexion, elles, sont opaques et stockees en base
+ * Les sessions de connexion, elles, sont opaques et stockées en base
  * (`services/session.auth.service.js`) : elles sont ainsi revocables sur-le-champ.
  */
 
@@ -35,13 +35,13 @@ function verify(token, expectedType) {
     throw ApiError.unauthorized('Jeton invalide')
   }
 
-  // Sans ce controle, un lien famille ferait un defi de connexion valide.
+  // Sans ce contrôle, un lien famille ferait un défi de connexion valide.
   if (payload.type !== expectedType) throw ApiError.unauthorized('Jeton invalide')
 
   return payload
 }
 
-/** Lien de suivi famille : un seul enfant, lecture seule, duree courte. */
+/** Lien de suivi famille : un seul enfant, lecture seule, durée courte. */
 export function signFamilyLinkToken({ childId, issuedBy }, expiresIn = env.auth.familyLinkTtl) {
   return sign(
     { sub: childId, childId, issuedBy, role: 'family', type: TOKEN_TYPES.familyLink },
@@ -52,8 +52,8 @@ export function signFamilyLinkToken({ childId, issuedBy }, expiresIn = env.auth.
 export const verifyFamilyLinkToken = (token) => verify(token, TOKEN_TYPES.familyLink)
 
 /**
- * Jeton intermediaire entre le mot de passe et le code a usage unique.
- * Il prouve que le premier facteur est passe, et rien d autre.
+ * Jeton intermediaire entre le mot de passe et le code à usage unique.
+ * Il prouve que le premier facteur est passe, et rien d'autre.
  */
 export function signMfaChallengeToken(user) {
   return sign({ sub: user.id, type: TOKEN_TYPES.mfaChallenge }, env.mfa.challengeTtl)
@@ -61,7 +61,7 @@ export function signMfaChallengeToken(user) {
 
 export const verifyMfaChallengeToken = (token) => verify(token, TOKEN_TYPES.mfaChallenge)
 
-/** Date d'expiration d un jeton deja signe, pour l'afficher au client. */
+/** Date d'expiration d'un jeton déjà signe, pour l'afficher au client. */
 export function expiresAt(token) {
   const { exp } = jwt.decode(token) ?? {}
   return exp ? new Date(exp * 1000).toISOString() : null

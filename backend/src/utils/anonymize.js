@@ -1,20 +1,20 @@
 import { createHash } from 'node:crypto'
 
 /**
- * Anonymisation de la galerie d activites.
+ * Anonymisation de la galerie d'activités.
  *
- * Une activite est collective : la consulter depuis la fiche d un enfant ne
- * doit pas reveler l identite des autres enfants presents. Chaque participant
+ * Une activité est collective : la consulter depuis la fiche d'un enfant ne
+ * doit pas reveler l'identité des autres enfants présents. Chaque participant
  * est donc remplace par un alias, y compris dans les textes libres (titre,
- * description, legendes de photos) ou un educateur a pu ecrire des prenoms.
+ * description, legendes de photos) ou un éducateur a pu écrire des prenoms.
  */
 
 /**
- * Alias stable pour un enfant DANS une activite donnee.
+ * Alias stable pour un enfant DANS une activité donnée.
  *
- * L'identifiant de l'activite entre dans le hachage : un meme enfant n a pas
- * le meme alias d une activite a l'autre. Sans cela, il suffirait de recouper
- * deux galeries pour re-identifier quelqu un par elimination.
+ * L'identifiant de l'activité entre dans le hachage : un même enfant n'a pas
+ * le même alias d'une activité a l'autre. Sans cela, il suffirait de recouper
+ * deux galeries pour re-identifier quelqu'un par elimination.
  */
 export function aliasFor(activityId, childId, salt) {
   const digest = createHash('sha256').update(`${salt}:${activityId}:${childId}`).digest('hex')
@@ -26,7 +26,7 @@ function escapeRegExp(value) {
 }
 
 /**
- * Motifs a masquer pour un enfant, du plus specifique au plus general :
+ * Motifs a masquer pour un enfant, du plus spécifique au plus général :
  * « Malik Ferrand » avant « Malik », sinon on laisserait « Enfant #1A2B Ferrand ».
  */
 function namePatterns(child) {
@@ -43,8 +43,8 @@ function namePatterns(child) {
 
 /**
  * Remplace dans un texte libre les noms des autres enfants par leur alias.
- * Limite connue : deux enfants homonymes recoivent l alias du premier motif
- * applique. Le texte reste anonyme, seule l'attribution peut etre imprecise.
+ * Limite connue : deux enfants homonymes reçoivent l'alias du premier motif
+ * applique. Le texte reste anonyme, seule l'attribution peut être imprecise.
  */
 function scrubNames(text, replacements) {
   if (typeof text !== 'string' || text === '') return text
@@ -53,11 +53,11 @@ function scrubNames(text, replacements) {
 }
 
 /**
- * Projette une activite dans la galerie d un enfant.
+ * Projette une activité dans la galerie d'un enfant.
  *
- * L enfant consulte (`subjectChildId`) garde son nom : l educateur ouvre sa
- * fiche, il le connait deja. Tous les autres sont anonymises. Les champs
- * internes (auteur de la saisie, notes pedagogiques) ne sont pas exposes.
+ * L'enfant consulte (`subjectChildId`) garde son nom : l'éducateur ouvre sa
+ * fiche, il le connait déjà. Tous les autres sont anonymises. Les champs
+ * internes (auteur de la saisie, notes pédagogiques) ne sont pas exposes.
  */
 export function anonymizeActivity(activity, { subjectChildId, children = [], salt } = {}) {
   const childrenById = new Map(children.map((child) => [child.id, child]))

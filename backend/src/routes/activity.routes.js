@@ -15,7 +15,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 
 const router = Router()
 
-// La vue non anonymisee reste interne : les familles passent par la galerie.
+// La vue non anonymisée reste interne : les familles passent par la galerie.
 router.use(authenticate, authorize(...STAFF_ROLES))
 
 router.get('/', asyncHandler(listActivities))

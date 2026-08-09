@@ -1,15 +1,15 @@
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 
 /**
- * Codes a usage unique bases sur le temps (TOTP, RFC 6238).
+ * Codes à usage unique bases sur le temps (TOTP, RFC 6238).
  *
  * Compatible avec Google Authenticator, Authy, 1Password, FreeOTP : ces
- * applications implementent toutes le meme standard, il n y a donc rien a
- * installer cote centre.
+ * applications implementent toutes le même standard, il n'y a donc rien a
+ * installer côté centre.
  *
- * L'algorithme tient en quelques lignes et se verifie contre les vecteurs de
- * test publies dans la RFC (voir `tests/totp.test.js`) : une dependance
- * supplementaire n'apporterait ici ni securite ni lisibilite.
+ * L'algorithme tient en quelques lignes et se vérifie contre les vecteurs de
+ * test publies dans la RFC (voir `tests/totp.test.js`) : une dépendance
+ * supplementaire n'apporterait ici ni sécurité ni lisibilite.
  */
 
 const BASE32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
@@ -63,12 +63,12 @@ export function generateSecret() {
   return toBase32(randomBytes(20))
 }
 
-/** Numero du pas de temps courant. */
+/** Numéro du pas de temps courant. */
 export const stepFor = (date = Date.now()) => Math.floor(date / 1000 / STEP_SECONDS)
 
 /**
  * Code a 6 chiffres pour un pas donne.
- * `algorithm` reste SHA-1 : c est ce que lisent les applications grand public.
+ * `algorithm` reste SHA-1 : c'est ce que lisent les applications grand public.
  */
 export function generateCode(secret, step = stepFor()) {
   const counter = Buffer.alloc(8)
@@ -95,14 +95,14 @@ const safeEqual = (a, b) => {
 }
 
 /**
- * Verifie un code et rend le pas qui l'a valide, ou `null`.
+ * Vérifie un code et rend le pas qui l'a valide, ou `null`.
  *
- * `window` autorise les pas voisins pour absorber le decalage d horloge du
- * telephone : 1 signifie « le pas courant, le precedent et le suivant », soit
- * une tolerance de +/- 30 secondes.
+ * `window` autorise les pas voisins pour absorber le décalage d'horloge du
+ * téléphone : 1 signifie « le pas courant, le précédent et le suivant », soit
+ * une tolérance de +/- 30 secondes.
  *
  * Le pas est renvoye pour que l'appelant puisse refuser sa reutilisation : sans
- * cela, un code intercepte reste valable pendant toute sa fenetre.
+ * cela, un code intercepte reste valable pendant toute sa fenêtre.
  */
 export function verifyCode(secret, code, { window = 1, at = Date.now() } = {}) {
   const candidate = String(code ?? '').replace(/\s/g, '')
@@ -119,7 +119,7 @@ export function verifyCode(secret, code, { window = 1, at = Date.now() } = {}) {
 
 /**
  * URI `otpauth://` a encoder en QR code.
- * Le libelle affiche dans l application est `issuer (compte)`.
+ * Le libelle affiche dans l'application est `issuer (compte)`.
  */
 export function buildOtpAuthUri({ secret, account, issuer }) {
   const label = encodeURIComponent(`${issuer}:${account}`)

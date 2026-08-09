@@ -21,21 +21,21 @@ import { formatDate, initials, todayIso, weekDays } from '@/lib/format.js'
 import { cx } from '@/lib/ui.js'
 
 /**
- * Presences de la semaine.
+ * Présences de la semaine.
  *
  * L API sert une journee a la fois (`GET /attendance?date=`) : la grille
  * hebdomadaire est reconstituee en interrogeant les cinq jours ouvres en
  * parallele. Toute saisie est corrigeable — le serveur remplace la ligne du
- * jour plutot que d'en creer une seconde.
+ * jour plutôt que d'en créer une seconde.
  */
 
 const DAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven']
 
 const STATUSES = [
-  { value: 'present', label: 'Present', color: '#1E5FD8' },
+  { value: 'present', label: 'Présent', color: '#1E5FD8' },
   { value: 'late', label: 'Retard', color: '#F0C98B' },
   { value: 'absent', label: 'Absent', color: '#E7A9B5' },
-  { value: 'excused', label: 'Absence justifiee', color: '#B9CDF6' },
+  { value: 'excused', label: 'Absence justifiée', color: '#B9CDF6' },
 ]
 
 const STATUS_COLOR = Object.fromEntries(STATUSES.map((entry) => [entry.value, entry.color]))
@@ -68,7 +68,7 @@ async function loadWeek(reference) {
   return {
     days,
     rows: [...rows.values()].map((row) => ({ ...row, alerts: alertByChild.get(row.child.id) ?? [] })),
-    // La feuille de la date choisie, pas celle du jour : c est elle qu on pointe.
+    // La feuille de la date choisie, pas celle du jour : c'est elle qu'on pointe.
     sheet: sheets[days.indexOf(reference)] ?? sheets.at(-1) ?? null,
   }
 }
@@ -81,7 +81,7 @@ function AttendancePage() {
     <>
       <PageHeader
         crumb="Gestion des enfants"
-        title="Presences quotidiennes"
+        title="Présences quotidiennes"
         action={
           <input
             type="date"
@@ -100,8 +100,8 @@ function AttendancePage() {
           <Skeleton height={380} className="rounded-2xl" />
         ) : !data || data.rows.length === 0 ? (
           <EmptyState
-            title="Aucun enfant dans votre perimetre"
-            description="La feuille de presence se remplit avec les enfants de vos groupes."
+            title="Aucun enfant dans votre périmètre"
+            description="La feuille de présence se remplit avec les enfants de vos groupes."
           />
         ) : (
           <>
@@ -203,9 +203,9 @@ function AttendancePage() {
 }
 
 /**
- * Pointage d une journee : tous les enfants du perimetre, saisis ou non.
- * Le statut deja enregistre est mis en avant et reste modifiable — une erreur
- * de pointage se corrige sur place, sans passer par un ecran d'edition.
+ * Pointage d'une journee : tous les enfants du périmètre, saisis ou non.
+ * Le statut déjà enregistre est mis en avant et reste modifiable — une erreur
+ * de pointage se corrige sur place, sans passer par un écran d'edition.
  */
 function DailySheet({ sheet, onSaved }) {
   const [saving, setSaving] = useState(null)
@@ -250,7 +250,7 @@ function DailySheet({ sheet, onSaved }) {
         title={`Pointage du ${formatDate(sheet.date)}`}
         subtitle={
           missing === 0
-            ? 'Feuille complete · cliquez un statut pour le corriger'
+            ? 'Feuille complète · cliquez un statut pour le corriger'
             : `${missing} enfant${missing > 1 ? 's' : ''} sans saisie`
         }
       />

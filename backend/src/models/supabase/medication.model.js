@@ -24,7 +24,7 @@ export const medicationModel = {
     if (filter.childIds) builder = builder.in('child_id', filter.childIds)
     if (filter.active !== undefined) builder = builder.eq('active', filter.active)
 
-    // Traitement en cours a une date donnee : commence avant, pas encore fini.
+    // Traitement en cours a une date donnée : commence avant, pas encore fini.
     if (filter.onDate) {
       builder = builder
         .lte('start_date', filter.onDate)
@@ -61,7 +61,7 @@ export const administrationModel = {
     )
   },
 
-  /** Une prise est identifiee par traitement + jour + horaire prevu. */
+  /** Une prise est identifiee par traitement + jour + horaire prévu. */
   async findOne({ medicationId, date, scheduledTime }) {
     return runMaybeOne(
       administrations

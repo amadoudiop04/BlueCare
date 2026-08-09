@@ -1,7 +1,7 @@
 import { reportService } from '../services/report.service.js'
 import { sessionService } from '../services/session.service.js'
 
-/** Seances et comptes-rendus. */
+/** Séances et comptes-rendus. */
 
 export async function listSessions(req, res) {
   const { items, pagination } = await sessionService.list(req.query, req.user)

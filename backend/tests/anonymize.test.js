@@ -14,7 +14,7 @@ const CHILDREN = [
 const ACTIVITY = {
   id: 'act_1',
   title: 'Atelier peinture avec Malik Ferrand',
-  description: "Lina a choisi les couleurs, Malik a peint l arbre et Elsa a signe la fresque.",
+  description: "Lina a choisi les couleurs, Malik a peint l'arbre et Elsa a signe la fresque.",
   category: 'arts',
   date: '2026-08-03',
   group: 'Les Coquelicots',
@@ -94,7 +94,7 @@ describe('anonymizeActivity', () => {
     const fromLina = anonymize('chd_1').participants.map((entry) => entry.alias)
     const fromMalik = anonymize('chd_2').participants.map((entry) => entry.alias)
 
-    // Les aliases sont les memes, seul le marqueur `isSubject` bouge.
+    // Les aliases sont les mêmes, seul le marqueur `isSubject` bouge.
     assert.deepEqual(fromLina, fromMalik)
     assert.equal(anonymize('chd_1').participants[0].isSubject, true)
     assert.equal(anonymize('chd_2').participants[0].isSubject, false)

@@ -16,9 +16,9 @@ import { cx } from '@/lib/ui.js'
 /**
  * Appareils connectes.
  *
- * Chaque session vit en base : la fermer ici la revoque immediatement, sans
- * attendre l'expiration d un jeton. C est ce qui permet a quelqu un qui a
- * oublie de se deconnecter d un poste partage de le faire a distance.
+ * Chaque session vit en base : la fermer ici la revoque immédiatement, sans
+ * attendre l'expiration d'un jeton. C'est ce qui permet a quelqu'un qui a
+ * oublié de se déconnecter d'un poste partagé de le faire à distance.
  */
 
 /** L'user-agent brut est illisible : on en tire l'essentiel. */
@@ -35,7 +35,7 @@ function describeDevice(userAgent) {
           ? 'macOS'
           : /Linux/i.test(userAgent)
             ? 'Linux'
-            : 'Systeme inconnu'
+            : 'Système inconnu'
 
   const browser = /Edg\//i.test(userAgent)
     ? 'Edge'
@@ -53,7 +53,7 @@ function describeDevice(userAgent) {
 function relativeTime(iso) {
   const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000)
 
-  if (minutes < 2) return 'a l instant'
+  if (minutes < 2) return 'a l\'instant'
   if (minutes < 60) return `il y a ${minutes} min`
   if (minutes < 1440) return `il y a ${Math.round(minutes / 60)} h`
 
@@ -86,7 +86,7 @@ function SessionsCard() {
       <CardHeader
         className="mb-4"
         title="Appareils connectes"
-        subtitle="Fermer une session la revoque immediatement"
+        subtitle="Fermer une session la revoque immédiatement"
         action={
           others > 0 ? (
             <Button
@@ -106,7 +106,7 @@ function SessionsCard() {
       {loading ? (
         <Skeleton height={120} />
       ) : sessions.length === 0 ? (
-        <EmptyState title="Aucune session" description="Aucun appareil n est connecte." />
+        <EmptyState title="Aucune session" description="Aucun appareil n'est connecte." />
       ) : (
         <div className="flex flex-col gap-2.5">
           {sessions.map((session) => (

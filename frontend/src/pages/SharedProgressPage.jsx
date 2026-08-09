@@ -15,11 +15,11 @@ import { useApi } from '@/hooks/useApi.js'
 import { formatDate, monthLabel, percent } from '@/lib/format.js'
 
 /**
- * Consultation par lien securise, sans compte.
+ * Consultation par lien sécurisé, sans compte.
  *
- * Le jeton est dans l URL : il porte lui-meme sa portee (un enfant, lecture
- * seule) et expire au bout de sept jours. Aucun element de navigation vers le
- * reste de l application n'est affiche ici.
+ * Le jeton est dans l URL : il porte lui-même sa portée (un enfant, lecture
+ * seule) et expire au bout de sept jours. Aucun élément de navigation vers le
+ * reste de l'application n'est affiche ici.
  */
 
 const SERIES_COLORS = ['#1E5FD8', '#14866B', '#6C9BF0', '#C77A0A']
@@ -47,7 +47,7 @@ function SharedProgressPage() {
           <Skeleton height={420} className="rounded-2xl" />
         ) : error ? (
           <EmptyState
-            title="Ce lien n est plus valide"
+            title="Ce lien n'est plus valide"
             description="Les liens de suivi expirent au bout de sept jours. Demandez-en un nouveau au centre."
           />
         ) : (
@@ -81,16 +81,16 @@ function SharedContent({ data }) {
           Progression de {data.child.firstName}
         </div>
         <div className="max-w-[540px] text-[13.5px] leading-relaxed text-onnavy-soft">
-          Periode du {formatDate(data.period.from)} au {formatDate(data.period.to)}. Les
-          observations detaillees et les donnees medicales ne sont pas partagees.
+          Période du {formatDate(data.period.from)} au {formatDate(data.period.to)}. Les
+          observations détaillées et les données médicales ne sont pas partagees.
         </div>
       </Card>
 
       <Card className="px-6 py-[22px]">
-        <CardHeader className="mb-4" title="Objectifs suivis" subtitle="Taux d avancement actuel" />
+        <CardHeader className="mb-4" title="Objectifs suivis" subtitle="Taux d'avancement actuel" />
 
         {data.goals.length === 0 ? (
-          <div className="text-[12.5px] text-muted">Aucun objectif defini sur la periode.</div>
+          <div className="text-[12.5px] text-muted">Aucun objectif défini sur la période.</div>
         ) : (
           <div className="flex flex-col gap-3.5">
             {data.goals.map((entry, index) => (
@@ -112,10 +112,10 @@ function SharedContent({ data }) {
       <Card className="px-6 py-[22px]">
         <CardHeader
           className="mb-[18px]"
-          title="Evolution sur 6 mois"
+          title="Évolution sur 6 mois"
           action={series.length > 0 ? <ChartLegend series={series} shape="line" /> : null}
         />
-        <LineChart series={series} labels={labels} emptyLabel="Pas encore de mesure sur la periode" />
+        <LineChart series={series} labels={labels} emptyLabel="Pas encore de mesure sur la période" />
       </Card>
     </div>
   )

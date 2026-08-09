@@ -1,12 +1,12 @@
 /**
- * Client HTTP unique de l application.
+ * Client HTTP unique de l'application.
  *
- * L application ne detient AUCUN jeton : la session est portee par un cookie
- * `httpOnly` pose par le serveur, que JavaScript ne peut ni lire ni ecrire.
+ * L'application ne detient AUCUN jeton : la session est portée par un cookie
+ * `httpOnly` pose par le serveur, que JavaScript ne peut ni lire ni écrire.
  * Une injection de script n'a donc rien a voler — contrairement a un jeton
  * range dans `localStorage`.
  *
- * En contrepartie chaque appel doit demander l'envoi du cookie, d ou le
+ * En contrepartie chaque appel doit demander l'envoi du cookie, d'ou le
  * `credentials: 'include'` systematique ci-dessous.
  */
 
@@ -23,7 +23,7 @@ class ApiError extends Error {
   }
 }
 
-/** Routes qui n'exigent pas de session : un 401 y est une reponse, pas une expiration. */
+/** Routes qui n'exigent pas de session : un 401 y est une réponse, pas une expiration. */
 const PUBLIC_PATHS = [
   '/auth/login',
   '/auth/mfa/verify',
@@ -36,7 +36,7 @@ const PUBLIC_PATHS = [
 
 const isPublic = (path) => PUBLIC_PATHS.some((entry) => path.startsWith(entry))
 
-/** Prevenu quand la session tombe, pour que le contexte d'auth deconnecte. */
+/** Prévenu quand la session tombe, pour que le contexte d'auth déconnecte. */
 let onSessionExpired = () => {}
 
 export function setSessionExpiredHandler(handler) {
@@ -56,13 +56,13 @@ async function request(path, { method = 'GET', body, headers, signal, raw = fals
     signal,
   })
 
-  // Session expiree ou revoquee cote serveur : plus rien a nettoyer localement,
-  // il suffit de ramener l utilisateur a l ecran de connexion.
+  // Session expiree ou revoquee côté serveur : plus rien a nettoyer localement,
+  // il suffit de ramener l'utilisateur a l'écran de connexion.
   if (response.status === 401 && !isPublic(path)) onSessionExpired()
 
   if (raw) {
     if (!response.ok) {
-      throw new ApiError(`Requete echouee (${response.status})`, { status: response.status })
+      throw new ApiError(`Requête échouée (${response.status})`, { status: response.status })
     }
     return response
   }
@@ -71,7 +71,7 @@ async function request(path, { method = 'GET', body, headers, signal, raw = fals
   const data = isJson ? await response.json() : await response.text()
 
   if (!response.ok) {
-    throw new ApiError(data?.message || `Requete echouee (${response.status})`, {
+    throw new ApiError(data?.message || `Requête échouée (${response.status})`, {
       status: response.status,
       data,
     })
@@ -88,7 +88,7 @@ export const apiClient = {
   // `DELETE` accepte un corps : la suppression de compte y transmet le mot de
   // passe, qui n'a rien a faire dans une URL.
   delete: (path, options) => request(path, { ...options, method: 'DELETE' }),
-  /** Reponse brute, pour les telechargements (PDF). */
+  /** Réponse brute, pour les telechargements (PDF). */
   raw: (path, options) => request(path, { ...options, raw: true }),
 }
 

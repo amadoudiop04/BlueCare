@@ -16,9 +16,9 @@ function Sidebar({ badges = {} }) {
 
   const onLogout = async () => {
     setLeaving(true)
-    // `logout` avale ses erreurs : sur un poste partage, se deconnecter doit
-    // aboutir meme si le reseau est tombe. Pas de `finally` pour reactiver le
-    // bouton, l'ecran de connexion remplace la barre dans la foulee.
+    // `logout` avale ses erreurs : sur un poste partagé, se déconnecter doit
+    // aboutir même si le réseau est tombe. Pas de `finally` pour reactiver le
+    // bouton, l'écran de connexion remplace la barre dans la foulee.
     await logout()
   }
 
@@ -79,9 +79,9 @@ function Sidebar({ badges = {} }) {
         </NavLink>
 
         {/*
-         * La deconnexion est a portee de main depuis n importe quel ecran.
-         * Sur les postes partages du centre, l'enfouir dans la page Profil
-         * revient a ce que personne ne se deconnecte.
+         * La déconnexion est à portée de main depuis n'importe quel écran.
+         * Sur les postes partagés du centre, l'enfouir dans la page Profil
+         * revient a ce que personne ne se déconnecte.
          */}
         <button
           type="button"
@@ -93,7 +93,7 @@ function Sidebar({ badges = {} }) {
           )}
         >
           <span className="inline-block w-4 font-mono text-[11px] opacity-70">{'<-'}</span>
-          <span className="flex-1">{leaving ? 'Deconnexion…' : 'Deconnexion'}</span>
+          <span className="flex-1">{leaving ? 'Déconnexion…' : 'Déconnexion'}</span>
         </button>
 
         <DeveloperCredit tone="light" className="mt-3 border-t border-white/[0.08] px-2 pt-3.5" />

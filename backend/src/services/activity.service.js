@@ -19,10 +19,10 @@ import {
 import { assertCanWrite, requireChildAccess, scopedChildIds } from './access.service.js'
 
 /**
- * Activites du centre et galerie par enfant.
+ * Activités du centre et galerie par enfant.
  *
- * Une activite est collective. Consultee depuis la fiche d un enfant, elle
- * passe par `anonymizeActivity` : les autres participants n y apparaissent
+ * Une activité est collective. Consultee depuis la fiche d'un enfant, elle
+ * passe par `anonymizeActivity` : les autres participants n'y apparaissent
  * que sous un alias, y compris dans les textes libres.
  */
 
@@ -82,7 +82,7 @@ async function readParticipants(value, errors, { required }) {
 
 async function normalizeActivityPayload(payload = {}, { partial = false } = {}) {
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
-    throw ApiError.badRequest('Corps de requete invalide')
+    throw ApiError.badRequest('Corps de requête invalide')
   }
 
   const errors = createErrors()
@@ -120,23 +120,23 @@ async function normalizeActivityPayload(payload = {}, { partial = false } = {}) 
     data.createdBy = readString(payload.createdBy, 'createdBy', errors, { max: 120 })
   }
 
-  errors.throwIfAny('Activite invalide')
+  errors.throwIfAny('Activité invalide')
 
   return compact(data)
 }
 
 /**
- * Charge une activite en verifiant le perimetre : il faut suivre au moins un
- * de ses participants. Sans ce controle, un educateur pourrait modifier
- * l'atelier d un autre groupe en connaissant simplement son identifiant.
+ * Charge une activité en vérifiant le périmètre : il faut suivre au moins un
+ * de ses participants. Sans ce contrôle, un éducateur pourrait modifier
+ * l'atelier d'un autre groupe en connaissant simplement son identifiant.
  */
 async function requireActivityAccess(activityId, user, { write = false } = {}) {
   const activity = await activityModel.findById(activityId)
-  if (!activity) throw ApiError.notFound('Activite introuvable')
+  if (!activity) throw ApiError.notFound('Activité introuvable')
 
   const scoped = await scopedChildIds(user)
   if (scoped && !activity.participantIds.some((id) => scoped.includes(id))) {
-    throw ApiError.forbidden('Cette activite ne concerne aucun enfant de votre perimetre')
+    throw ApiError.forbidden('Cette activité ne concerne aucun enfant de votre périmètre')
   }
   if (write) assertCanWrite(user)
 
@@ -163,7 +163,7 @@ export const activityService = {
     const { page, pageSize } = readPagination(query)
     const found = await activityModel.findAll(compact({ ...filter, childId }))
 
-    // Une activite n'est visible que si l'appelant suit au moins un participant.
+    // Une activité n'est visible que si l'appelant suit au moins un participant.
     const scoped = await scopedChildIds(user)
     const all = scoped
       ? found.filter((activity) => activity.participantIds.some((id) => scoped.includes(id)))
@@ -189,7 +189,7 @@ export const activityService = {
   async create(payload, user) {
     const data = await normalizeActivityPayload(payload)
 
-    // On ne cree une activite que pour des enfants de son perimetre.
+    // On ne crée une activité que pour des enfants de son périmètre.
     for (const childId of data.participantIds) {
       await requireChildAccess(user, childId, { write: true })
     }
@@ -208,7 +208,7 @@ export const activityService = {
     await requireActivityAccess(activityId, user, { write: true })
     const data = await normalizeActivityPayload(payload, { partial: true })
 
-    // Ajouter un participant hors perimetre reviendrait a contourner le controle.
+    // Ajouter un participant hors périmètre reviendrait a contourner le contrôle.
     for (const childId of data.participantIds ?? []) {
       await requireChildAccess(user, childId, { write: true })
     }
@@ -224,9 +224,9 @@ export const activityService = {
   },
 
   /**
-   * Galerie d un enfant, anonymisee.
-   * Seul l enfant dont on ouvre la fiche est nomme ; les autres participants
-   * sont remplaces par un alias propre a chaque activite.
+   * Galerie d'un enfant, anonymisée.
+   * Seul l'enfant dont on ouvre la fiche est nomme ; les autres participants
+   * sont remplaces par un alias propre à chaque activité.
    */
   async getChildGallery(childId, query = {}, user) {
     const child = await requireChildAccess(user, childId)
@@ -240,7 +240,7 @@ export const activityService = {
     const start = (page - 1) * pageSize
     const pageItems = all.slice(start, start + pageSize)
 
-    // Un seul chargement des enfants cites, toutes activites confondues.
+    // Un seul chargement des enfants cites, toutes activités confondues.
     const participantIds = [...new Set(pageItems.flatMap((activity) => activity.participantIds))]
     const children = await childModel.findManyByIds(participantIds)
 

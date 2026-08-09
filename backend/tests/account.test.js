@@ -14,7 +14,7 @@ let child
 const loginWith = (email, password = PASSWORD) =>
   api('/auth/login', { method: 'POST', body: { email, password } })
 
-/** Cree une seance et son compte-rendu, pour rattacher du travail a un compte. */
+/** Crée une séance et son compte-rendu, pour rattacher du travail a un compte. */
 async function authorSomeWork(account) {
   const session = await api(`/children/${child.id}/sessions`, {
     method: 'POST',
@@ -177,7 +177,7 @@ describe('Supprimer son compte', () => {
     assert.equal((await loginWith(account.email)).status, 401)
 
     // La ligne survit pour que le compte-rendu garde un auteur, mais elle ne
-    // porte plus aucune donnee personnelle.
+    // porte plus aucune donnée personnelle.
     const users = await api('/users?status=disabled&pageSize=100', { token: director.token })
     const anonymised = users.body.data.find((entry) => entry.id === account.user.id)
 

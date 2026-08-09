@@ -1,7 +1,7 @@
 import { db, newId, nowIso, snapshot } from './store.js'
 
 /**
- * Acces aux fiches enfants.
+ * Accès'aux fiches enfants.
  * Le filtrage vit ici : avec une vraie base, il deviendrait une clause WHERE
  * sans que les services aient a changer.
  */
@@ -14,7 +14,7 @@ function matches(child, filter) {
   if (filter.group && child.group !== filter.group) return false
   if (filter.disabilityType && child.disability?.type !== filter.disabilityType) return false
   if (filter.ids && !filter.ids.includes(child.id)) return false
-  // Perimetre d un educateur : ses groupes uniquement.
+  // Périmètre d'un éducateur : ses groupes uniquement.
   if (filter.groups && !filter.groups.includes(child.group)) return false
 
   if (filter.search) {
@@ -41,7 +41,7 @@ export const childModel = {
     return ids.map((id) => db.children.get(id)).filter(Boolean).map(snapshot)
   },
 
-  /** Sert a refuser deux fiches pour le meme enfant. */
+  /** Sert a refuser deux fiches pour le même enfant. */
   async findDuplicate({ firstName, lastName, birthDate }, { excludeId } = {}) {
     const match = [...db.children.values()].find(
       (child) =>
@@ -81,7 +81,7 @@ export const childModel = {
     return db.children.delete(id)
   },
 
-  /** Groupes reellement utilises, pour alimenter les filtres du front. */
+  /** Groupes réellement utilisés, pour alimenter les filtres du front. */
   async listGroups() {
     const groups = new Set([...db.children.values()].map((child) => child.group).filter(Boolean))
     return [...groups].sort((a, b) => a.localeCompare(b, 'fr'))

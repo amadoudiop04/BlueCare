@@ -17,16 +17,16 @@ import {
 import { requireChildAccess, scopeFilter } from './access.service.js'
 
 /**
- * Presences quotidiennes et alertes sur absences repetees.
+ * Présences quotidiennes et alertes sur absences répétées.
  *
- * Les alertes ne sont pas stockees : elles sont recalculees a chaque lecture
- * par `evaluateAttendanceAlerts`. Corriger une saisie erronee fait donc
- * disparaitre l'alerte qu elle avait declenchee, sans traitement de rattrapage.
+ * Les alertes ne sont pas stockées : elles sont recalculees à chaque lecture
+ * par `evaluateAttendanceAlerts`. Corriger une saisie erronée fait donc
+ * disparaître l'alerte qu'elle avait declenchee, sans traitement de rattrapage.
  */
 
 const STATUS_KEYS = keysOf(ATTENDANCE_STATUSES)
 
-/** Profondeur d'historique renvoyee par defaut sur la fiche d un enfant. */
+/** Profondeur d'historique renvoyee par défaut sur la fiche d'un enfant. */
 const DEFAULT_HISTORY_DAYS = 60
 
 const alertOptions = (referenceDate = today()) => ({
@@ -51,23 +51,23 @@ function normalizeRecordPayload(payload = {}, errors, { childId, date } = {}) {
     }),
     departureTime: readTime(payload.departureTime, 'departureTime', errors),
     reason: readString(payload.reason, 'reason', errors, {
-      // Une absence justifiee doit porter son motif, c est ce qui la distingue.
+      // Une absence justifiée doit porter son motif, c'est ce qui la distingue.
       required: status === 'excused',
       max: 500,
     }),
     notes: readString(payload.notes, 'notes', errors, { max: 1000 }),
-    // A remplacer par l utilisateur authentifie quand l'auth sera branchee.
+    // A remplacer par l'utilisateur authentifie quand l'auth sera branchee.
     recordedBy: readString(payload.recordedBy, 'recordedBy', errors, { max: 120 }),
   })
 
   if (record.arrivalTime && record.departureTime && record.departureTime < record.arrivalTime) {
-    errors.add('departureTime', "L heure de depart precede l heure d'arrivee")
+    errors.add('departureTime', "L'heure de depart précède l'heure d'arrivee")
   }
 
   return record
 }
 
-/** Un enfant sorti des effectifs ne doit plus apparaitre dans les saisies. */
+/** Un enfant sorti des effectifs ne doit plus apparaître dans les saisies. */
 function assertRecordable(child) {
   if (child.status === 'archived') {
     throw ApiError.conflict(`La fiche de ${child.firstName} ${child.lastName} est archivee`)
@@ -83,7 +83,7 @@ async function alertsForChild(childId, referenceDate = today()) {
 
 export const attendanceService = {
   /**
-   * Feuille de presence du jour : tous les enfants accueillis, avec leur
+   * Feuille de présence du jour : tous les enfants accueillis, avec leur
    * saisie si elle existe. Les enfants sans saisie remontent avec
    * `status: null`, ce qui rend les oublis visibles.
    */
@@ -119,14 +119,14 @@ export const attendanceService = {
   },
 
   /**
-   * Saisie d une presence (creation ou correction).
+   * Saisie d'une présence (création ou correction).
    * Renvoie l'enregistrement et les alertes que cette saisie laisse actives :
-   * l educateur voit immediatement si l enfant bascule en absences repetees.
+   * l'éducateur voit immédiatement si l'enfant bascule en absences répétées.
    */
   async record(payload = {}, user) {
     const errors = createErrors()
     const data = normalizeRecordPayload(payload, errors)
-    errors.throwIfAny('Saisie de presence invalide')
+    errors.throwIfAny('Saisie de présence invalide')
 
     const child = await requireChildAccess(user, data.childId, { write: true })
     assertRecordable(child)
@@ -138,8 +138,8 @@ export const attendanceService = {
   },
 
   /**
-   * Saisie groupee : la feuille d appel d un groupe part en une requete.
-   * Rien n'est ecrit tant qu une ligne est invalide, pour ne pas laisser
+   * Saisie groupee : la feuille d'appel d'un groupe part en une requête.
+   * Rien n'est écrit tant qu'une ligne est invalide, pour ne pas laisser
    * la feuille a moitie saisie.
    */
   async recordMany(payload = {}, user) {
@@ -168,7 +168,7 @@ export const attendanceService = {
     })
     errors.throwIfAny('Saisie groupee invalide')
 
-    // On verifie tous les enfants et le perimetre avant d'ecrire quoi que ce soit.
+    // On vérifie tous les enfants et le périmètre avant d'écrire quoi que ce soit.
     const children = await Promise.all(
       normalized.map((data) => requireChildAccess(user, data.childId, { write: true })),
     )
@@ -199,14 +199,14 @@ export const attendanceService = {
     return { date, records, alerts }
   },
 
-  /** Historique d un enfant : ses saisies, ses compteurs et ses alertes. */
+  /** Historique d'un enfant : ses saisies, ses compteurs et ses alertes. */
   async getChildHistory(childId, query = {}, user) {
     const child = await requireChildAccess(user, childId)
 
     const errors = createErrors()
     const to = readDate(query.to, 'to', errors) ?? today()
     const from = readDate(query.from, 'from', errors) ?? addDays(to, -(DEFAULT_HISTORY_DAYS - 1))
-    errors.throwIfAny('Periode invalide')
+    errors.throwIfAny('Période invalide')
 
     if (from > to) throw ApiError.badRequest('La date de debut suit la date de fin')
 
@@ -295,7 +295,7 @@ export const attendanceService = {
     }
   },
 
-  /** Annule une saisie erronee (ex. presence enregistree sur le mauvais enfant). */
+  /** Annule une saisie erronée (ex. présence enregistrée sur le mauvais enfant). */
   async remove(childId, date, user) {
     await requireChildAccess(user, childId, { write: true })
 
@@ -304,7 +304,7 @@ export const attendanceService = {
     errors.throwIfAny('Date invalide')
 
     const removed = await attendanceModel.remove(childId, date)
-    if (!removed) throw ApiError.notFound('Aucune presence enregistree pour cette date')
+    if (!removed) throw ApiError.notFound('Aucune présence enregistrée pour cette date')
 
     return { childId, date }
   },

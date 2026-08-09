@@ -2,9 +2,9 @@ import { compareIsoDates } from '../../utils/dates.js'
 import { db, newId, nowIso, snapshot } from './store.js'
 
 /**
- * Comptes-rendus de seance.
- * Un compte-rendu par seance : `sessionId` porte cette contrainte, verifiee
- * par `findBySession` avant toute creation.
+ * Comptes-rendus de séance.
+ * Un compte-rendu par séance : `sessionId` porte cette contrainte, vérifiée
+ * par `findBySession` avant toute création.
  */
 
 function matches(report, filter) {

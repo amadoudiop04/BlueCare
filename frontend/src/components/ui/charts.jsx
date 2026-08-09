@@ -2,9 +2,9 @@
  * Graphiques dessines en SVG, sans librairie.
  *
  * Les besoins sont modestes — deux formes, des valeurs en pourcentage — et une
- * dependance de graphes pese plus lourd que ces quelques lignes. Les axes sont
- * fixes de 0 a 100 : toutes les series de l application sont des taux, et une
- * echelle qui bouge donnerait l'illusion de progres inegaux.
+ * dépendance de graphes pese plus lourd que ces quelques lignes. Les axes sont
+ * fixes de 0 a 100 : toutes les séries de l'application sont des taux, et une
+ * echelle qui bouge donnerait l'illusion de progrès'inegaux.
  */
 
 const WIDTH = 620
@@ -15,9 +15,9 @@ const toY = (value) => HEIGHT - (Math.max(0, Math.min(100, value)) / 100) * HEIG
 const toX = (index, count) => (count <= 1 ? WIDTH / 2 : (index * WIDTH) / (count - 1))
 
 /**
- * Courbes d evolution. Chaque serie porte `points: [number | null]` —
- * `null` signifie « pas de mesure ce mois-la » et coupe le trait plutot que
- * de tracer une ligne droite a travers une periode sans seance.
+ * Courbes d'évolution. Chaque série porte `points: [number | null]` —
+ * `null` signifie « pas de mesure ce mois-la » et coupe le trait plutôt que
+ * de tracer une ligne droite à travers une période sans séance.
  */
 export function LineChart({ series = [], labels = [], height = 200, emptyLabel }) {
   const hasData = series.some((entry) => entry.points.some((value) => value !== null))
@@ -28,12 +28,12 @@ export function LineChart({ series = [], labels = [], height = 200, emptyLabel }
         className="flex items-center justify-center rounded-xl border border-dashed border-line text-[12.5px] text-muted"
         style={{ height }}
       >
-        {emptyLabel ?? 'Aucune mesure sur la periode'}
+        {emptyLabel ?? 'Aucune mesure sur la période'}
       </div>
     )
   }
 
-  /** Decoupe une serie en segments continus, en sautant les trous. */
+  /** Decoupe une série en segments continus, en sautant les trous. */
   const segmentsOf = (points) => {
     const segments = []
     let current = []
@@ -57,7 +57,7 @@ export function LineChart({ series = [], labels = [], height = 200, emptyLabel }
         viewBox={`-6 -8 ${WIDTH + 12} ${HEIGHT + 16}`}
         style={{ width: '100%', height, display: 'block', overflow: 'visible' }}
         role="img"
-        aria-label={`Evolution : ${series.map((entry) => entry.label).join(', ')}`}
+        aria-label={`Évolution : ${series.map((entry) => entry.label).join(', ')}`}
       >
         {GRID.map((value) => (
           <line key={value} x1={0} x2={WIDTH} y1={toY(value)} y2={toY(value)} stroke="#EEF1F7" strokeWidth={1} />
@@ -114,7 +114,7 @@ export function LineChart({ series = [], labels = [], height = 200, emptyLabel }
   )
 }
 
-/** Barres groupees : une colonne par categorie, une barre par serie. */
+/** Barres groupees : une colonne par catégorie, une barre par série. */
 export function GroupedBarChart({ groups = [], series = [], height = 190, emptyLabel }) {
   if (groups.length === 0) {
     return (
@@ -122,7 +122,7 @@ export function GroupedBarChart({ groups = [], series = [], height = 190, emptyL
         className="flex items-center justify-center rounded-xl border border-dashed border-line text-[12.5px] text-muted"
         style={{ height }}
       >
-        {emptyLabel ?? 'Aucune donnee'}
+        {emptyLabel ?? 'Aucune donnée'}
       </div>
     )
   }

@@ -11,16 +11,16 @@ import { homePathFor } from '@/lib/navigation.js'
 import { inputClass } from '@/lib/ui.js'
 
 /*
- * L'effet ASCII embarque three.js (~600 Ko), pour une decoration presente sur
- * ce seul ecran. Le charger a la demande evite de le faire porter a toute
- * l application, qui n'en a jamais besoin une fois connecte.
+ * L'effet ASCII embarque three.js (~600 Ko), pour une decoration présente sur
+ * ce seul écran. Le charger a la demande évite de le faire porter a toute
+ * l'application, qui n'en a jamais besoin une fois connecté.
  */
 const AsciiButterfly = lazy(() => import('@/components/ui/AsciiButterfly.jsx'))
 
 const STATS = [
-  { value: '42', label: 'enfants accompagnes' },
-  { value: '3', label: 'groupes educatifs' },
-  { value: 'AES-256', label: 'donnees chiffrees' },
+  { value: '42', label: 'enfants accompagnés' },
+  { value: '3', label: 'groupes éducatifs' },
+  { value: 'AES-256', label: 'données chiffrées' },
 ]
 
 function LoginPage() {
@@ -28,7 +28,7 @@ function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Depose par la reinitialisation, qui renvoie ici une fois le mot de passe change.
+  // Déposé par la réinitialisation, qui renvoie ici une fois le mot de passe change.
   const notice = location.state?.notice ?? null
 
   const [email, setEmail] = useState('')
@@ -60,7 +60,7 @@ function LoginPage() {
     const result = await login({ email, password })
 
     if (result.mfaRequired) {
-      // Le mot de passe n'est plus utile : on ne le garde pas en memoire.
+      // Le mot de passe n'est plus utile : on ne le garde pas en mémoire.
       setPassword('')
       setChallenge(result)
       setCode('')
@@ -80,10 +80,10 @@ function LoginPage() {
       const account = await completeMfa({ challengeToken: challenge.challengeToken, code: value })
       goHome(account)
     } catch (requestError) {
-      setError(requestError.message || 'Code refuse')
+      setError(requestError.message || 'Code refusé')
       setCode('')
 
-      // Jeton de defi expire : il faut repasser par le mot de passe.
+      // Jeton de défi expire : il faut repasser par le mot de passe.
       if (requestError.status === 400 || requestError.status === 401) {
         if (/jeton/i.test(requestError.message ?? '')) resetToPassword()
       }
@@ -106,8 +106,8 @@ function LoginPage() {
     try {
       await submitPassword()
     } catch (requestError) {
-      // Le serveur renvoie le meme message pour un e-mail inconnu et un mot de
-      // passe faux : on le reprend tel quel plutot que d'en deduire davantage.
+      // Le serveur renvoie le même message pour un e-mail inconnu et un mot de
+      // passe faux : on le reprend tel quel plutôt que d'en deduire davantage.
       setError(requestError.message || 'Connexion impossible')
     } finally {
       setSubmitting(false)
@@ -133,14 +133,14 @@ function LoginPage() {
 
         <div className="mt-auto max-w-[440px] animate-up">
           <div className="mb-4 text-[11px] font-bold uppercase tracking-[0.12em] text-onnavy-bright">
-            Outil interne securise
+            Outil interne sécurisé
           </div>
           <div className="mb-4 text-[34px] font-bold leading-[1.15] tracking-[-0.03em] text-pretty">
-            Le suivi pedagogique de chaque enfant, au meme endroit.
+            Le suivi pédagogique de chaque enfant, au même endroit.
           </div>
           <div className="text-[14.5px] leading-[1.65] text-onnavy-pale">
-            Fiches individuelles, comptes-rendus de seance, objectifs et presences — accessibles
-            selon votre role et journalises.
+            Fiches individuelles, comptes-rendus de séance, objectifs et présences — accessibles
+            selon votre rôle et journalisés.
           </div>
         </div>
 
@@ -164,15 +164,15 @@ function LoginPage() {
           </div>
 
           <div className="mb-[7px] text-2xl font-bold tracking-[-0.02em]">
-            {challenge ? 'Verification' : 'Connexion'}
+            {challenge ? 'Vérification' : 'Connexion'}
           </div>
           <div className="mb-7 text-[13.5px] text-muted">
             {challenge
-              ? 'Saisissez le code a 6 chiffres affiche par votre application d authentification.'
+              ? 'Saisissez le code à 6 chiffres affiché par votre application d\'authentification.'
               : 'Utilisez votre compte professionnel du centre.'}
           </div>
 
-          {/* Message depose par la reinitialisation, qui redirige ici une fois faite. */}
+          {/* Message déposé par la réinitialisation, qui redirige ici une fois faite. */}
           {notice && !challenge ? (
             <div className="mb-5 rounded-[10px] border border-success/25 bg-success-bg px-3.5 py-3 text-[12.5px] font-semibold text-success">
               {notice}
@@ -184,7 +184,7 @@ function LoginPage() {
               <>
                 <div>
                   <div className="mb-2 text-xs font-bold text-ink">
-                    {useRecovery ? 'Code de secours' : 'Code de verification'}
+                    {useRecovery ? 'Code de secours' : 'Code de vérification'}
                   </div>
 
                   {useRecovery ? (
@@ -216,7 +216,7 @@ function LoginPage() {
                 ) : null}
 
                 <Button type="submit" disabled={submitting} className="mt-1 py-3.5 text-sm">
-                  {submitting ? 'Verification…' : 'Verifier'}
+                  {submitting ? 'Vérification…' : 'Vérifier'}
                 </Button>
 
                 <div className="flex items-center justify-between text-[12.5px]">
@@ -281,16 +281,16 @@ function LoginPage() {
                     to="/mot-de-passe-oublie"
                     className="font-semibold text-brand hover:underline"
                   >
-                    Mot de passe oublie ?
+                    Mot de passe oublié ?
                   </Link>
-                  <span className="text-muted-light">Acces famille par lien securise</span>
+                  <span className="text-muted-light">Accès famille par lien sécurisé</span>
                 </div>
               </>
             )}
           </div>
         </form>
 
-        {/* Le panneau bleu est masque sur petit ecran : la mention y reste visible. */}
+        {/* Le panneau bleu est masque sur petit écran : la mention y reste visible. */}
         <DeveloperCredit className="absolute bottom-6 lg:hidden" />
       </div>
     </div>

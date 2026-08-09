@@ -14,7 +14,7 @@ import {
 /**
  * Les vecteurs de la RFC 6238 (annexe B) utilisent le secret ASCII
  * « 12345678901234567890 ». On le convertit en base32 pour interroger notre
- * implementation avec exactement les memes entrees que la norme.
+ * implementation avec exactement les mêmes entrees que la norme.
  */
 const RFC_SECRET = toBase32(Buffer.from('12345678901234567890', 'ascii'))
 

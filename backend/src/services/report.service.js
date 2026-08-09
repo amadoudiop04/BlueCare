@@ -21,13 +21,13 @@ import { requireChildAccess, scopedChildIds } from './access.service.js'
 import { requireSessionAccess } from './session.service.js'
 
 /**
- * Comptes-rendus de seance : humeur, objectifs travailles, observations,
- * points d attention.
+ * Comptes-rendus de séance : humeur, objectifs travailles, observations,
+ * points d'attention.
  *
- * Deposer un compte-rendu a deux effets de bord voulus :
- *  - la seance passe en `completed`
- *  - le taux d avancement de chaque objectif evalue est mis a jour
- * C est ce qui alimente les courbes d evolution sans double saisie.
+ * Déposer un compte-rendu a deux effets de bord voulus :
+ *  - la séance passe en `completed`
+ *  - le taux d'avancement de chaque objectif évalué est mis à jour
+ * C'est ce qui alimente les courbes d'évolution sans double saisie.
  */
 
 const MOOD_KEYS = keysOf(MOODS)
@@ -72,7 +72,7 @@ function readHealthFlag(value, errors) {
   const nested = errors.nested('healthFlag')
   const flagged = readBoolean(value.flagged, 'flagged', nested) ?? false
   const description = readString(value.description, 'description', nested, {
-    // Signaler sans decrire ne sert a rien a l infirmiere.
+    // Signaler sans decrire ne sert à rien a l'infirmière.
     required: flagged,
     max: 1000,
   })
@@ -81,7 +81,7 @@ function readHealthFlag(value, errors) {
   return { flagged, description: description ?? null }
 }
 
-/** Un compte-rendu ne peut evaluer que les objectifs de l enfant concerne. */
+/** Un compte-rendu ne peut évaluer que les objectifs de l'enfant concerne. */
 async function assertGoalsBelongToChild(goalProgress = [], childId) {
   if (goalProgress.length === 0) return
 
@@ -98,7 +98,7 @@ async function assertGoalsBelongToChild(goalProgress = [], childId) {
 
 function normalizeReportPayload(payload = {}, { partial = false } = {}) {
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
-    throw ApiError.badRequest('Corps de requete invalide')
+    throw ApiError.badRequest('Corps de requête invalide')
   }
 
   const errors = createErrors()
@@ -140,7 +140,7 @@ function normalizeReportPayload(payload = {}, { partial = false } = {}) {
   return compact(data)
 }
 
-/** Reporte sur les objectifs le taux d avancement releve pendant la seance. */
+/** Reporte sur les objectifs le taux d'avancement releve pendant la séance. */
 async function applyGoalProgress(goalProgress = [], childId) {
   const applied = []
 
@@ -161,18 +161,18 @@ async function applyGoalProgress(goalProgress = [], childId) {
 }
 
 export const reportService = {
-  /** Depot du compte-rendu d une seance. Un seul par seance. */
+  /** Depot du compte-rendu d'une séance. Un seul par séance. */
   async createForSession(sessionId, payload, user) {
     const session = await requireSessionAccess(user, sessionId, { write: true })
 
     if (session.status === 'cancelled') {
-      throw ApiError.conflict('Cette seance a ete annulee')
+      throw ApiError.conflict('Cette séance a été annulée')
     }
     if (await reportModel.findBySession(sessionId)) {
-      throw ApiError.conflict('Cette seance a deja un compte-rendu', { sessionId })
+      throw ApiError.conflict('Cette séance a déjà un compte-rendu', { sessionId })
     }
     if (session.date > today()) {
-      throw ApiError.conflict('Cette seance n a pas encore eu lieu')
+      throw ApiError.conflict('Cette séance n\'a pas encore eu lieu')
     }
 
     const data = normalizeReportPayload(payload)
@@ -256,8 +256,8 @@ export const reportService = {
   },
 
   /**
-   * Comptes-rendus en attente : seances passees, non annulees, sans
-   * compte-rendu depose. Au-dela de `REPORT_DUE_DAYS`, elles sont en retard.
+   * Comptes-rendus en attente : séances passees, non annulées, sans
+   * compte-rendu dépose. Au-delà de `REPORT_DUE_DAYS`, elles sont en retard.
    */
   async listPending(query = {}, user) {
     const childIds = await scopedChildIds(user)

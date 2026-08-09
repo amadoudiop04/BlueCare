@@ -1,7 +1,7 @@
 import { newId, nowIso } from '../ids.js'
 import { db, snapshot } from './store.js'
 
-/** Sessions de connexion (memoire). Une ligne = un appareil connecte. */
+/** Sessions de connexion (mémoire). Une ligne = un appareil connecte. */
 
 export const authSessionModel = {
   async create(data) {
@@ -42,7 +42,7 @@ export const authSessionModel = {
     return db.authSessions.delete(id)
   },
 
-  /** Deconnexion de tous les autres appareils. */
+  /** Déconnexion de tous les autres appareils. */
   async removeForUser(userId, { except } = {}) {
     let removed = 0
 
@@ -56,7 +56,7 @@ export const authSessionModel = {
     return removed
   },
 
-  /** Menage des sessions expirees, appele a chaque connexion. */
+  /** Menage des sessions expirees, appele à chaque connexion. */
   async removeExpired(now = nowIso()) {
     let removed = 0
 

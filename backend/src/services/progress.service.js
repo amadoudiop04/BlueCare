@@ -10,17 +10,17 @@ import { requireChildAccess } from './access.service.js'
 import { averageProgress } from './goal.service.js'
 
 /**
- * Series d evolution destinees aux graphiques.
+ * Séries d'évolution destinees aux graphiques.
  *
- * Les points viennent des comptes-rendus de seance : chaque evaluation d'un
+ * Les points viennent des comptes-rendus de séance : chaque évaluation d'un
  * objectif produit un point date. On renvoie aussi une agregation mensuelle,
- * car six mois de seances font trop de points pour un graphique lisible, et
+ * car six mois de séances font trop de points pour un graphique lisible, et
  * le front n'a alors aucun calcul a refaire.
  */
 
 const round = (value) => Math.round(value * 10) / 10
 
-/** Moyenne par mois, avec les mois sans seance conserves a `null`. */
+/** Moyenne par mois, avec les mois sans séance conservés a `null`. */
 function monthlySeries(points, from, to, valueOf) {
   const buckets = new Map()
 
@@ -52,8 +52,8 @@ function trendOf(points, valueOf) {
 
 export const progressService = {
   /**
-   * Evolution d un enfant sur N mois : une serie par objectif, plus une
-   * serie d'humeur, toutes deux pretes a etre tracees.
+   * Évolution d'un enfant sur N mois : une série par objectif, plus une
+   * série d'humeur, toutes deux prêtes à être tracées.
    */
   async getChildProgress(childId, query = {}, user) {
     const child = await requireChildAccess(user, childId)
@@ -63,7 +63,7 @@ export const progressService = {
       readInteger(query.months, 'months', errors, { min: 1, max: 24 }) ??
       env.tracking.progressWindowMonths
     const status = readEnum(query.status, ['active', 'achieved', 'paused', 'abandoned'], 'status', errors)
-    errors.throwIfAny('Parametres invalides')
+    errors.throwIfAny('Paramètres invalides')
 
     const to = today()
     const from = addMonths(to, -months)
@@ -141,7 +141,7 @@ export const progressService = {
     }
   },
 
-  /** Serie d un seul objectif, pour un graphique isole. */
+  /** Série d'un seul objectif, pour un graphique isole. */
   async getGoalProgress(goalId, query = {}, user) {
     const goal = await goalModel.findById(goalId)
     if (!goal) throw ApiError.notFound('Objectif introuvable')

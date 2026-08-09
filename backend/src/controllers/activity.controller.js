@@ -1,6 +1,6 @@
 import { activityService } from '../services/activity.service.js'
 
-/** Activites et galerie anonymisee. */
+/** Activités'et galerie anonymisée. */
 
 export async function listActivities(req, res) {
   const { items, pagination } = await activityService.list(req.query, req.user)

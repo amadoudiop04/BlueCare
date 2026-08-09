@@ -4,7 +4,7 @@ import { after, before, describe, it } from 'node:test'
 import { createChildDirect, createUserWithToken, startTestServer } from './helpers.js'
 import { addDays, addMonths, today } from '../src/utils/dates.js'
 
-/** Objectifs, seances, comptes-rendus et courbes d evolution. */
+/** Objectifs, séances, comptes-rendus et courbes d'évolution. */
 
 let context
 let api
@@ -116,7 +116,7 @@ describe('Seances', () => {
     const other = await createChildDirect({ lastName: 'Autre', group: 'Les Coquelicots' })
     const created = await asEducator(`/children/${other.id}/goals`, {
       method: 'POST',
-      body: { title: 'Objectif de l autre enfant', domain: 'motor' },
+      body: { title: 'Objectif de l\'autre enfant', domain: 'motor' },
     })
 
     const { status, body } = await asEducator(`/children/${child.id}/sessions`, {
@@ -170,7 +170,7 @@ describe('Comptes-rendus de seance', () => {
   })
 
   it("reporte le taux d avancement sur l objectif travaille", async () => {
-    const goal = await createGoal({ title: 'Objectif suivi en seance' })
+    const goal = await createGoal({ title: 'Objectif suivi en séance' })
     const session = await createSession({ goalIds: [goal.id] })
 
     const { body } = await asEducator(`/sessions/${session.id}/report`, {
@@ -261,7 +261,7 @@ describe("Courbes d evolution", () => {
     })
     const goalId = goal.body.data.id
 
-    // Trois seances etalees sur trois mois, avec une progression croissante.
+    // Trois séances etalees sur trois mois, avec une progression croissante.
     for (const [monthsAgo, progress] of [
       [3, 20],
       [2, 45],
@@ -293,7 +293,7 @@ describe("Courbes d evolution", () => {
     assert.equal(serie.trend.current, 70)
     assert.equal(serie.trend.delta, 50)
 
-    // Sept mois couverts (bornes incluses), les mois sans seance restent a null.
+    // Sept mois couverts (bornes incluses), les mois sans séance restent a null.
     assert.equal(serie.monthly.length, 7)
     assert.ok(serie.monthly.some((month) => month.average === null))
     assert.ok(serie.monthly.some((month) => month.average === 45))

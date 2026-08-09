@@ -13,8 +13,8 @@ import { env } from '../config/env.js'
 import { childModel } from '../models/child.model.js'
 
 /**
- * Referentiel expose au front : listes deroulantes et libelles.
- * Le vocabulaire metier reste ainsi defini a un seul endroit, cote serveur.
+ * Référentiel expose au front : listes deroulantes et libelles.
+ * Le vocabulaire metier reste ainsi défini a un seul endroit, côté serveur.
  */
 export const referenceService = {
   async get() {

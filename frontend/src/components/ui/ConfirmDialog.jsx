@@ -4,17 +4,17 @@ import { Button, ErrorNotice } from '@/components/ui/primitives.jsx'
 import { cx, inputClass } from '@/lib/ui.js'
 
 /**
- * Confirmation d une action, avec palier de friction reglable.
+ * Confirmation d'une action, avec palier de friction reglable.
  *
  * `confirmText` demande de recopier une valeur avant d'activer le bouton :
- * reserve aux actions irreversibles, ou un clic de trop efface un dossier.
+ * réserve aux actions irreversibles, ou un clic de trop efface un dossier.
  * Pour tout le reste, un simple bouton suffit — multiplier les obstacles
  * apprend surtout a cliquer sans lire.
  */
 /**
- * Le contenu vit dans un composant separe, monte seulement quand la boite
- * s'ouvre : le champ a recopier repart donc vide a chaque ouverture, sans
- * avoir a le remettre a zero depuis un effet.
+ * Le contenu vit dans un composant sépare, monte seulement quand la boite
+ * s'ouvre : le champ a recopier repart donc vide à chaque ouverture, sans
+ * avoir a le remettre a zéro depuis un effet.
  */
 function ConfirmDialog({ open, ...props }) {
   if (!open) return null
@@ -38,8 +38,8 @@ function Dialog({
   const field = useRef(null)
 
   useEffect(() => {
-    // Le focus entre dans la boite : au champ a recopier s il existe,
-    // sinon au panneau lui-meme pour que Echap et Tab restent utilisables.
+    // Le focus entre dans la boite : au champ a recopier s'il existe,
+    // sinon au panneau lui-même pour que Echap et Tab restent utilisables.
     ;(field.current ?? panel.current)?.focus()
   }, [])
 
@@ -61,7 +61,7 @@ function Dialog({
       aria-modal="true"
       aria-labelledby="confirm-title"
       onMouseDown={(event) => {
-        // Clic sur le fond : on ferme, sauf pendant l'operation.
+        // Clic sur le fond : on ferme, sauf pendant l'opération.
         if (event.target === event.currentTarget && !busy) onCancel()
       }}
     >

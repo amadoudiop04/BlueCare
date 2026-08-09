@@ -7,11 +7,11 @@ import { setMailTransport } from '../src/utils/mailer.js'
 import { generateCode, stepFor } from '../src/utils/totp.js'
 
 /**
- * Mot de passe oublie.
+ * Mot de passe oublié.
  *
- * Deux proprietes structurent ces tests :
- *   - la reponse ne dit jamais si une adresse existe ;
- *   - un lien de reinitialisation ne contourne pas la double authentification.
+ * Deux propriétés structurent ces tests :
+ *   - la réponse ne dit jamais si une adresse existe ;
+ *   - un lien de réinitialisation ne contourne pas la double authentification.
  * Le reste (usage unique, expiration, fermeture des sessions) en decoule.
  */
 
@@ -21,7 +21,7 @@ let outbox = []
 
 const NEW_PASSWORD = 'NouveauMotDePasse2026!'
 
-/** Le lien envoye contient le jeton : c'est ainsi que le test le recupere. */
+/** Le lien envoyé contient le jeton : c'est ainsi que le test le récupère. */
 const tokenFromLastMail = () => {
   const mail = outbox.at(-1)
   assert.ok(mail, 'aucun courriel envoye')
@@ -40,7 +40,7 @@ const reset = (token, body) =>
 const loginWith = (email, password) =>
   api('/auth/login', { method: 'POST', body: { email, password } })
 
-/** Enrole un compte en 2FA et rend son secret. */
+/** Enrôle un compte en 2FA et rend son secret. */
 async function enableMfa(account) {
   const setup = await api('/auth/mfa/setup', { method: 'POST', token: account.token })
   const { secret } = setup.body.data
@@ -55,8 +55,8 @@ async function enableMfa(account) {
   return { secret, recoveryCodes: enabled.body.data.recoveryCodes }
 }
 
-// Le code d activation est marque consomme : on prend le pas suivant, comme
-// dans mfa.test.js, encore accepte par la tolerance d horloge.
+// Le code d'activation est marque consommé : on prend le pas suivant, comme
+// dans mfa.test.js, encore accepte par la tolérance d'horloge.
 const freshCode = (secret) => generateCode(secret, stepFor() + 1)
 
 before(async () => {
@@ -97,7 +97,7 @@ describe('Demande de reinitialisation', () => {
     const response = await forgot(account.email)
 
     assert.equal(response.status, 200)
-    // Reponse identique au cas inconnu : rien ne distingue les deux.
+    // Réponse identique au cas inconnu : rien ne distingue les deux.
     assert.deepEqual(response.body.data, { requested: true })
     assert.equal(outbox.length, 1)
     assert.equal(outbox[0].to, account.email)
@@ -143,7 +143,7 @@ describe('Demande de reinitialisation', () => {
     const account = await createUserWithToken(api, { role: 'educator' })
 
     // Cinq demandes passent, la sixieme est refusee : on ne peut pas inonder
-    // la boite de quelqu un en rejouant le formulaire.
+    // la boite de quelqu'un en rejouant le formulaire.
     for (let attempt = 0; attempt < 5; attempt += 1) {
       assert.equal((await forgot(account.email)).status, 200)
     }
@@ -174,7 +174,7 @@ describe('Verification du lien', () => {
     assert.equal(status, 200)
     assert.equal(body.data.valid, true)
     assert.equal(body.data.mfaRequired, false)
-    // Ni adresse ni identite : le lien a pu etre transfere ou intercepte.
+    // Ni adresse ni identité : le lien a pu être transfere ou intercepte.
     assert.deepEqual(Object.keys(body.data).sort(), ['mfaRequired', 'valid'])
   })
 
@@ -227,7 +227,7 @@ describe('Reinitialisation', () => {
     await forgot(account.email)
     await reset(tokenFromLastMail(), { password: NEW_PASSWORD })
 
-    // Si le compte etait compromis, laisser l intrus connecte n aurait pas de sens.
+    // Si le compte etait compromis, laisser l'intrus connecte n'aurait pas de sens.
     const after = await api('/auth/me', { token: account.token })
     assert.equal(after.status, 401)
   })
@@ -280,7 +280,7 @@ describe('Reinitialisation avec double authentification', () => {
     await forgot(account.email)
     const token = tokenFromLastMail()
 
-    // Le point central : l acces a la boite mail ne suffit pas a prendre le
+    // Le point central : l'accès'a la boite mail ne suffit pas a prendre le
     // compte, sinon la double authentification ne protegerait plus de rien.
     const withoutCode = await reset(token, { password: NEW_PASSWORD })
     assert.equal(withoutCode.status, 400)
@@ -288,7 +288,7 @@ describe('Reinitialisation avec double authentification', () => {
     const wrongCode = await reset(token, { password: NEW_PASSWORD, code: '000000' })
     assert.equal(wrongCode.status, 401)
 
-    // Le mot de passe d origine reste le bon.
+    // Le mot de passe d'origine reste le bon.
     const login = await loginWith(account.email, NEW_PASSWORD)
     assert.equal(login.status, 401)
   })
@@ -305,7 +305,7 @@ describe('Reinitialisation avec double authentification', () => {
 
     assert.equal(response.status, 200, JSON.stringify(response.body))
 
-    // La 2FA reste active : elle est demandee a la connexion suivante.
+    // La 2FA reste active : elle est demandée a la connexion suivante.
     const login = await loginWith(account.email, NEW_PASSWORD)
     assert.equal(login.status, 200)
     assert.equal(login.body.data.mfaRequired, true)
@@ -323,7 +323,7 @@ describe('Reinitialisation avec double authentification', () => {
 
     assert.equal(response.status, 200, JSON.stringify(response.body))
 
-    // Le code de secours est consomme : il ne peut pas resservir.
+    // Le code de secours est consommé : il ne peut pas resservir.
     await forgot(account.email)
     const replay = await reset(tokenFromLastMail(), {
       password: 'EncoreUnAutre2026!',

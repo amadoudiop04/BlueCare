@@ -1,6 +1,6 @@
 import { apiClient, query } from '@/api/client.js'
 
-/** Seances, comptes-rendus, presences, notifications et tableau de bord. */
+/** Séances, comptes-rendus, présences, notifications et tableau de bord. */
 
 export async function createSession(childId, payload) {
   const body = await apiClient.post(`/children/${childId}/sessions`, payload)
@@ -28,7 +28,7 @@ export async function recordAttendance(payload) {
   return { record: body.data, alerts: body.meta.alerts }
 }
 
-/** Annule une saisie de presence (mauvais enfant, mauvais jour). */
+/** Annule une saisie de présence (mauvais enfant, mauvais jour). */
 export async function deleteAttendance(childId, date) {
   const body = await apiClient.delete(`/attendance/${childId}/${date}`)
   return body.data

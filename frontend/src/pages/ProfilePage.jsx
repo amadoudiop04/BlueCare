@@ -23,13 +23,13 @@ import { permissionsFor, roleLabel } from '@/lib/roles.js'
 import { cx } from '@/lib/ui.js'
 
 /**
- * Profil de l utilisateur connecte.
+ * Profil de l'utilisateur connecte.
  *
- * Les droits affiches sont deduits de la matrice appliquee par le serveur
- * (`lib/roles.js`) : l ecran ne peut donc pas promettre un acces que l API
- * refuserait. Les blocs de la maquette sans equivalent cote backend
+ * Les droits affichés sont deduits de la matrice appliquee par le serveur
+ * (`lib/roles.js`) : l'écran ne peut donc pas promettre un accès que l API
+ * refuserait. Les blocs de la maquette sans equivalent côté backend
  * (terminaux connectes, preferences de notification persistees) ne sont pas
- * repris plutot que d'etre simules.
+ * repris plutôt que d'être simules.
  */
 function ProfilePage() {
   const { user, scope, logout } = useAuth()
@@ -47,11 +47,11 @@ function ProfilePage() {
           ? `${user.childIds?.length ?? 0} enfant(s)`
           : (user.groups?.length ? user.groups.join(' · ') : 'Tout le centre'),
     },
-    { key: 'Perimetre', value: `${scope?.childCount ?? '—'} enfant(s) accessibles` },
-    { key: 'Compte cree le', value: formatDate(user.createdAt) },
+    { key: 'Périmètre', value: `${scope?.childCount ?? '—'} enfant(s) accessibles` },
+    { key: 'Compte crée le', value: formatDate(user.createdAt) },
     {
-      key: 'Derniere connexion',
-      value: user.lastLoginAt ? formatDate(user.lastLoginAt.slice(0, 10)) : 'Premiere session',
+      key: 'Dernière connexion',
+      value: user.lastLoginAt ? formatDate(user.lastLoginAt.slice(0, 10)) : 'Première session',
     },
   ]
 
@@ -76,7 +76,7 @@ function ProfilePage() {
               <div className="mt-1 text-[13px] text-muted">{user.email}</div>
             </div>
             <Button variant="secondary" onClick={logout} className="mb-1">
-              Se deconnecter
+              Se déconnecter
             </Button>
           </div>
         </Card>
@@ -99,8 +99,8 @@ function ProfilePage() {
             <Card className="px-6 py-[22px]">
               <CardHeader
                 className="mb-4"
-                title="Droits d acces"
-                subtitle="Definis par votre role · appliques par le serveur"
+                title="Droits d'accès"
+                subtitle="Définis par votre rôle · appliques par le serveur"
               />
               <div className="flex flex-col gap-2.5">
                 {permissions.map((permission) => (
@@ -133,8 +133,8 @@ function ProfilePage() {
             <Card className="px-6 py-[22px]">
               <CardHeader
                 className="mb-4"
-                title="Activite recente"
-                subtitle="Ce qui demande votre attention aujourd hui"
+                title="Activité récente"
+                subtitle="Ce qui demande votre attention aujourd'hui"
               />
 
               {notifications.loading ? (
@@ -200,8 +200,8 @@ function PasswordCard() {
     <Card className="px-6 py-[22px]">
       <CardHeader
         className="mb-4"
-        title="Securite"
-        subtitle="10 caracteres minimum"
+        title="Sécurité"
+        subtitle="10 caractères minimum"
         action={<Badge tone="success">SESSION 24 H</Badge>}
       />
 
@@ -217,7 +217,7 @@ function PasswordCard() {
 
         <Field
           label="Nouveau mot de passe"
-          hint={`${newPassword.length} / 10 caracteres minimum`}
+          hint={`${newPassword.length} / 10 caractères minimum`}
           error={state.error?.details?.newPassword?.[0]}
         >
           <PasswordInput
@@ -233,7 +233,7 @@ function PasswordCard() {
 
         {state.done ? (
           <div className="rounded-[10px] bg-success-bg px-3.5 py-3 text-[12.5px] font-semibold text-success">
-            Mot de passe mis a jour.
+            Mot de passe mis à jour.
           </div>
         ) : null}
 

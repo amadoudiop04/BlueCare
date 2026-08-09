@@ -19,33 +19,33 @@ import { formatDate, initials, percent, todayIso } from '@/lib/format.js'
 import { cx, inputClass } from '@/lib/ui.js'
 
 /**
- * Saisie d un compte-rendu de seance.
+ * Saisie d'un compte-rendu de séance.
  *
- * Le formulaire de la maquette suppose une seance deja creee. Ici on enchaine
- * les deux en une soumission : creation de la seance puis depot du
- * compte-rendu, parce qu un educateur saisit presque toujours apres coup.
+ * Le formulaire de la maquette suppose une séance déjà créée. Ici on enchaine
+ * les deux en une soumission : création de la séance puis depot du
+ * compte-rendu, parce qu'un éducateur saisit presque toujours après coup.
  */
 
 const MOODS = [
-  { value: 'very-good', label: 'Tres bon', color: '#14866B' },
+  { value: 'very-good', label: 'Très bon', color: '#14866B' },
   { value: 'good', label: 'Bon', color: '#1E5FD8' },
   { value: 'neutral', label: 'Neutre', color: '#5A6A85' },
   { value: 'difficult', label: 'Difficile', color: '#C77A0A' },
-  { value: 'very-difficult', label: 'Tres difficile', color: '#C0405A' },
+  { value: 'very-difficult', label: 'Très difficile', color: '#C0405A' },
 ]
 
 const ATTENTION_TAGS = [
   'Fatigue',
   'Douleur signalee',
   'Conflit avec un pair',
-  'Progres notable',
+  'Progrès notable',
   'A revoir avec la famille',
 ]
 
 const SESSION_TYPES = [
-  { value: 'individual', label: 'Seance individuelle' },
+  { value: 'individual', label: 'Séance individuelle' },
   { value: 'group', label: 'Atelier collectif' },
-  { value: 'therapy', label: 'Seance therapeutique' },
+  { value: 'therapy', label: 'Séance therapeutique' },
   { value: 'outing', label: 'Sortie' },
   { value: 'other', label: 'Autre' },
 ]
@@ -79,10 +79,10 @@ function SessionReportPage() {
   const [fieldErrors, setFieldErrors] = useState(null)
 
   /*
-   * Les valeurs par defaut (premier enfant, premier objectif, taux actuel)
-   * sont DEDUITES plutot que posees dans un effet : un `setState` synchrone
-   * dans un effet declenche un rendu en cascade a chaque chargement. Un choix
-   * explicite de l utilisateur (`null` = pas encore choisi) prend le dessus.
+   * Les valeurs par défaut (premier enfant, premier objectif, taux actuel)
+   * sont DEDUITES plutôt que posees dans un effet : un `setState` synchrone
+   * dans un effet déclenche un rendu en cascade à chaque chargement. Un choix
+   * explicite de l'utilisateur (`null` = pas encore choisi) prend le dessus.
    */
   const [pickedChildId, setPickedChildId] = useState(params.get('enfant'))
   const [pickedGoalId, setPickedGoalId] = useState(null)
@@ -105,12 +105,12 @@ function SessionReportPage() {
       ? pickedGoalId
       : (goalItems[0]?.id ?? '')
 
-  // Deux recherches dans des listes de quelques dizaines d'elements :
+  // Deux recherches dans des listes de quelques dizaines d'éléments :
   // les memoiser couterait plus cher que de les refaire.
   const child = children.find((entry) => entry.id === childId) ?? null
   const selectedGoal = goalItems.find((entry) => entry.id === goalId) ?? null
 
-  // Tant que le curseur n a pas ete bouge, il affiche le taux actuel de l objectif.
+  // Tant que le curseur n'a pas été bouge, il affiche le taux actuel de l'objectif.
   const goalProgress = pickedProgress ?? selectedGoal?.progress ?? 0
 
   const selectChild = (value) => {
@@ -164,7 +164,7 @@ function SessionReportPage() {
 
   return (
     <>
-      <PageHeader crumb="Suivi pedagogique" title="Nouveau compte-rendu de seance" />
+      <PageHeader crumb="Suivi pédagogique" title="Nouveau compte-rendu de séance" />
 
       <PageBody>
         <ErrorNotice error={error} />
@@ -181,10 +181,10 @@ function SessionReportPage() {
                 <div className="flex-1">
                   <div className="text-base font-bold tracking-[-0.01em]">
                     {child ? `${child.firstName} ${child.lastName}` : 'Selectionnez un enfant'}
-                    {child ? ` · seance du ${formatDate(date)}` : ''}
+                    {child ? ` · séance du ${formatDate(date)}` : ''}
                   </div>
                   <div className="mt-0.5 text-[12.5px] text-muted">
-                    {child ? `${child.group} · ${child.age} ans` : 'Perimetre : vos groupes'}
+                    {child ? `${child.group} · ${child.age} ans` : 'Périmètre : vos groupes'}
                   </div>
                 </div>
                 <Badge tone="warn">BROUILLON</Badge>
@@ -223,7 +223,7 @@ function SessionReportPage() {
                 </label>
 
                 <label className="flex flex-col gap-2">
-                  <span className="text-xs font-bold text-ink">Type de seance</span>
+                  <span className="text-xs font-bold text-ink">Type de séance</span>
                   <select
                     value={type}
                     onChange={(event) => setType(event.target.value)}
@@ -279,7 +279,7 @@ function SessionReportPage() {
                   <Skeleton height={64} />
                 ) : goalItems.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-line px-4 py-3.5 text-[13px] text-muted">
-                    Cet enfant n a pas encore d objectif. Le compte-rendu reste enregistrable.
+                    Cet enfant n'a pas encore d'objectif. Le compte-rendu reste enregistrable.
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2.5">
@@ -315,7 +315,7 @@ function SessionReportPage() {
                 {selectedGoal ? (
                   <div className="mt-4 rounded-xl bg-canvas px-4 py-3.5">
                     <div className="mb-2 flex items-center justify-between text-xs font-bold text-ink">
-                      <span>Nouveau taux d avancement</span>
+                      <span>Nouveau taux d'avancement</span>
                       <span className="font-mono text-sm">{goalProgress}%</span>
                     </div>
                     <input
@@ -328,7 +328,7 @@ function SessionReportPage() {
                       className="w-full accent-brand"
                     />
                     <div className="mt-1.5 text-[11.5px] text-muted">
-                      Etait a {percent(selectedGoal.progress)} avant cette seance.
+                      Etait a {percent(selectedGoal.progress)} avant cette séance.
                     </div>
                   </div>
                 ) : null}
@@ -336,7 +336,7 @@ function SessionReportPage() {
 
               <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <div className="text-xs font-bold text-ink">Observations de seance</div>
+                  <div className="text-xs font-bold text-ink">Observations de séance</div>
                   <span className="font-mono text-[11px] text-muted-light">
                     {observations.length} / {MAX_OBSERVATIONS}
                   </span>
@@ -347,7 +347,7 @@ function SessionReportPage() {
                   required
                   minLength={10}
                   rows={5}
-                  placeholder="Ce qui a ete travaille, comment l enfant a reagi, ce qui a fonctionne…"
+                  placeholder="Ce qui a été travaille, comment l'enfant a reagi, ce qui a fonctionne…"
                   className={cx(inputClass, 'min-h-[120px] resize-y leading-[1.65]')}
                 />
                 {errorFor('observations') ? (
@@ -358,7 +358,7 @@ function SessionReportPage() {
               </div>
 
               <div>
-                <div className="mb-3 text-xs font-bold text-ink">Points d attention</div>
+                <div className="mb-3 text-xs font-bold text-ink">Points d'attention</div>
                 <div className="mb-3 flex flex-wrap gap-2">
                   {ATTENTION_TAGS.map((tag) => {
                     const active = tags.includes(tag)
@@ -390,10 +390,10 @@ function SessionReportPage() {
                   />
                   <span className="flex-1">
                     <span className="block text-[13px] font-semibold text-ink">
-                      Signaler un point de sante a l infirmiere
+                      Signaler un point de santé a l'infirmière
                     </span>
                     <span className="mt-0.5 block text-[11.5px] text-muted">
-                      Genere une alerte immediate dans son fil de notifications.
+                      Génère une alerte immédiate dans son fil de notifications.
                     </span>
                   </span>
                 </label>
@@ -432,7 +432,7 @@ function SessionReportPage() {
 
             <div className="flex flex-col gap-[18px]">
               <Card className="p-5">
-                <div className="mb-3.5 text-sm font-bold">Impact sur l objectif</div>
+                <div className="mb-3.5 text-sm font-bold">Impact sur l'objectif</div>
                 {selectedGoal ? (
                   <>
                     <div className="mb-3 flex items-end gap-2.5">
@@ -449,12 +449,12 @@ function SessionReportPage() {
                     </div>
                     <ProgressBar value={goalProgress} height={8} />
                     <div className="mt-3 text-xs leading-[1.55] text-muted">
-                      Le taux de l objectif est mis a jour des la validation du compte-rendu.
+                      Le taux de l'objectif est mis à jour des la validation du compte-rendu.
                     </div>
                   </>
                 ) : (
                   <div className="text-[12.5px] text-muted">
-                    Selectionnez un objectif pour voir l impact de cette seance.
+                    Selectionnez un objectif pour voir l'impact de cette séance.
                   </div>
                 )}
               </Card>
@@ -462,11 +462,11 @@ function SessionReportPage() {
               <Card className="p-5">
                 <CardHeader
                   className="mb-3.5"
-                  title="Seances en attente"
+                  title="Séances en attente"
                   subtitle={`${data?.pending?.summary?.total ?? 0} sans compte-rendu`}
                 />
                 {(data?.pending?.items ?? []).length === 0 ? (
-                  <div className="text-[12.5px] text-muted">Tout est a jour.</div>
+                  <div className="text-[12.5px] text-muted">Tout est à jour.</div>
                 ) : (
                   <div className="flex flex-col gap-3">
                     {data.pending.items.slice(0, 4).map(({ session, overdue, daysLate }) => (

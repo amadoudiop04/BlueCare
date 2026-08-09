@@ -1,10 +1,10 @@
 import { createRepository, fromRow, runMany, runMaybeOne } from './repository.js'
 
-/** Acces aux fiches enfants (Postgres). */
+/** Accès'aux fiches enfants (Postgres). */
 
 const repository = createRepository({ table: 'children', prefix: 'chd' })
 
-/** Neutralise les caracteres que PostgREST interprete dans un filtre `or`. */
+/** Neutralise les caractères que PostgREST interprete dans un filtre `or`. */
 const escapeLike = (value) => value.replace(/[,()*\\%_]/g, ' ').trim()
 
 function applyFilters(builder, filter) {
@@ -12,7 +12,7 @@ function applyFilters(builder, filter) {
   if (filter.group) builder = builder.eq('group', filter.group)
   if (filter.disabilityType) builder = builder.eq('disability->>type', filter.disabilityType)
   if (filter.ids) builder = builder.in('id', filter.ids)
-  // Perimetre d un educateur : ses groupes uniquement.
+  // Périmètre d'un éducateur : ses groupes uniquement.
   if (filter.groups) builder = builder.in('group', filter.groups)
 
   if (filter.search) {
@@ -28,7 +28,7 @@ function applyFilters(builder, filter) {
 export const childModel = {
   async findAll(filter = {}) {
     // Un tableau de filtre vide ne doit rien renvoyer : `in('id', [])` le fait
-    // deja, mais on court-circuite pour eviter un aller-retour inutile.
+    // déjà, mais on court-circuite pour éviter un aller-retour inutile.
     if (filter.ids?.length === 0 || filter.groups?.length === 0) return []
 
     const builder = applyFilters(repository.select(), filter)
@@ -42,7 +42,7 @@ export const childModel = {
   findById: (id) => repository.findById(id),
   findManyByIds: (ids) => repository.findManyByIds(ids),
 
-  /** Sert a refuser deux fiches pour le meme enfant. */
+  /** Sert a refuser deux fiches pour le même enfant. */
   async findDuplicate({ firstName, lastName, birthDate }, { excludeId } = {}) {
     let builder = repository
       .select()
@@ -59,7 +59,7 @@ export const childModel = {
   update: (id, patch) => repository.update(id, patch),
   remove: (id) => repository.remove(id),
 
-  /** Groupes reellement utilises, pour alimenter les filtres du front. */
+  /** Groupes réellement utilisés, pour alimenter les filtres du front. */
   async listGroups() {
     const rows = await runMany(repository.from().select('group'), 'children.listGroups')
     const groups = new Set(rows.map((row) => row.group).filter(Boolean))

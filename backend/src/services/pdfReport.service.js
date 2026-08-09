@@ -9,13 +9,13 @@ import { progressService } from './progress.service.js'
 
 /**
  * Rapport de progression au format PDF, destine aux familles et aux
- * partenaires (MDPH, ecole, medecin).
+ * partenaires (MDPH, ecole, médecin).
  *
- * Le document est ecrit directement dans la reponse HTTP : rien n'est stocke
- * sur le disque, donc rien a nettoyer ni a proteger apres coup.
+ * Le document est écrit directement dans la réponse HTTP : rien n'est stocke
+ * sur le disque, donc rien a nettoyer ni a proteger après coup.
  *
  * Ce rapport sort du centre : il ne contient aucune note interne, aucun nom
- * d autre enfant, et pas de donnee medicale detaillee.
+ * d'autre enfant, et pas de donnée médicale détaillée.
  */
 
 const COLORS = {
@@ -51,7 +51,7 @@ function keyValue(doc, key, value) {
   doc.font('Helvetica').fillColor(COLORS.ink).fontSize(10).text(String(value ?? '-'))
 }
 
-/** Barre de progression : un taux se lit plus vite qu il ne se compte. */
+/** Barre de progression : un taux se lit plus vite qu'il ne se compte. */
 function progressBar(doc, percent) {
   const width = 180
   const height = 8
@@ -77,7 +77,7 @@ function progressBar(doc, percent) {
   doc.x = MARGIN
 }
 
-/** Courbe d evolution mensuelle, dessinee a la main : aucune dependance graphique. */
+/** Courbe d'évolution mensuelle, dessinee à la main : aucune dépendance graphique. */
 function sparkline(doc, monthly) {
   const points = monthly.filter((entry) => entry.average !== null)
   if (points.length < 2) return
@@ -122,9 +122,9 @@ function sparkline(doc, monthly) {
 
 export const pdfReportService = {
   /**
-   * Rassemble les donnees du rapport et le nom du fichier.
+   * Rassemble les données du rapport et le nom du fichier.
    *
-   * Separe du rendu parce que le controller doit poser ses en-tetes HTTP
+   * Sépare du rendu parce que le controller doit poser ses en-tetes HTTP
    * (dont le nom de fichier) AVANT que le moindre octet de PDF ne parte.
    */
   async prepareProgressReport(childId, query, user) {
@@ -150,20 +150,20 @@ export const pdfReportService = {
     }
   },
 
-  /** Ecrit le PDF dans le flux fourni (la reponse HTTP). */
+  /** Écrit le PDF dans le flux fourni (la réponse HTTP). */
   render(reportData, stream) {
     const { child, period, goals, mood, summary, fullChild, attendanceSummary } = reportData
 
     const doc = new PDFDocument({ size: 'A4', margin: MARGIN, bufferPages: true })
     doc.pipe(stream)
 
-    // --- En-tete -----------------------------------------------------------
+    // --- En-tête -----------------------------------------------------------
     doc.fillColor(COLORS.accent).fontSize(20).font('Helvetica-Bold').text('Centre Papillon Bleu')
     doc
       .fillColor(COLORS.muted)
       .fontSize(11)
       .font('Helvetica')
-      .text('Rapport de progression pedagogique')
+      .text('Rapport de progression pédagogique')
     doc.moveDown(1)
 
     doc.fillColor(COLORS.ink).fontSize(16).font('Helvetica-Bold')
@@ -172,15 +172,15 @@ export const pdfReportService = {
 
     doc.fontSize(9).font('Helvetica').fillColor(COLORS.muted)
     doc.text(
-      `Periode du ${formatFrench(period.from)} au ${formatFrench(period.to)} ` +
-        `(${period.months} mois) - edite le ${formatFrench(new Date().toISOString().slice(0, 10))}`,
+      `Période du ${formatFrench(period.from)} au ${formatFrench(period.to)} ` +
+        `(${period.months} mois) - édité le ${formatFrench(new Date().toISOString().slice(0, 10))}`,
     )
 
-    // --- Identite ----------------------------------------------------------
-    heading(doc, "L enfant")
+    // --- Identité ----------------------------------------------------------
+    heading(doc, "L'enfant")
     keyValue(doc, 'Groupe', child.group)
     if (fullChild) {
-      keyValue(doc, 'Age', `${ageInYears(fullChild.birthDate)} ans`)
+      keyValue(doc, 'Âge', `${ageInYears(fullChild.birthDate)} ans`)
       keyValue(
         doc,
         'Accompagnement',
@@ -191,35 +191,35 @@ export const pdfReportService = {
       }
     }
 
-    // --- Synthese ----------------------------------------------------------
-    heading(doc, 'Synthese de la periode')
+    // --- Synthèse ----------------------------------------------------------
+    heading(doc, 'Synthèse de la période')
     keyValue(doc, 'Objectifs suivis', summary.goals)
     keyValue(
       doc,
       'Avancement moyen',
-      summary.averageProgress === null ? 'Non evalue' : `${summary.averageProgress} %`,
+      summary.averageProgress === null ? 'Non évalué' : `${summary.averageProgress} %`,
     )
-    keyValue(doc, 'Seances realisees', summary.sessionsCompleted)
+    keyValue(doc, 'Séances réalisées', summary.sessionsCompleted)
     keyValue(doc, 'Comptes-rendus', summary.reports)
     keyValue(
       doc,
-      'Presence',
+      'Présence',
       attendanceSummary.recorded === 0
-        ? 'Aucune journee enregistree'
+        ? 'Aucune journee enregistrée'
         : `${Math.round((1 - attendanceSummary.absenceRate) * 100)} % ` +
             `(${attendanceSummary.present + attendanceSummary.late} jours sur ${attendanceSummary.recorded})`,
     )
 
     if (mood.trend.current !== null) {
       const lastMood = mood.points.at(-1)
-      keyValue(doc, 'Humeur en fin de periode', label(MOODS, lastMood.mood))
+      keyValue(doc, 'Humeur en fin de période', label(MOODS, lastMood.mood))
     }
 
     // --- Objectifs ---------------------------------------------------------
-    heading(doc, 'Objectifs pedagogiques')
+    heading(doc, 'Objectifs pédagogiques')
 
     if (goals.length === 0) {
-      doc.fillColor(COLORS.muted).text('Aucun objectif defini sur la periode.')
+      doc.fillColor(COLORS.muted).text('Aucun objectif défini sur la période.')
     }
 
     for (const entry of goals) {
@@ -233,7 +233,7 @@ export const pdfReportService = {
         .fillColor(COLORS.muted)
         .text(
           `${label(GOAL_DOMAINS, entry.goal.domain)} - ${label(GOAL_STATUSES, entry.goal.status)}` +
-            (entry.goal.targetDate ? ` - echeance ${formatFrench(entry.goal.targetDate)}` : ''),
+            (entry.goal.targetDate ? ` - échéance ${formatFrench(entry.goal.targetDate)}` : ''),
         )
       doc.moveDown(0.4)
       doc.fillColor(COLORS.ink).fontSize(10)
@@ -246,14 +246,14 @@ export const pdfReportService = {
           .fontSize(9)
           .fillColor(COLORS.muted)
           .text(
-            `Evolution sur la periode : ${sign}${entry.trend.delta} points ` +
+            `Évolution sur la période : ${sign}${entry.trend.delta} points ` +
               `(${entry.trend.start} % -> ${entry.trend.current} %), ` +
-              `${entry.sessionsWorked} seances de travail.`,
+              `${entry.sessionsWorked} séances de travail.`,
           )
         doc.moveDown(0.3)
         sparkline(doc, entry.monthly)
       } else if (entry.points.length === 0) {
-        doc.fontSize(9).fillColor(COLORS.muted).text('Pas encore evalue en seance sur la periode.')
+        doc.fontSize(9).fillColor(COLORS.muted).text('Pas encore évalué en séance sur la période.')
       }
 
       const lastComment = [...entry.points].reverse().find((point) => point.comment)
@@ -261,7 +261,7 @@ export const pdfReportService = {
         doc
           .fontSize(9)
           .fillColor(COLORS.ink)
-          .text(`Derniere observation (${formatFrench(lastComment.date)}) : ${lastComment.comment}`, {
+          .text(`Dernière observation (${formatFrench(lastComment.date)}) : ${lastComment.comment}`, {
             width: CONTENT_WIDTH,
           })
       }
@@ -278,7 +278,7 @@ export const pdfReportService = {
         .fillColor(COLORS.muted)
         .text(
           'Document confidentiel - Centre Papillon Bleu. ' +
-            'A ne pas diffuser en dehors des destinataires prevus.',
+            'A ne pas diffuser en dehors des destinataires prévus.',
           MARGIN,
           792 - MARGIN + 10,
           { width: CONTENT_WIDTH, align: 'center' },

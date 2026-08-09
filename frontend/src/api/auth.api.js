@@ -3,13 +3,13 @@ import { apiClient } from '@/api/client.js'
 /** Connexion, session et profil courant. */
 
 /**
- * Premiere etape. Deux issues possibles :
+ * Première étape. Deux issues possibles :
  *  - compte sans 2FA : la session est ouverte, le cookie est pose
- *  - compte protege  : `mfaRequired` et un jeton de defi a echanger contre un code
+ *  - compte protege  : `mfaRequired` et un jeton de défi a echanger contre un code
  *
- * Le corps de la reponse contient aussi `sessionToken`, dont le navigateur
- * n a pas l usage : il a le cookie. Seuls les clients sans gestionnaire de
- * cookies (Postman, scripts) s en servent.
+ * Le corps de la réponse contient aussi `sessionToken`, dont le navigateur
+ * n'a pas l'usage : il a le cookie. Seuls les clients sans gestionnaire de
+ * cookies (Postman, scripts) s'en servent.
  */
 export async function login({ email, password }) {
   const body = await apiClient.post('/auth/login', { email, password })
@@ -25,7 +25,7 @@ export async function login({ email, password }) {
   return { user: body.data.user, mfaSetupRequired: body.meta.mfaSetupRequired }
 }
 
-/** Seconde etape : le code a usage unique, ou un code de secours. */
+/** Seconde étape : le code à usage unique, ou un code de secours. */
 export async function verifyMfa({ challengeToken, code }) {
   const body = await apiClient.post('/auth/mfa/verify', { challengeToken, code })
   return { user: body.data.user }
@@ -85,7 +85,7 @@ export async function changePassword({ currentPassword, newPassword }) {
 
 // --- Suppression de son compte ----------------------------------------------
 
-/** Ce que la suppression effacerait et ce qu elle conserverait. */
+/** Ce que la suppression effacerait et ce qu'elle conserverait. */
 export async function fetchAccountDeletion() {
   const body = await apiClient.get('/auth/account/deletion')
   return body.data

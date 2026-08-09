@@ -9,10 +9,10 @@ import { apiClient } from '@/api/client.js'
 import { inputClass } from '@/lib/ui.js'
 
 /**
- * Choix d un nouveau mot de passe depuis le lien recu par courriel.
+ * Choix d'un nouveau mot de passe depuis le lien reçu par courriel.
  *
- * Quand le compte est protege par un second facteur, le code reste exige ici.
- * C est le point important de cet ecran : sans cela, l acces a la boite mail
+ * Quand le compte est protégé par un second facteur, le code reste exige ici.
+ * C'est le point important de cet écran : sans cela, l'accès'a la boite mail
  * suffirait a prendre le compte, et la double authentification ne protegerait
  * plus de grand-chose.
  */
@@ -31,7 +31,7 @@ function ResetPasswordPage() {
   const [error, setError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
 
-  // Le lien est verifie avant d'afficher le formulaire : inutile de faire
+  // Le lien est vérifie avant d'afficher le formulaire : inutile de faire
   // saisir un mot de passe pour apprendre ensuite que le lien a expire.
   useEffect(() => {
     let active = true
@@ -74,10 +74,10 @@ function ResetPasswordPage() {
         state: { notice: 'Mot de passe modifie. Connectez-vous avec le nouveau.' },
       })
     } catch (requestError) {
-      setError(requestError.message || 'Reinitialisation impossible')
+      setError(requestError.message || 'Réinitialisation impossible')
       setCode('')
 
-      // Lien consomme ou expire pendant la saisie : le formulaire n a plus lieu d'etre.
+      // Lien consommé ou expire pendant la saisie : le formulaire n'a plus lieu d'être.
       if (requestError.status === 400 && /lien/i.test(requestError.message ?? '')) {
         setState((current) => ({ ...current, status: 'invalid' }))
       }
@@ -88,7 +88,7 @@ function ResetPasswordPage() {
 
   if (state.status === 'checking') {
     return (
-      <AuthShell title="Verification du lien" subtitle="Un instant, nous validons votre lien.">
+      <AuthShell title="Vérification du lien" subtitle="Un instant, nous validons votre lien.">
         <div className="flex flex-col gap-3">
           <Skeleton height={44} />
           <Skeleton height={44} />
@@ -101,7 +101,7 @@ function ResetPasswordPage() {
     return (
       <AuthShell
         title="Lien expire"
-        subtitle="Ce lien n est plus valable : il a peut-etre deja servi, ou il date de plus d une heure."
+        subtitle="Ce lien n'est plus valable : il a peut-être déjà servi, ou il date de plus d'une heure."
         footer={
           <Link to="/connexion" className="font-semibold text-brand hover:underline">
             Retour a la connexion
@@ -120,14 +120,14 @@ function ResetPasswordPage() {
       title="Nouveau mot de passe"
       subtitle={
         state.mfaRequired
-          ? `Choisissez un mot de passe d au moins ${MIN_LENGTH} caracteres, puis confirmez avec votre code de verification.`
-          : `Choisissez un mot de passe d au moins ${MIN_LENGTH} caracteres.`
+          ? `Choisissez un mot de passe d'au moins ${MIN_LENGTH} caractères, puis confirmez avec votre code de vérification.`
+          : `Choisissez un mot de passe d'au moins ${MIN_LENGTH} caractères.`
       }
     >
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <Field
           label="Nouveau mot de passe"
-          hint={`${MIN_LENGTH} caracteres minimum`}
+          hint={`${MIN_LENGTH} caractères minimum`}
           error={tooShort ? `Trop court : ${MIN_LENGTH} caracteres minimum` : null}
         >
           <PasswordInput
@@ -154,7 +154,7 @@ function ResetPasswordPage() {
         {state.mfaRequired ? (
           <div>
             <div className="mb-2 text-xs font-bold text-ink">
-              {useRecovery ? 'Code de secours' : 'Code de verification'}
+              {useRecovery ? 'Code de secours' : 'Code de vérification'}
             </div>
 
             {useRecovery ? (
@@ -195,7 +195,7 @@ function ResetPasswordPage() {
           disabled={submitting || mismatch || tooShort}
           className="mt-1 py-3.5 text-sm"
         >
-          {submitting ? 'Enregistrement…' : 'Definir le mot de passe'}
+          {submitting ? 'Enregistrement…' : 'Définir le mot de passe'}
         </Button>
 
         <div className="text-[12.5px] leading-[1.6] text-muted">

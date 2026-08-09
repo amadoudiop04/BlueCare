@@ -4,12 +4,12 @@ import DeveloperCredit from '@/components/layout/DeveloperCredit.jsx'
 import ButterflyMark from '@/components/ui/ButterflyMark.jsx'
 
 /**
- * Cadre commun aux ecrans accessibles sans session.
+ * Cadre commun aux écrans accessibles sans session.
  *
- * L ecran de connexion garde sa mise en page en deux volets : c est la vitrine
- * de l application. Les ecrans de reinitialisation, eux, sont des passages —
+ * L'écran de connexion garde sa mise en page en deux volets : c'est la vitrine
+ * de l'application. Les écrans de réinitialisation, eux, sont des passages —
  * on y arrive depuis un courriel, on en repart connecte. Une colonne centree
- * suffit, et evite de charger l animation three.js pour rien.
+ * suffit, et évite de charger l'animation three.js pour rien.
  */
 function AuthShell({ title, subtitle, children, footer }) {
   return (
@@ -36,7 +36,7 @@ function AuthShell({ title, subtitle, children, footer }) {
   )
 }
 
-/** Bandeau d erreur, identique a celui de l ecran de connexion. */
+/** Bandeau d'erreur, identique a celui de l'écran de connexion. */
 export function AuthError({ children }) {
   if (!children) return null
 

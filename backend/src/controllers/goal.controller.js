@@ -1,7 +1,7 @@
 import { goalService } from '../services/goal.service.js'
 import { progressService } from '../services/progress.service.js'
 
-/** Objectifs pedagogiques et courbes d evolution. */
+/** Objectifs pédagogiques et courbes d'évolution. */
 
 export async function listChildGoals(req, res) {
   const { items, summary } = await goalService.listForChild(

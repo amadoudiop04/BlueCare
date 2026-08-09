@@ -17,10 +17,10 @@ import { todayIso } from '@/lib/format.js'
 import { cx, inputClass } from '@/lib/ui.js'
 
 /**
- * Creation d une fiche enfant.
+ * Création d'une fiche enfant.
  *
  * Les listes de valeurs (types de handicap, relations, groupes existants)
- * viennent de `/api/reference` : aucune n'est ecrite en dur ici, elles suivent
+ * viennent de `/api/reference` : aucune n'est écrite en dur ici, elles suivent
  * le vocabulaire du serveur.
  */
 
@@ -73,7 +73,7 @@ function ChildFormPage() {
     setFieldErrors(null)
     setSubmitting(true)
 
-    // Les champs laisses vides sont omis plutot qu'envoyes en chaine vide :
+    // Les champs laisses vides sont omis plutôt qu'envoyés'en chaîne vide :
     // le serveur les traiterait comme une valeur fournie et invalide.
     const clean = (object) =>
       Object.fromEntries(
@@ -118,7 +118,7 @@ function ChildFormPage() {
 
         <form onSubmit={onSubmit} className="flex flex-col gap-[18px]">
           <Card className="px-6 py-[22px]">
-            <CardHeader className="mb-4" title="Identite" />
+            <CardHeader className="mb-4" title="Identité" />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Prenom" error={errorFor('firstName')}>
@@ -184,7 +184,7 @@ function ChildFormPage() {
                 </datalist>
               </Field>
 
-              <Field label="Date d entree" error={errorFor('enrolledAt')}>
+              <Field label="Date d'entree" error={errorFor('enrolledAt')}>
                 <input
                   type="date"
                   max={todayIso()}
@@ -210,7 +210,7 @@ function ChildFormPage() {
             <CardHeader
               className="mb-4"
               title="Accompagnement"
-              subtitle="Visible par l equipe pedagogique"
+              subtitle="Visible par l'équipe pédagogique"
             />
 
             <div className="flex flex-col gap-4">
@@ -240,8 +240,8 @@ function ChildFormPage() {
               </Field>
 
               <Field
-                label="Plan d accompagnement (optionnel)"
-                hint="Ce que l equipe doit savoir pour animer les seances"
+                label="Plan d'accompagnement (optionnel)"
+                hint="Ce que l'équipe doit savoir pour animer les séances"
                 error={errorFor('disability.supportPlan')}
               >
                 <textarea
@@ -275,8 +275,8 @@ function ChildFormPage() {
             <div className="flex flex-col gap-4">
               {contacts.map((contact, index) => (
                 <div
-                  // Les contacts n ont pas encore d identifiant : le serveur
-                  // leur en attribue un a la creation.
+                  // Les contacts n'ont pas encore d'identifiant : le serveur
+                  // leur en attribue un a la création.
                   key={index}
                   className="rounded-xl border border-line-soft px-4 py-4"
                 >
@@ -337,7 +337,7 @@ function ChildFormPage() {
                       </select>
                     </Field>
 
-                    <Field label="Telephone" error={errorFor(`familyContacts.${index}.phone`)}>
+                    <Field label="Téléphone" error={errorFor(`familyContacts.${index}.phone`)}>
                       <input
                         required
                         value={contact.phone}
@@ -369,8 +369,8 @@ function ChildFormPage() {
           <Card className="px-6 py-[22px]">
             <CardHeader
               className="mb-4"
-              title="Medecin referent (optionnel)"
-              subtitle="Visible par l infirmiere et la direction uniquement"
+              title="Médecin référent (optionnel)"
+              subtitle="Visible par l'infirmière et la direction uniquement"
             />
 
             <div className="grid gap-3 sm:grid-cols-3">
@@ -390,7 +390,7 @@ function ChildFormPage() {
                 />
               </Field>
 
-              <Field label="Telephone" error={errorFor('referringDoctor.phone')}>
+              <Field label="Téléphone" error={errorFor('referringDoctor.phone')}>
                 <input
                   value={doctor.phone}
                   onChange={(event) => setDoctor({ ...doctor, phone: event.target.value })}
@@ -402,7 +402,7 @@ function ChildFormPage() {
 
           <div className="flex items-center gap-2.5">
             <Button type="submit" disabled={submitting} className="px-[22px] py-3.5 text-[13.5px]">
-              {submitting ? 'Enregistrement…' : 'Creer la fiche'}
+              {submitting ? 'Enregistrement…' : 'Créer la fiche'}
             </Button>
             <Button variant="secondary" onClick={() => navigate('/enfants')} disabled={submitting}>
               Annuler

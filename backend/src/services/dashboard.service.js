@@ -12,12 +12,12 @@ import { averageProgress } from './goal.service.js'
 import { reportService } from './report.service.js'
 
 /**
- * Vue globale pour la direction : ce qui se passe aujourd hui, ce qui derape,
+ * Vue globale pour la direction : ce qui se passe aujourd'hui, ce qui derape,
  * ce qui attend une action.
  *
- * Tout est recalcule a la demande a partir des memes services que les ecrans
- * de detail : le tableau de bord ne peut donc pas diverger de ce que voient
- * les educateurs.
+ * Tout est recalcule a la demande à partir des mêmes services que les écrans
+ * de détail : le tableau de bord ne peut donc pas diverger de ce que voient
+ * les éducateurs.
  */
 
 const GOAL_STATUS_KEYS = keysOf(GOAL_STATUSES)
@@ -36,7 +36,7 @@ export const dashboardService = {
     const errors = createErrors()
     const days =
       readInteger(query.days, 'days', errors, { min: 7, max: 180 }) ?? env.attendance.windowDays
-    errors.throwIfAny('Parametres invalides')
+    errors.throwIfAny('Paramètres invalides')
 
     const to = today()
     const from = addDays(to, -(days - 1))
@@ -44,13 +44,13 @@ export const dashboardService = {
     const children = await childModel.findAll({ status: 'active' })
     const childIds = children.map((child) => child.id)
 
-    // --- Presences ---------------------------------------------------------
+    // --- Présences ---------------------------------------------------------
     const sheet = await attendanceService.getDailySheet({ date: to }, user)
     const records = await attendanceModel.findMany({ from, to, childIds })
     const attendanceSummary = summarizeAttendance(records)
     const { items: alertItems } = await attendanceService.listAlerts({}, user)
 
-    // --- Progression pedagogique ------------------------------------------
+    // --- Progression pédagogique ------------------------------------------
     const goals = await goalModel.findAll({ childIds })
     const activeGoals = goals.filter((goal) => goal.status === 'active')
 
@@ -73,7 +73,7 @@ export const dashboardService = {
       }
     })
 
-    // --- Seances et comptes-rendus ----------------------------------------
+    // --- Séances et comptes-rendus ----------------------------------------
     const sessions = await sessionModel.findAll({ childIds, from, to })
     const upcoming = await sessionModel.findAll({
       childIds,

@@ -4,9 +4,9 @@ import { db, newId, nowIso, snapshot } from './store.js'
 /**
  * Traitements en cours et traces d'administration.
  *
- * Donnees medicales : l acces est reserve a l infirmiere et a la direction
- * (voir `constants/roles.js`). Les prises sont tracees une par une, ce qui
- * permet aux rappels de disparaitre une fois le medicament donne.
+ * Données médicales : l'accès'est réserve a l'infirmière et a la direction
+ * (voir `constants/roles.js`). Les prises sont tracées une par une, ce qui
+ * permet aux rappels de disparaître une fois le médicament donne.
  */
 
 function matches(medication, filter) {
@@ -14,7 +14,7 @@ function matches(medication, filter) {
   if (filter.childIds && !filter.childIds.includes(medication.childId)) return false
   if (filter.active !== undefined && medication.active !== filter.active) return false
 
-  // Traitement en cours a une date donnee.
+  // Traitement en cours a une date donnée.
   if (filter.onDate) {
     if (medication.startDate > filter.onDate) return false
     if (medication.endDate && medication.endDate < filter.onDate) return false
@@ -97,7 +97,7 @@ export const administrationModel = {
       .map(snapshot)
   },
 
-  /** Une prise est identifiee par traitement + jour + horaire prevu. */
+  /** Une prise est identifiee par traitement + jour + horaire prévu. */
   async findOne({ medicationId, date, scheduledTime }) {
     return snapshot(
       [...db.administrations.values()].find(

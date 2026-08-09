@@ -16,9 +16,9 @@ import { useApi } from '@/hooks/useApi.js'
 import { formatDate, initials, todayIso } from '@/lib/format.js'
 
 /**
- * Rappels de medicaments du jour.
- * Tracer une prise fait disparaitre le rappel correspondant du fil de
- * notifications : c est le meme calcul cote serveur.
+ * Rappels de médicaments du jour.
+ * Tracer une prise fait disparaître le rappel correspondant du fil de
+ * notifications : c'est le même calcul côté serveur.
  */
 
 const STATUS_TONE = { given: 'success', refused: 'warn', missed: 'danger', pending: 'neutral' }
@@ -36,8 +36,8 @@ function MedicationsPage() {
   return (
     <>
       <PageHeader
-        crumb="Suivi sante"
-        title="Rappels de medicaments"
+        crumb="Suivi santé"
+        title="Rappels de médicaments"
         action={
           <input
             type="date"
@@ -57,7 +57,7 @@ function MedicationsPage() {
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-3">
-              <SummaryTile label="Prises prevues" value={data.summary.total} />
+              <SummaryTile label="Prises prévues" value={data.summary.total} />
               <SummaryTile label="A tracer" value={data.summary.pending} tone="warn" />
               <SummaryTile label="Administrees" value={data.summary.given} tone="success" />
             </div>
@@ -66,15 +66,15 @@ function MedicationsPage() {
               <div className="border-b border-line-soft px-6 pb-4 pt-5">
                 <CardHeader
                   title={`Prises du ${formatDate(date)}`}
-                  subtitle="Chaque prise est tracee individuellement, avec son horaire prevu"
+                  subtitle="Chaque prise est tracée individuellement, avec son horaire prévu"
                 />
               </div>
 
               {data.items.length === 0 ? (
                 <div className="px-6 py-6">
                   <EmptyState
-                    title="Aucune prise prevue"
-                    description="Aucun traitement actif ne demande d administration ce jour-la."
+                    title="Aucune prise prévue"
+                    description="Aucun traitement actif ne demande d'administration ce jour-la."
                   />
                 </div>
               ) : (
@@ -108,7 +108,7 @@ function SummaryTile({ label, value, tone = 'brand' }) {
   )
 }
 
-/** Les trois issues possibles d une prise, dans l'ordre du plus frequent. */
+/** Les trois issues possibles d'une prise, dans l'ordre du plus fréquent. */
 const ACTIONS = [
   { value: 'given', label: 'Administre', variant: 'primary' },
   { value: 'refused', label: 'Refuse', variant: 'secondary' },
@@ -118,8 +118,8 @@ const ACTIONS = [
 function DoseRow({ dose, date, onRecorded }) {
   const [saving, setSaving] = useState(null)
   const [error, setError] = useState(null)
-  // Une prise deja tracee ne montre ses boutons qu'a la demande : la correction
-  // reste possible, sans inviter a modifier un releve valide d un clic distrait.
+  // Une prise déjà tracée ne montre ses boutons qu'a la demande : la correction
+  // reste possible, sans inviter a modifier un releve valide d'un clic distrait.
   const [correcting, setCorrecting] = useState(false)
 
   const recorded = dose.status !== 'pending'

@@ -15,10 +15,10 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 
 const router = Router()
 
-// La feuille de presence est un outil d'equipe : les familles n'y ont pas acces.
+// La feuille de présence est un outil d'équipe : les familles n'y ont pas accès.
 router.use(authenticate, authorize(...STAFF_ROLES))
 
-// `/alerts` est declare avant toute route parametree pour ne pas etre capture.
+// `/alerts` est declare avant toute route paramétrée pour ne pas être capture.
 router.get('/alerts', asyncHandler(listAttendanceAlerts))
 
 router.get('/', asyncHandler(getDailySheet))

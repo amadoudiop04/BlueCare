@@ -5,18 +5,18 @@ import { seedDemoData } from './models/seed.js'
 import { logger } from './utils/logger.js'
 
 /**
- * Le stockage en memoire repart vide a chaque demarrage : on le reamorce pour
- * que `npm run dev` ouvre sur une application deja peuplee. Avec Supabase les
- * donnees survivent, l'amorcage se fait donc une fois, a la main
- * (`npm run seed`), et jamais au demarrage.
+ * Le stockage en mémoire repart vide à chaque démarrage : on le reamorce pour
+ * que `npm run dev` ouvre sur une application déjà peuplee. Avec Supabase les
+ * données survivent, l'amorçage se fait donc une fois, à la main
+ * (`npm run seed`), et jamais au démarrage.
  */
 async function bootstrap() {
   if (env.seedDemoData && !isProduction && !usesSupabase) {
     try {
       const result = await seedDemoData()
-      if (!result.skipped) logger.info('Donnees de demonstration chargees (stockage en memoire)')
+      if (!result.skipped) logger.info('Données de démonstration chargees (stockage en mémoire)')
     } catch (error) {
-      logger.error("Echec de l'amorcage des donnees de demonstration", error.message)
+      logger.error("Échec de l'amorçage des données de démonstration", error.message)
     }
   }
 
@@ -29,16 +29,16 @@ async function bootstrap() {
     )
   })
 
-  // Arret propre : on laisse les requetes en cours se terminer.
+  // Arrêt propre : on laisse les requêtes en cours se terminer.
   for (const signal of ['SIGINT', 'SIGTERM']) {
     process.on(signal, () => {
-      logger.info(`${signal} recu, arret du serveur...`)
+      logger.info(`${signal} reçu, arrêt du serveur...`)
       server.close(() => process.exit(0))
     })
   }
 }
 
 bootstrap().catch((error) => {
-  logger.error('Demarrage impossible', error)
+  logger.error('Démarrage impossible', error)
   process.exit(1)
 })

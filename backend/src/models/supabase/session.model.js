@@ -1,6 +1,6 @@
 import { createRepository, runMany } from './repository.js'
 
-/** Seances (Postgres) : planifiees, realisees ou annulees. */
+/** Séances (Postgres) : planifiées, réalisées ou annulées. */
 
 const repository = createRepository({ table: 'sessions', prefix: 'ses', immutable: ['childId'] })
 

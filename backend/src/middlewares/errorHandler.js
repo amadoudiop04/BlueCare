@@ -2,7 +2,7 @@ import { isProduction } from '../config/env.js'
 import { logger } from '../utils/logger.js'
 
 /**
- * Dernier middleware de la chaine : formate toute erreur en JSON.
+ * Dernier middleware de la chaîne : formate toute erreur en JSON.
  * Express le reconnait a sa signature a 4 arguments.
  */
 // eslint-disable-next-line no-unused-vars

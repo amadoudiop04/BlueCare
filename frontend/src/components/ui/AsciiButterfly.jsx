@@ -6,12 +6,12 @@ import * as THREE from 'three'
  *
  * Le principe : un papillon est dessine sur un canvas 2D, applique comme
  * texture sur un plan Three.js legerement ondule, puis le rendu WebGL est
- * relu pixel par pixel et remplace par des caracteres selon la luminosite.
+ * relu pixel par pixel et remplace par des caractères selon la luminosite.
  *
  * Ecart avec la version maquette : celle-ci s'appuyait sur `window.THREE`
  * charge par un <script> et sur des globales React. Ici tout est importe,
- * l'animation s'arrete quand le composant disparait ou quand l onglet passe
- * en arriere-plan, et l'effet est desactive si l utilisateur a demande a
+ * l'animation s'arrete quand le composant disparait ou quand l'onglet passe
+ * en arrière-plan, et l'effet est désactive si l'utilisateur a demande a
  * reduire les animations.
  */
 
@@ -47,7 +47,7 @@ void main() {
 const CHARSET = ' .\'`^",:;Il!i~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$'
 const FONT = "'IBM Plex Mono', monospace"
 
-/** Dessine le papillon sur un canvas : c est la source de la texture. */
+/** Dessine le papillon sur un canvas : c'est la source de la texture. */
 function drawButterfly(canvas, color) {
   const ctx = canvas.getContext('2d')
   const { width: w, height: h } = canvas
@@ -77,7 +77,7 @@ function drawButterfly(canvas, color) {
   wing(1)
   wing(-1)
 
-  // Corps et tete.
+  // Corps et tête.
   ctx.beginPath()
   ctx.ellipse(cx, cy + s * 0.16, s * 0.055, s * 0.62, 0, 0, Math.PI * 2)
   ctx.fill()
@@ -151,7 +151,7 @@ function AsciiButterfly({
     renderer.setPixelRatio(1)
     renderer.setClearColor(0x000000, 0)
 
-    // Le rendu WebGL est reduit a une grille de caracteres.
+    // Le rendu WebGL est reduit a une grille de caractères.
     const pre = document.createElement('pre')
     Object.assign(pre.style, {
       margin: '0',
@@ -243,7 +243,7 @@ function AsciiButterfly({
       pointer.y = (event.clientY - bounds.top) / bounds.height
     }
 
-    // Onglet en arriere-plan : inutile de continuer a calculer des frames.
+    // Onglet en arrière-plan : inutile de continuer a calculer des frames.
     const onVisibility = () => {
       if (document.hidden) {
         if (frameId) cancelAnimationFrame(frameId)

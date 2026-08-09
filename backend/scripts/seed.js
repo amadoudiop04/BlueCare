@@ -4,15 +4,15 @@ import { isProduction } from '../src/config/env.js'
 import { logger } from '../src/utils/logger.js'
 
 /**
- * Amorcage manuel de la base : `npm run seed --workspace backend`.
+ * Amorçage manuel de la base : `npm run seed --workspace backend`.
  *
- * A lancer une fois apres avoir execute `supabase/schema.sql`. La commande est
- * idempotente : si des enfants existent deja, elle ne fait rien plutot que de
- * creer des doublons.
+ * A lancer une fois après'avoir execute `supabase/schema.sql`. La commande est
+ * idempotente : si des enfants existent déjà, elle ne fait rien plutôt que de
+ * créer des doublons.
  */
 
 if (isProduction) {
-  logger.error('Refus : les donnees de demonstration ne doivent pas etre chargees en production.')
+  logger.error('Refus : les données de démonstration ne doivent pas être chargees en production.')
   process.exit(1)
 }
 
@@ -25,7 +25,7 @@ if (!usesSupabase) {
   process.exit(1)
 }
 
-logger.info(`Amorcage du stockage « ${driverName} »...`)
+logger.info(`Amorçage du stockage « ${driverName} »...`)
 
 try {
   const result = await seedDemoData()
@@ -41,6 +41,6 @@ try {
 
   process.exit(0)
 } catch (error) {
-  logger.error("Echec de l'amorcage :", error.message)
+  logger.error("Échec de l'amorçage :", error.message)
   process.exit(1)
 }

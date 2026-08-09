@@ -11,11 +11,11 @@ import { inputClass } from '@/lib/ui.js'
 /**
  * Suppression de son propre compte.
  *
- * Le serveur annonce d'abord ce qu il fera : effacer entierement la ligne si
- * rien n'y est rattache, ou n'en garder qu une coquille anonyme si des
+ * Le serveur annonce d'abord ce qu'il fera : effacer entièrement la ligne si
+ * rien n'y est rattache, ou n'en garder qu'une coquille anonyme si des
  * comptes-rendus portent la signature de la personne. On affiche cette
- * distinction AVANT de demander confirmation — personne ne doit decouvrir
- * apres coup que son nom reste attache a un dossier.
+ * distinction AVANT de demander confirmation — personne ne doit découvrir
+ * après coup que son nom reste attache a un dossier.
  */
 function AccountDangerZone() {
   const { user, logout } = useAuth()
@@ -33,8 +33,8 @@ function AccountDangerZone() {
 
     try {
       await deleteAccount({ password, code: code || undefined })
-      // La session est deja close cote serveur : on vide l etat local et
-      // l utilisateur retombe sur l ecran de connexion.
+      // La session est déjà close côté serveur : on vide l'état local et
+      // l'utilisateur retombe sur l'écran de connexion.
       await logout()
     } catch (requestError) {
       setActionError(requestError)
@@ -52,7 +52,7 @@ function AccountDangerZone() {
   }
 
   // Le dernier compte de direction ne peut pas partir : plus personne ne
-  // pourrait creer de comptes ni reinitialiser une double authentification.
+  // pourrait créer de comptes ni réinitialiser une double authentification.
   const blocked = preview?.lastAdministrator
 
   return (
@@ -61,12 +61,12 @@ function AccountDangerZone() {
         <CardHeader
           className="mb-4"
           title="Supprimer mon compte"
-          subtitle={error ? 'Etat indisponible' : undefined}
+          subtitle={error ? 'État indisponible' : undefined}
         />
 
         {blocked ? (
           <div className="rounded-xl border border-warn/30 bg-warn-bg px-4 py-3 text-[12.5px] leading-relaxed text-warn-ink">
-            Vous etes le dernier compte de direction actif. Nommez un remplacant avant de
+            Vous êtes le dernier compte de direction actif. Nommez un remplacant avant de
             supprimer le votre, sinon plus personne ne pourra gerer les comptes du centre.
           </div>
         ) : (
@@ -74,18 +74,18 @@ function AccountDangerZone() {
             <p className="text-[13px] leading-relaxed text-muted-strong">
               {preview?.mode === 'anonymise' ? (
                 <>
-                  Vos donnees personnelles seront effacees et vous ne pourrez plus vous connecter.
+                  Vos données personnelles seront effacees et vous ne pourrez plus vous connecter.
                   Les <strong className="text-ink">{preview.authoredRecords} enregistrements</strong>{' '}
                   que vous avez signes ({preview.reports} compte
                   {preview.reports > 1 ? 's' : ''}-rendu{preview.reports > 1 ? 's' : ''},{' '}
-                  {preview.sessions} seance{preview.sessions > 1 ? 's' : ''}) resteront au dossier
+                  {preview.sessions} séance{preview.sessions > 1 ? 's' : ''}) resteront au dossier
                   des enfants, sous la mention « Compte supprime » : un dossier de suivi doit garder
-                  la trace de qui a ecrit quoi.
+                  la trace de qui a écrit quoi.
                 </>
               ) : (
                 <>
-                  Aucun compte-rendu ni seance n est rattache a votre compte : il sera{' '}
-                  <strong className="text-ink">entierement efface</strong>, sans rien laisser.
+                  Aucun compte-rendu ni séance n'est rattache a votre compte : il sera{' '}
+                  <strong className="text-ink">entièrement efface</strong>, sans rien laisser.
                 </>
               )}
             </p>
@@ -99,8 +99,8 @@ function AccountDangerZone() {
 
       <ConfirmDialog
         open={open}
-        title="Supprimer definitivement votre compte ?"
-        description="Cette action est irreversible. Vous serez deconnecte immediatement et ne pourrez plus acceder a l application."
+        title="Supprimer définitivement votre compte ?"
+        description="Cette action est irreversible. Vous serez déconnecte immédiatement et ne pourrez plus acceder a l'application."
         confirmLabel="Supprimer mon compte"
         confirmText={user.email}
         busy={busy}
@@ -123,7 +123,7 @@ function AccountDangerZone() {
           </Field>
 
           {user.mfaEnabled ? (
-            <Field label="Code de verification" hint="Affiche par votre application d authentification">
+            <Field label="Code de vérification" hint="Affiche par votre application d'authentification">
               <input
                 inputMode="numeric"
                 value={code}

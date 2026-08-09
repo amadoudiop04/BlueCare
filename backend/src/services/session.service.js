@@ -17,7 +17,7 @@ import {
 } from '../utils/validate.js'
 import { requireChildAccess, scopedChildIds } from './access.service.js'
 
-/** Seances : planification, realisation, historique par enfant. */
+/** Séances : planification, realisation, historique par enfant. */
 
 const TYPE_KEYS = keysOf(SESSION_TYPES)
 const STATUS_KEYS = keysOf(SESSION_STATUSES)
@@ -36,7 +36,7 @@ async function readGoalIds(value, childId, errors) {
   const missing = ids.filter((id) => !goals.some((goal) => goal.id === id))
   if (missing.length > 0) errors.add('goalIds', `Objectifs introuvables : ${missing.join(', ')}`)
 
-  // Un objectif appartient a un enfant : on ne travaille pas celui d un autre.
+  // Un objectif appartient a un enfant : on ne travaille pas celui d'un autre.
   const foreign = goals.filter((goal) => goal.childId !== childId)
   if (foreign.length > 0) {
     errors.add('goalIds', 'Certains objectifs appartiennent a un autre enfant')
@@ -47,7 +47,7 @@ async function readGoalIds(value, childId, errors) {
 
 async function normalizeSessionPayload(payload = {}, { partial = false, childId } = {}) {
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
-    throw ApiError.badRequest('Corps de requete invalide')
+    throw ApiError.badRequest('Corps de requête invalide')
   }
 
   const errors = createErrors()
@@ -57,7 +57,7 @@ async function normalizeSessionPayload(payload = {}, { partial = false, childId 
   const data = {}
 
   if (shouldRead('date')) {
-    // Une seance peut etre planifiee dans le futur : pas de borne haute.
+    // Une séance peut être planifiée dans le futur : pas de borne haute.
     data.date = readDate(payload.date, 'date', errors, { required: true })
   }
   if (shouldRead('type')) {
@@ -83,20 +83,20 @@ async function normalizeSessionPayload(payload = {}, { partial = false, childId 
   }
 
   if (data.startTime && data.endTime && data.endTime < data.startTime) {
-    errors.add('endTime', "L heure de fin precede l heure de debut")
+    errors.add('endTime', "L'heure de fin précède l'heure de debut")
   }
   if (data.status === 'completed' && data.date && data.date > today()) {
-    errors.add('status', 'Une seance a venir ne peut pas etre marquee realisee')
+    errors.add('status', 'Une séance a venir ne peut pas être marquee réalisée')
   }
 
-  errors.throwIfAny('Seance invalide')
+  errors.throwIfAny('Séance invalide')
 
   return compact(data)
 }
 
 export async function requireSessionAccess(user, sessionId, { write = false } = {}) {
   const session = await sessionModel.findById(sessionId)
-  if (!session) throw ApiError.notFound('Seance introuvable')
+  if (!session) throw ApiError.notFound('Séance introuvable')
 
   await requireChildAccess(user, session.childId, { write })
   return session
@@ -171,7 +171,7 @@ export const sessionService = {
     const session = await requireSessionAccess(user, sessionId, { write: true })
 
     if (await reportModel.findBySession(sessionId)) {
-      throw ApiError.conflict('Cette seance a deja un compte-rendu, elle ne peut plus etre annulee')
+      throw ApiError.conflict('Cette séance a déjà un compte-rendu, elle ne peut plus être annulée')
     }
 
     const errors = createErrors()
@@ -186,14 +186,14 @@ export const sessionService = {
 
     const report = await reportModel.findBySession(sessionId)
     if (report) {
-      throw ApiError.conflict('Supprimez d abord le compte-rendu associe a cette seance')
+      throw ApiError.conflict('Supprimez d\'abord le compte-rendu associe a cette séance')
     }
 
     await sessionModel.remove(session.id)
     return { sessionId }
   },
 
-  /** Historique complet des seances d un enfant, comptes-rendus inclus. */
+  /** Historique complet des séances d'un enfant, comptes-rendus inclus. */
   async getChildHistory(childId, query = {}, user) {
     const child = await requireChildAccess(user, childId)
 
@@ -201,7 +201,7 @@ export const sessionService = {
     const to = readDate(query.to, 'to', errors) ?? addDays(today(), 365)
     const from = readDate(query.from, 'from', errors) ?? addDays(today(), -DEFAULT_HISTORY_DAYS)
     const status = readEnum(query.status, STATUS_KEYS, 'status', errors)
-    errors.throwIfAny('Periode invalide')
+    errors.throwIfAny('Période invalide')
 
     const sessions = await sessionModel.findAll(compact({ childId, from, to, status }))
     const reports = await reportModel.findAll({ childId })

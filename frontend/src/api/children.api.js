@@ -1,6 +1,6 @@
 import { apiClient, query } from '@/api/client.js'
 
-/** Fiches enfants et ressources qui en dependent. */
+/** Fiches enfants et ressources qui en dépendent. */
 
 export async function fetchChildren(params) {
   const body = await apiClient.get(`/children${query(params)}`)
@@ -19,23 +19,23 @@ export async function createChild(payload) {
 
 
 /**
- * Sortie d un enfant : la fiche quitte les listes mais l historique reste.
- * C est l'action normale quand un enfant n'est plus accueilli.
+ * Sortie d'un enfant : la fiche quitte les listes mais l'historique reste.
+ * C'est l'action normale quand un enfant n'est plus accueilli.
  */
 export async function archiveChild(childId) {
   const body = await apiClient.delete(`/children/${childId}`)
   return body.data
 }
 
-/** Retour d un enfant archive dans les effectifs. */
+/** Retour d'un enfant archive dans les effectifs. */
 export async function restoreChild(childId) {
   const body = await apiClient.patch(`/children/${childId}`, { status: 'active' })
   return body.data
 }
 
 /**
- * Effacement definitif (droit a l effacement) : la fiche, ses presences, ses
- * objectifs, ses seances, ses comptes-rendus et ses traitements disparaissent.
+ * Effacement definitif (droit a l'effacement) : la fiche, ses présences, ses
+ * objectifs, ses séances, ses comptes-rendus et ses traitements disparaissent.
  * Irreversible.
  */
 export async function purgeChild(childId) {
@@ -70,13 +70,13 @@ export async function fetchChildMedications(childId) {
 }
 
 
-/** Tous les objectifs du perimetre : evite un appel par enfant sur la liste. */
+/** Tous les objectifs du périmètre : évite un appel par enfant sur la liste. */
 export async function fetchGoals(params) {
   const body = await apiClient.get(`/goals${query(params)}`)
   return body.data
 }
 
-/** Chemin du rapport PDF. Le cookie de session part avec la requete. */
+/** Chemin du rapport PDF. Le cookie de session part avec la requête. */
 export function progressReportPath(childId, months = 6) {
   return `/children/${childId}/progress.pdf${query({ months })}`
 }

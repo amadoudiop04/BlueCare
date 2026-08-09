@@ -1,7 +1,7 @@
 /**
  * Helpers de dates au format ISO court (`YYYY-MM-DD`).
- * Tout est calcule en UTC : une presence saisie le matin ne doit pas
- * basculer au jour precedent selon le fuseau du serveur.
+ * Tout est calcule en UTC : une présence saisie le matin ne doit pas
+ * basculer au jour précédent selon le fuseau du serveur.
  */
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/
@@ -33,7 +33,7 @@ export function addDays(isoDate, days) {
 }
 
 /**
- * Decalage en mois en restant sur un jour valide : le 31 mars moins un mois
+ * Décalage en mois en restant sur un jour valide : le 31 mars moins un mois
  * donne le 28 (ou 29) fevrier, pas le 3 mars.
  */
 export function addMonths(isoDate, months) {
@@ -45,12 +45,12 @@ export function addMonths(isoDate, months) {
   return target.toISOString().slice(0, 10)
 }
 
-/** `2026-08-05` -> `2026-08`, cle de regroupement mensuel. */
+/** `2026-08-05` -> `2026-08`, clé de regroupement mensuel. */
 export function monthOf(isoDate) {
   return isoDate.slice(0, 7)
 }
 
-/** Tous les mois de la periode, bornes incluses : `['2026-03', '2026-04', ...]`. */
+/** Tous les mois de la période, bornes incluses : `['2026-03', '2026-04', ...]`. */
 export function monthsBetween(from, to) {
   const months = []
   let cursor = monthOf(from)
@@ -72,8 +72,8 @@ export function daysBetween(from, to) {
 }
 
 /**
- * Les dates ISO se comparent comme des chaines (`'2026-01-02' > '2026-01-01'`).
- * On evite donc de construire des objets Date pour trier ou filtrer.
+ * Les dates ISO se comparent comme des chaînes (`'2026-01-02' > '2026-01-01'`).
+ * On évite donc de construire des objets Date pour trier ou filtrer.
  */
 export function compareIsoDates(a, b) {
   if (a === b) return 0
@@ -92,7 +92,7 @@ export function isWeekend(isoDate) {
   return day === 0 || day === 6
 }
 
-/** `2026-08-05` -> `05/08/2026`, pour les messages d alerte. */
+/** `2026-08-05` -> `05/08/2026`, pour les messages d'alerte. */
 export function formatFrench(isoDate) {
   if (!isIsoDate(isoDate)) return ''
   const [year, month, day] = isoDate.split('-')

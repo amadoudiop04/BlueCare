@@ -31,7 +31,7 @@ import { useAuth } from '@/hooks/useAuth.js'
 import { formatDate, initials, monthLabel, percent, splitDate } from '@/lib/format.js'
 import { canReadMedical, canWrite } from '@/lib/roles.js'
 
-/** Fiche individuelle : identite, objectifs, evolution, historique des seances. */
+/** Fiche individuelle : identité, objectifs, évolution, historique des séances. */
 
 const GOAL_COLORS = ['#1E5FD8', '#14866B', '#6C9BF0', '#C77A0A', '#8A6FD1', '#0C1E42']
 
@@ -81,8 +81,8 @@ function ChildFilePage() {
       const blob = await response.blob()
       const url = URL.createObjectURL(blob)
 
-      // Le PDF part avec un en-tete d authentification : il faut passer par un
-      // blob plutot que par un simple lien, qui n'emporterait pas le jeton.
+      // Le PDF part avec un en-tête d'authentification : il faut passer par un
+      // blob plutôt que par un simple lien, qui n'emporterait pas le jeton.
       const link = document.createElement('a')
       link.href = url
       link.download = `progression-${data?.child?.lastName ?? 'enfant'}.pdf`.toLowerCase()
@@ -103,7 +103,7 @@ function ChildFilePage() {
         action={
           <div className="flex gap-2.5">
             <Button variant="secondary" onClick={downloadReport} disabled={!data || exporting}>
-              {exporting ? 'Generation…' : 'Rapport PDF'}
+              {exporting ? 'Génération…' : 'Rapport PDF'}
             </Button>
             {canWrite(user.role) ? (
               <Button onClick={() => navigate(`/comptes-rendus?enfant=${childId}`)}>
@@ -174,7 +174,7 @@ function IdentityCard({ child, reference }) {
         : 'Non renseignee',
     },
     {
-      key: 'Medecin referent',
+      key: 'Médecin référent',
       value: child.referringDoctor
         ? `${child.referringDoctor.lastName}${child.referringDoctor.specialty ? ` · ${child.referringDoctor.specialty}` : ''}`
         : 'Non communique',
@@ -216,7 +216,7 @@ function IdentityCard({ child, reference }) {
       {child.disability?.supportPlan ? (
         <div className="mt-4 rounded-xl bg-canvas px-3.5 py-3">
           <div className="mb-1 text-[11px] font-bold uppercase tracking-[0.08em] text-muted">
-            Plan d accompagnement
+            Plan d'accompagnement
           </div>
           <div className="text-[12.5px] leading-relaxed text-muted-strong">
             {child.disability.supportPlan}
@@ -228,9 +228,9 @@ function IdentityCard({ child, reference }) {
 }
 
 /**
- * Volet medical. Pour un educateur, le serveur ne renvoie tout simplement pas
- * ces donnees : la carte reste visible mais explicitement fermee, plutot que
- * de disparaitre sans explication.
+ * Volet médical. Pour un éducateur, le serveur ne renvoie tout simplement pas
+ * ces données : la carte reste visible mais explicitement fermee, plutôt que
+ * de disparaître sans explication.
  */
 function MedicalCard({ medications, role }) {
   if (!canReadMedical(role)) {
@@ -238,13 +238,13 @@ function MedicalCard({ medications, role }) {
       <Card className="border-dashed bg-[#FAFBFE] p-5">
         <div className="mb-3.5 flex items-center gap-2.5">
           <span className="h-2 w-2 rounded-full bg-line-strong" />
-          <div className="text-sm font-bold text-muted">Volet medical</div>
+          <div className="text-sm font-bold text-muted">Volet médical</div>
           <Badge tone="neutral" className="ml-auto">
             INFIRMIERE
           </Badge>
         </div>
         <div className="text-[12.5px] leading-relaxed text-muted">
-          Les traitements et le medecin referent sont reserves a l infirmiere et a la direction.
+          Les traitements et le médecin référent sont réservés'a l'infirmière et a la direction.
         </div>
       </Card>
     )
@@ -254,7 +254,7 @@ function MedicalCard({ medications, role }) {
     <Card className="p-5">
       <div className="mb-3.5 flex items-center gap-2.5">
         <span className="h-2 w-2 rounded-full bg-danger" />
-        <div className="text-sm font-bold">Volet medical</div>
+        <div className="text-sm font-bold">Volet médical</div>
         <Badge tone="danger" className="ml-auto">
           INFIRMIERE
         </Badge>
@@ -292,12 +292,12 @@ function GalleryCard({ items }) {
   return (
     <Card className="p-5">
       <div className="mb-3.5 flex items-center justify-between">
-        <div className="text-sm font-bold">Galerie d activites</div>
-        <span className="text-[10.5px] font-semibold text-muted">Anonymisee</span>
+        <div className="text-sm font-bold">Galerie d'activités</div>
+        <span className="text-[10.5px] font-semibold text-muted">Anonymisée</span>
       </div>
 
       {items.length === 0 ? (
-        <div className="text-[12.5px] text-muted">Aucune activite enregistree.</div>
+        <div className="text-[12.5px] text-muted">Aucune activité enregistrée.</div>
       ) : (
         <div className="grid grid-cols-2 gap-2.5">
           {items.slice(0, 4).map((activity) => (
@@ -326,18 +326,18 @@ function GoalsCard({ goals }) {
     <Card className="px-6 py-[22px]">
       <CardHeader
         className="mb-5"
-        title="Objectifs pedagogiques"
+        title="Objectifs pédagogiques"
         subtitle={
           goals.summary?.total
             ? `${goals.summary.active} en cours · ${goals.summary.achieved} atteints · moyenne ${percent(goals.summary.averageProgress)}`
-            : 'Aucun objectif defini'
+            : 'Aucun objectif défini'
         }
       />
 
       {goals.items.length === 0 ? (
         <EmptyState
           title="Aucun objectif"
-          description="Les objectifs pedagogiques definissent ce qui est travaille en seance."
+          description="Les objectifs pédagogiques definissent ce qui est travaille en séance."
         />
       ) : (
         <div className="flex flex-col gap-3.5">
@@ -348,7 +348,7 @@ function GoalsCard({ goals }) {
                   <div className="mb-1 text-sm font-semibold text-ink">{goal.title}</div>
                   <div className="text-xs text-muted">
                     {goal.domain}
-                    {goal.targetDate ? ` · echeance ${formatDate(goal.targetDate)}` : ''}
+                    {goal.targetDate ? ` · échéance ${formatDate(goal.targetDate)}` : ''}
                     {goal.status === 'achieved' ? ' · atteint' : ''}
                   </div>
                 </div>
@@ -383,15 +383,15 @@ function EvolutionCard({ progress }) {
     <Card className="px-6 py-[22px]">
       <CardHeader
         className="mb-[18px]"
-        title="Evolution sur 6 mois"
-        subtitle="Taux d avancement releve a chaque compte-rendu"
+        title="Évolution sur 6 mois"
+        subtitle="Taux d'avancement releve à chaque compte-rendu"
         action={series.length > 0 ? <ChartLegend series={series} shape="line" /> : null}
       />
 
       <LineChart
         series={series}
         labels={labels}
-        emptyLabel="Aucun compte-rendu n a encore evalue ces objectifs"
+        emptyLabel="Aucun compte-rendu n'a encore évalué ces objectifs"
       />
     </Card>
   )
@@ -404,19 +404,19 @@ function SessionsCard({ sessions, canWrite: writable }) {
     <Card className="overflow-hidden">
       <div className="flex items-center justify-between px-6 pb-4 pt-5">
         <CardHeader
-          title="Historique des seances"
-          subtitle={`${sessions.length} seance${sessions.length > 1 ? 's' : ''} · ${withReport.length} avec compte-rendu`}
+          title="Historique des séances"
+          subtitle={`${sessions.length} séance${sessions.length > 1 ? 's' : ''} · ${withReport.length} avec compte-rendu`}
         />
       </div>
 
       {sessions.length === 0 ? (
         <div className="px-6 pb-6">
           <EmptyState
-            title="Aucune seance"
+            title="Aucune séance"
             description={
               writable
-                ? 'Creez une seance depuis l ecran Comptes-rendus.'
-                : 'Les seances apparaitront ici une fois saisies.'
+                ? "Creez une séance depuis l'écran Comptes-rendus."
+                : 'Les séances apparaitront ici une fois saisies.'
             }
           />
         </div>
@@ -458,13 +458,13 @@ function SessionsCard({ sessions, canWrite: writable }) {
 
                 {session.report?.attentionPoints?.length ? (
                   <div className="mt-2.5 rounded-r-md border-l-[3px] border-warn bg-warn-bg px-3 py-2.5 text-xs leading-relaxed text-warn-ink">
-                    Point d attention · {session.report.attentionPoints.join(' · ')}
+                    Point d'attention · {session.report.attentionPoints.join(' · ')}
                   </div>
                 ) : null}
 
                 {session.report?.healthFlag?.flagged ? (
                   <div className="mt-2.5 rounded-r-md border-l-[3px] border-danger bg-danger-bg px-3 py-2.5 text-xs leading-relaxed text-danger">
-                    Signalement sante · {session.report.healthFlag.description}
+                    Signalement santé · {session.report.healthFlag.description}
                   </div>
                 ) : null}
               </div>

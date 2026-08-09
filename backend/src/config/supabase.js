@@ -4,12 +4,12 @@ import { env } from './env.js'
 import { logger } from '../utils/logger.js'
 
 /**
- * Client Supabase, cree a la premiere utilisation.
+ * Client Supabase, crée a la première utilisation.
  *
- * L API se connecte avec la cle `service_role`, qui contourne les policies
- * RLS : c est le controle d acces applicatif (`middlewares/authorize.js` et
+ * L API se connecte avec la clé `service_role`, qui contourne les policies
+ * RLS : c'est le contrôle d'accès'applicatif (`middlewares/authorize.js` et
  * `services/access.service.js`) qui fait autorite, et lui seul est teste.
- * Cette cle donne les pleins pouvoirs sur la base — elle ne doit jamais
+ * Cette clé donne les pleins pouvoirs sur la base — elle ne doit jamais
  * atteindre le navigateur.
  */
 
@@ -28,7 +28,7 @@ export function supabase() {
   }
 
   client = createClient(env.supabase.url, env.supabase.serviceRoleKey, {
-    // Un serveur n a pas de session a conserver ni a rafraichir.
+    // Un serveur n'a pas de session a conserver ni a rafraichir.
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     global: { headers: { 'x-application-name': 'bluecare-api' } },
   })

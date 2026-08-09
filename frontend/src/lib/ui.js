@@ -1,9 +1,9 @@
 /**
  * Helpers de style partages.
  *
- * Separes de `components/ui/primitives.jsx` parce qu un module qui exporte
+ * Séparés de `components/ui/primitives.jsx` parce qu'un module qui exporte
  * autre chose que des composants casse le Fast Refresh de Vite : le fichier
- * entier serait recharge au lieu d'etre remplace a chaud.
+ * entier serait recharge au lieu d'être remplace a chaud.
  */
 
 export const cx = (...classes) => classes.filter(Boolean).join(' ')

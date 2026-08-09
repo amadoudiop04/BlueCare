@@ -7,10 +7,10 @@ import { apiClient } from '@/api/client.js'
 import { inputClass } from '@/lib/ui.js'
 
 /**
- * Demande de reinitialisation.
+ * Demande de réinitialisation.
  *
- * L ecran de confirmation ne dit pas si l adresse existe : sinon ce formulaire
- * deviendrait un moyen de decouvrir qui travaille au centre. Le message est
+ * L'écran de confirmation ne dit pas si l'adresse existe : sinon ce formulaire
+ * deviendrait un moyen de découvrir qui travaille au centre. Le message est
  * donc volontairement au conditionnel, et identique dans les deux cas.
  */
 function ForgotPasswordPage() {
@@ -38,10 +38,10 @@ function ForgotPasswordPage() {
   if (sent) {
     return (
       <AuthShell
-        title="Verifiez votre messagerie"
+        title="Vérifiez votre messagerie"
         subtitle={
-          `Si un compte est associe a ${email}, un lien de reinitialisation vient d y etre ` +
-          `envoye. Il expire dans l heure et ne fonctionne qu une fois.`
+          `Si un compte est associe a ${email}, un lien de réinitialisation vient d'y être ` +
+          `envoyé. Il expire dans l'heure et ne fonctionne qu'une fois.`
         }
         footer={
           <Link to="/connexion" className="font-semibold text-brand hover:underline">
@@ -50,8 +50,8 @@ function ForgotPasswordPage() {
         }
       >
         <div className="rounded-[10px] border border-line bg-white px-4 py-3.5 text-[12.5px] leading-[1.6] text-muted">
-          Le message n arrive pas ? Regardez dans les indesirables, puis contactez la direction —
-          elle peut reinitialiser votre acces depuis la gestion des comptes.
+          Le message n'arrive pas ? Regardez dans les indesirables, puis contactez la direction —
+          elle peut réinitialiser votre accès depuis la gestion des comptes.
         </div>
       </AuthShell>
     )
@@ -59,8 +59,8 @@ function ForgotPasswordPage() {
 
   return (
     <AuthShell
-      title="Mot de passe oublie"
-      subtitle="Indiquez l adresse de votre compte professionnel : nous vous enverrons un lien pour en choisir un nouveau."
+      title="Mot de passe oublié"
+      subtitle="Indiquez l'adresse de votre compte professionnel : nous vous enverrons un lien pour en choisir un nouveau."
       footer={
         <Link to="/connexion" className="font-semibold text-brand hover:underline">
           Retour a la connexion

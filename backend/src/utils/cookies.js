@@ -4,13 +4,13 @@ import { isProduction } from '../config/env.js'
  * Cookie de session.
  *
  * `res.cookie()` et `res.clearCookie()` sont natifs a Express ; seule la
- * LECTURE demande un parseur, d ou les quelques lignes ci-dessous plutot
- * qu une dependance supplementaire.
+ * LECTURE demande un parseur, d'ou les quelques lignes ci-dessous plutôt
+ * qu'une dépendance supplementaire.
  *
- * Trois attributs portent la securite :
+ * Trois attributs portent la sécurité :
  *   httpOnly — le jeton est invisible pour JavaScript, donc inatteignable
  *              par une injection de script (ce que localStorage ne permet pas)
- *   sameSite — strict : le cookie n'accompagne aucune requete venue d'un
+ *   sameSite — strict : le cookie n'accompagne aucune requête venue d'un
  *              autre site, ce qui coupe les attaques CSRF a la racine
  *   secure   — en production, le cookie ne circule que sur HTTPS
  */
@@ -35,7 +35,7 @@ export function clearSessionCookie(res) {
   res.clearCookie(SESSION_COOKIE, baseOptions())
 }
 
-/** Lit un cookie dans l'en-tete `Cookie` de la requete. */
+/** Lit un cookie dans l'en-tête `Cookie` de la requête. */
 function readCookie(req, name) {
   const header = req.get('cookie')
   if (!header) return null
@@ -55,11 +55,11 @@ function readCookie(req, name) {
 const readSessionCookie = (req) => readCookie(req, SESSION_COOKIE)
 
 /**
- * Jeton de session porte par la requete.
+ * Jeton de session porte par la requête.
  *
  * Le cookie d'abord (navigateur), puis `Authorization: Bearer` pour les
- * clients qui n ont pas de gestionnaire de cookies — tests, Postman, scripts.
- * C est le meme jeton opaque dans les deux cas.
+ * clients qui n'ont pas de gestionnaire de cookies — tests, Postman, scripts.
+ * C'est le même jeton opaque dans les deux cas.
  */
 export function readSessionToken(req) {
   const cookie = readSessionCookie(req)

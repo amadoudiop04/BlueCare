@@ -15,22 +15,22 @@ import { reportService } from './report.service.js'
 /**
  * Fil de notifications (alertes push).
  *
- * Comme les alertes d absence, les notifications sont CALCULEES a la demande
- * plutot que stockees : elles refletent toujours l etat reel des donnees. Un
- * medicament administre, un compte-rendu depose, et la notification disparait
- * d'elle-meme — sans tache de nettoyage.
+ * Comme les alertes d'absence, les notifications sont CALCULEES a la demande
+ * plutôt que stockées : elles refletent toujours l'état réel des données. Un
+ * médicament administre, un compte-rendu dépose, et la notification disparait
+ * d'elle-même — sans tache de nettoyage.
  *
- * Seul l'acquittement est persiste (`db.notificationReads`), puisqu il ne se
- * deduit d'aucune donnee metier.
+ * Seul l'acquittement est persiste (`db.notificationReads`), puisqu'il ne se
+ * deduit d'aucune donnée metier.
  *
- * L'envoi effectif vers les terminaux (Web Push / FCM) n est pas branche :
- * `subscribe` conserve les abonnements, `dispatch` reste a ecrire le jour ou
+ * L'envoi effectif vers les terminaux (Web Push / FCM) n'est pas branche :
+ * `subscribe` conserve les abonnements, `dispatch` reste à écrire le jour ou
  * un fournisseur sera choisi.
  */
 
 const TYPE_KEYS = keysOf(NOTIFICATION_TYPES)
 
-/** Qui recoit quoi. Un role absent de la liste ne voit jamais ce type. */
+/** Qui reçoit quoi. Un rôle absent de la liste ne voit jamais ce type. */
 const AUDIENCE = Object.freeze({
   'absence-alert': ['director', 'educator'],
   'medication-reminder': ['nurse', 'director'],
@@ -50,7 +50,7 @@ async function absenceNotifications(user) {
       id: `absence-alert:${entry.child.id}:${alert.rule}:${today()}`,
       type: 'absence-alert',
       severity: alert.severity,
-      title: `${entry.child.firstName} ${entry.child.lastName} : absences repetees`,
+      title: `${entry.child.firstName} ${entry.child.lastName} : absences répétées`,
       message: alert.message,
       child: entry.child,
       link: `/children/${entry.child.id}/attendance`,
@@ -94,8 +94,8 @@ async function sessionNotifications(user) {
       id: `session-reminder:${session.id}`,
       type: 'session-reminder',
       severity: 'info',
-      title: `Seance planifiee le ${formatFrench(session.date)}`,
-      message: `${session.title ?? 'Seance'} avec ${child?.firstName ?? 'un enfant'}${
+      title: `Séance planifiée le ${formatFrench(session.date)}`,
+      message: `${session.title ?? 'Séance'} avec ${child?.firstName ?? 'un enfant'}${
         session.startTime ? ` a ${session.startTime}` : ''
       }.`,
       child: childRef(child),
@@ -120,8 +120,8 @@ async function pendingReportNotifications(user) {
     severity: overdue ? 'warning' : 'info',
     title: `Compte-rendu a saisir (${formatFrench(session.date)})`,
     message: overdue
-      ? `Seance du ${formatFrench(session.date)} sans compte-rendu depuis ${daysLate} jours.`
-      : `La seance du ${formatFrench(session.date)} attend son compte-rendu.`,
+      ? `Séance du ${formatFrench(session.date)} sans compte-rendu depuis ${daysLate} jours.`
+      : `La séance du ${formatFrench(session.date)} attend son compte-rendu.`,
     child: childRef(childById.get(session.childId)),
     link: `/sessions/${session.id}/report`,
     occurredAt: session.date,
@@ -141,8 +141,8 @@ async function healthNotifications(user) {
     id: `health-alert:${report.id}`,
     type: 'health-alert',
     severity: 'critical',
-    title: 'Point de sante signale',
-    message: report.healthFlag?.description ?? 'Un compte-rendu signale un point de sante.',
+    title: 'Point de santé signale',
+    message: report.healthFlag?.description ?? 'Un compte-rendu signale un point de santé.',
     child: childRef(childById.get(report.childId)),
     link: `/reports/${report.id}`,
     occurredAt: report.date,
@@ -168,14 +168,14 @@ export const notificationService = {
 
     const unreadOnly = query.unreadOnly === 'true'
 
-    // Un role ne recoit que les types qui le concernent.
+    // Un rôle ne reçoit que les types qui le concernent.
     const types = (type ? [type] : TYPE_KEYS).filter((entry) =>
       AUDIENCE[entry].includes(user.role),
     )
 
     const built = (await Promise.all(types.map((entry) => BUILDERS[entry](user)))).flat()
 
-    // Un seul aller-retour pour savoir ce qui a deja ete acquitte.
+    // Un seul aller-retour pour savoir ce qui a déjà été acquitte.
     const readIds = await notificationModel.readIdsFor(
       user.id,
       built.map((notification) => notification.id),
@@ -206,7 +206,7 @@ export const notificationService = {
     }
   },
 
-  /** Acquittement : la seule part du fil qui soit reellement stockee. */
+  /** Acquittement : la seule part du fil qui soit réellement stockée. */
   async markAsRead(notificationId, user) {
     if (typeof notificationId !== 'string' || notificationId.length > 200) {
       throw ApiError.badRequest('Identifiant de notification invalide')
@@ -225,7 +225,7 @@ export const notificationService = {
 
   /**
    * Enregistre un terminal pour l'envoi push.
-   * L'envoi lui-meme (Web Push, FCM) reste a brancher : ces abonnements sont
+   * L'envoi lui-même (Web Push, FCM) reste à brancher : ces abonnements sont
    * ce dont ce futur service aura besoin.
    */
   async subscribe(payload = {}, user) {
@@ -238,7 +238,7 @@ export const notificationService = {
     const keys = payload.keys && typeof payload.keys === 'object' ? payload.keys : null
     errors.throwIfAny('Abonnement invalide')
 
-    // Reabonner le meme terminal ne doit pas creer un doublon.
+    // Reabonner le même terminal ne doit pas créer un doublon.
     const existing = await notificationModel.findSubscription(user.id, endpoint)
     if (existing) return existing
 

@@ -4,7 +4,7 @@ import { goalService } from '../services/goal.service.js'
 
 /**
  * Lien de suivi famille : lecture seule, un seul enfant, sans mot de passe.
- * Le jeton porte lui-meme le perimetre (voir `authenticateFamilyLink`).
+ * Le jeton porte lui-même le périmètre (voir `authenticateFamilyLink`).
  */
 
 export async function createFamilyLink(req, res) {

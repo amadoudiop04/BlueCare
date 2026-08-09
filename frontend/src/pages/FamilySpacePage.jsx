@@ -17,10 +17,10 @@ import { useApi } from '@/hooks/useApi.js'
 import { monthLabel, percent } from '@/lib/format.js'
 
 /**
- * Espace famille : progression de l enfant, en lecture seule.
+ * Espace famille : progression de l'enfant, en lecture seule.
  *
- * La famille ne voit ni les observations detaillees des seances, ni les
- * donnees medicales — le serveur ne les lui renvoie pas, et cet ecran ne
+ * La famille ne voit ni les observations détaillées des séances, ni les
+ * données médicales — le serveur ne les lui renvoie pas, et cet écran ne
  * demande que ce a quoi elle a droit.
  */
 
@@ -61,7 +61,7 @@ function FamilySpacePage() {
 
   return (
     <>
-      <PageHeader crumb="Acces securise" title="Espace famille" />
+      <PageHeader crumb="Accès sécurisé" title="Espace famille" />
 
       <PageBody>
         <ErrorNotice error={error} onRetry={reload} />
@@ -102,8 +102,8 @@ function FamilyContent({ data, onExport, exporting }) {
           Progression de {child.firstName}
         </div>
         <div className="max-w-[540px] text-[13.5px] leading-relaxed text-onnavy-soft">
-          Periode du {progress.period.from} au {progress.period.to}. Les observations detaillees de
-          l equipe et les donnees medicales ne sont pas partagees.
+          Période du {progress.period.from} au {progress.period.to}. Les observations détaillées de
+          l'équipe et les données médicales ne sont pas partagees.
         </div>
       </Card>
 
@@ -116,7 +116,7 @@ function FamilyContent({ data, onExport, exporting }) {
           color="#1E5FD8"
         />
         <SummaryCard
-          label="Seances realisees"
+          label="Séances réalisées"
           value={String(progress.summary.sessionsCompleted)}
           detail={`${progress.summary.reports} compte${progress.summary.reports > 1 ? 's' : ''}-rendu${progress.summary.reports > 1 ? 's' : ''}`}
           bar={Math.min(100, progress.summary.sessionsCompleted * 5)}
@@ -126,7 +126,7 @@ function FamilyContent({ data, onExport, exporting }) {
 
       {progress.goals.length > 0 ? (
         <Card className="px-6 py-[22px]">
-          <CardHeader className="mb-4" title="Objectifs travailles" subtitle="Taux d avancement actuel" />
+          <CardHeader className="mb-4" title="Objectifs travailles" subtitle="Taux d'avancement actuel" />
           <div className="flex flex-col gap-3.5">
             {progress.goals.map((entry, index) => (
               <div key={entry.goal.id}>
@@ -147,25 +147,25 @@ function FamilyContent({ data, onExport, exporting }) {
       <Card className="px-6 py-[22px]">
         <CardHeader
           className="mb-[18px]"
-          title="Evolution sur 6 mois"
-          subtitle="Un point par seance evaluee"
+          title="Évolution sur 6 mois"
+          subtitle="Un point par séance évaluée"
           action={series.length > 0 ? <ChartLegend series={series} shape="line" /> : null}
         />
         <LineChart
           series={series}
           labels={labels}
-          emptyLabel="L evolution apparaitra apres les premieres seances"
+          emptyLabel="L'évolution apparaîtra après les premières séances"
         />
       </Card>
 
       <Card className="px-6 py-[22px]">
         <div className="mb-2 text-[15px] font-bold">Rapport de progression</div>
         <div className="mb-[18px] text-[13.5px] leading-relaxed text-muted-strong">
-          Le rapport PDF reprend les objectifs, l avancement et la presence sur la periode. Il ne
-          contient ni note interne, ni nom d autre enfant.
+          Le rapport PDF reprend les objectifs, l'avancement et la présence sur la période. Il ne
+          contient ni note interne, ni nom d'autre enfant.
         </div>
         <Button onClick={onExport} disabled={exporting}>
-          {exporting ? 'Generation…' : 'Telecharger le rapport PDF'}
+          {exporting ? 'Génération…' : 'Telecharger le rapport PDF'}
         </Button>
       </Card>
     </div>

@@ -6,16 +6,16 @@ import { readSessionToken } from '../utils/cookies.js'
 import { verifyFamilyLinkToken } from '../utils/jwt.js'
 
 /**
- * Verifie la session et attache l utilisateur a `req.user`.
+ * Vérifie la session et attache l'utilisateur a `req.user`.
  *
  * Le jeton arrive par le cookie `httpOnly` pose a la connexion — le navigateur
- * ne le stocke jamais dans un endroit lisible par JavaScript. L'en-tete
- * `Authorization: Bearer` reste accepte pour les clients qui n ont pas de
- * gestionnaire de cookies (tests, Postman, scripts) : c est le meme jeton
- * opaque, adosse a la meme ligne en base, revocable de la meme facon.
+ * ne le stocke jamais dans un endroit lisible par JavaScript. L'en-tête
+ * `Authorization: Bearer` reste accepte pour les clients qui n'ont pas de
+ * gestionnaire de cookies (tests, Postman, scripts) : c'est le même jeton
+ * opaque, adosse a la même ligne en base, revocable de la même façon.
  *
- * Le role et le perimetre sont relus en base a chaque requete : desactiver un
- * compte ou changer une affectation prend effet immediatement.
+ * Le rôle et le périmètre sont relus en base à chaque requête : désactiver un
+ * compte ou changer une affectation prend effet immédiatement.
  */
 
 export const authenticate = asyncHandler(async (req, res, next) => {
@@ -28,7 +28,7 @@ export const authenticate = asyncHandler(async (req, res, next) => {
   const user = await userModel.findById(session.userId)
 
   if (!user) throw ApiError.unauthorized('Compte introuvable')
-  if (user.status !== 'active') throw ApiError.forbidden('Compte desactive')
+  if (user.status !== 'active') throw ApiError.forbidden('Compte désactivé')
 
   req.user = user
   req.session = session
@@ -38,8 +38,8 @@ export const authenticate = asyncHandler(async (req, res, next) => {
 
 /**
  * Lien de suivi famille : jeton signe, sans mot de passe, valable pour un
- * seul enfant et en lecture seule. Il voyage dans l URL (envoye par e-mail ou
- * SMS), il est donc volontairement de courte duree et sans session associee.
+ * seul enfant et en lecture seule. Il voyage dans l URL (envoyé par e-mail ou
+ * SMS), il est donc volontairement de courte durée et sans session associée.
  */
 export const authenticateFamilyLink = asyncHandler(async (req, res, next) => {
   const token = req.params.token

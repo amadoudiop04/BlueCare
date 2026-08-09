@@ -16,7 +16,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 
 const router = Router()
 
-// Le detail d une seance contient les observations de l equipe : il reste interne.
+// Le détail d'une séance contient les observations de l'équipe : il reste interne.
 router.use(authenticate, authorize(...STAFF_ROLES))
 
 router.get('/', asyncHandler(listSessions))
@@ -28,7 +28,7 @@ router.patch('/:sessionId', canWrite, asyncHandler(updateSession))
 router.post('/:sessionId/cancel', canWrite, asyncHandler(cancelSession))
 router.delete('/:sessionId', canWrite, asyncHandler(deleteSession))
 
-// Le compte-rendu se depose sur la seance qu il documente.
+// Le compte-rendu se dépose sur la séance qu'il documente.
 router.post('/:sessionId/report', canWrite, asyncHandler(createReport))
 
 export default router

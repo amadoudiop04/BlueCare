@@ -9,7 +9,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 
 const router = Router()
 
-// Vue globale du centre : reservee a la direction.
+// Vue globale du centre : réservée a la direction.
 router.get('/', authenticate, authorize(...DIRECTION_ROLES), asyncHandler(getDashboard))
 
 export default router

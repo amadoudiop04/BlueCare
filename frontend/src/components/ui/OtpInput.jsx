@@ -3,11 +3,11 @@ import { useEffect, useRef } from 'react'
 import { cx } from '@/lib/ui.js'
 
 /**
- * Saisie d un code a 6 chiffres, une case par chiffre.
+ * Saisie d'un code à 6 chiffres, une case par chiffre.
  *
- * Details qui comptent a l usage : le collage d un code entier remplit toutes
- * les cases, la touche retour recule d une case quand la case est vide, et
- * `autocomplete="one-time-code"` laisse iOS et Android proposer le code recu.
+ * Détails qui comptent à l'usage : le collage d'un code entier remplit toutes
+ * les cases, la touche retour recule d'une case quand la case est vide, et
+ * `autocomplete="one-time-code"` laisse iOS et Android proposer le code reçu.
  */
 const LENGTH = 6
 
@@ -70,7 +70,7 @@ function OtpInput({ value, onChange, onComplete, disabled, autoFocus = true, inv
       {digits.map((digit, index) => (
         <input
           // Les cases sont des positions fixes, pas une liste reordonnable :
-          // l index est ici la cle stable.
+          // l'index est ici la clé stable.
           key={index}
           ref={(element) => {
             inputs.current[index] = element

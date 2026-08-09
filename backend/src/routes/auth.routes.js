@@ -26,24 +26,24 @@ const router = Router()
 
 /*
  * Routes ouvertes sans session.
- * `/mfa/verify` n'en fait pas exception : elle exige le jeton de defi remis
- * par `/login`, qui n'ouvre rien d autre et expire en quelques minutes.
+ * `/mfa/verify` n'en fait pas exception : elle exige le jeton de défi remis
+ * par `/login`, qui n'ouvre rien d'autre et expire en quelques minutes.
  */
 router.post('/login', asyncHandler(login))
 router.post('/mfa/verify', asyncHandler(verifyMfa))
 
 /*
- * Mot de passe oublie. Ces trois routes sont forcement ouvertes : une personne
+ * Mot de passe oublié. Ces trois routes sont forcement ouvertes : une personne
  * qui a perdu son mot de passe ne peut pas s'authentifier pour le redemander.
- * C'est le jeton du lien, envoye a l'adresse du compte, qui fait autorite —
+ * C'est le jeton du lien, envoyé a l'adresse du compte, qui fait autorite —
  * et le second facteur reste exige quand il est actif.
  */
 router.post('/password/forgot', asyncHandler(forgotPassword))
 router.get('/password/reset/:token', asyncHandler(checkResetToken))
 router.post('/password/reset/:token', asyncHandler(resetPassword))
 
-// La deconnexion supprime la session en base ET le cookie, meme si la session
-// a deja expire : elle ne doit jamais echouer sur un poste partage.
+// La déconnexion supprime la session en base ET le cookie, même si la session
+// a déjà expire : elle ne doit jamais échouer sur un poste partagé.
 router.post('/logout', asyncHandler(logout))
 
 router.get('/me', authenticate, asyncHandler(me))
@@ -59,7 +59,7 @@ router.get('/sessions', authenticate, asyncHandler(listSessions))
 router.delete('/sessions', authenticate, asyncHandler(revokeOtherSessions))
 router.delete('/sessions/:sessionId', authenticate, asyncHandler(revokeSession))
 
-// Enrolement du second facteur, sur son propre compte uniquement.
+// Enrôlement du second facteur, sur son propre compte uniquement.
 router.get('/mfa', authenticate, asyncHandler(getMfaStatus))
 router.post('/mfa/setup', authenticate, asyncHandler(startMfaEnrollment))
 router.post('/mfa/enable', authenticate, asyncHandler(confirmMfaEnrollment))

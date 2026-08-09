@@ -6,14 +6,14 @@ import { logger } from '../src/utils/logger.js'
 import { hashPassword } from '../src/utils/password.js'
 
 /**
- * Cree le tout premier compte de direction : `npm run create-admin`.
+ * Crée le tout premier compte de direction : `npm run create-admin`.
  *
  * Sans lui, une base fraiche est un cul-de-sac — les comptes se creent depuis
- * l application, mais il faut deja etre directeur pour y acceder. Ce script est
- * la seule porte d'entree, et il ne sert qu une fois.
+ * l'application, mais il faut déjà être directeur pour y acceder. Ce script est
+ * la seule porte d'entree, et il ne sert qu'une fois.
  *
- * Contrairement au seed de demonstration, il fonctionne en production : c'est
- * precisement la qu'on en a besoin. Il ne cree donc AUCUNE donnee fictive, et
+ * Contrairement au seed de démonstration, il fonctionne en production : c'est
+ * précisément là qu'on en a besoin. Il ne crée donc AUCUNE donnée fictive, et
  * refuse d'ecraser un compte existant.
  *
  * Les identifiants passent par l'environnement, jamais par la ligne de commande :
@@ -45,8 +45,8 @@ if (!DIRECTION_ROLES.includes(role)) {
   fail(`ADMIN_ROLE doit valoir ${DIRECTION_ROLES.join(' ou ')}.`)
 }
 
-// Ecrire dans le stockage en memoire n aurait aucun effet : le compte
-// disparaitrait a la fin de cette commande.
+// Écrire dans le stockage en mémoire n'aurait aucun effet : le compte
+// disparaîtrait a la fin de cette commande.
 if (!usesSupabase) {
   fail(
     'Aucune clef Supabase configuree : le compte serait perdu immediatement. ' +
@@ -67,7 +67,7 @@ try {
     passwordHash: await hashPassword(password),
   })
 
-  logger.info(`Compte cree sur « ${driverName} » : ${user.email} (${user.role}).`)
+  logger.info(`Compte crée sur « ${driverName} » : ${user.email} (${user.role}).`)
   logger.info('Connectez-vous, puis activez la double authentification depuis « Mon profil ».')
   process.exit(0)
 } catch (error) {

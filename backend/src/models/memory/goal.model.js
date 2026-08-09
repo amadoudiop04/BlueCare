@@ -1,7 +1,7 @@
 import { compareIsoDates } from '../../utils/dates.js'
 import { db, newId, nowIso, snapshot } from './store.js'
 
-/** Objectifs pedagogiques personnalises, rattaches a un enfant. */
+/** Objectifs pédagogiques personnalises, rattaches a un enfant. */
 
 function matches(goal, filter) {
   if (filter.childId && goal.childId !== filter.childId) return false
@@ -44,7 +44,7 @@ export const goalModel = {
       ...current,
       ...patch,
       id: current.id,
-      childId: current.childId, // un objectif ne change jamais d enfant
+      childId: current.childId, // un objectif ne change jamais d'enfant
       createdAt: current.createdAt,
       updatedAt: nowIso(),
     }

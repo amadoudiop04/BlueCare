@@ -3,7 +3,7 @@ import { after, before, describe, it } from 'node:test'
 
 import { PASSWORD, createChildDirect, createUserWithToken, startTestServer } from './helpers.js'
 
-/** Authentification JWT, controle d acces par role et perimetre des donnees. */
+/** Authentification JWT, contrôle d'accès par rôle et périmètre des données. */
 
 let context
 let api
@@ -191,7 +191,7 @@ describe('Connexion', () => {
       token: director.token,
     })
 
-    // La session existe toujours, mais le compte est relu a chaque requete.
+    // La session existe toujours, mais le compte est relu à chaque requête.
     const { status } = await api('/auth/me', { token: victim.token })
     assert.equal(status, 403)
   })
@@ -296,7 +296,7 @@ describe('Perimetre des donnees', () => {
     const { status } = await api(`/children/${coquelicot.id}/goals`, {
       method: 'POST',
       token: family.token,
-      body: { title: 'Objectif ecrit par la famille', domain: 'social' },
+      body: { title: 'Objectif écrit par la famille', domain: 'social' },
     })
 
     assert.equal(status, 403)
@@ -308,7 +308,7 @@ describe('Perimetre des donnees', () => {
 
     assert.equal(forNurse.body.data.referringDoctor.lastName, 'Dupont')
     assert.equal(forEducator.body.data.referringDoctor, null)
-    // Le handicap reste visible : l educateur en a besoin pour ses seances.
+    // Le handicap reste visible : l'éducateur en a besoin pour ses séances.
     assert.equal(forEducator.body.data.disability.type, 'autism')
   })
 })
@@ -328,7 +328,7 @@ describe('Lien de suivi famille', () => {
     assert.equal(shared.status, 200)
     assert.equal(shared.body.meta.child.id, coquelicot.id)
 
-    // Le meme jeton ne doit rien ouvrir d autre.
+    // Le même jeton ne doit rien ouvrir d'autre.
     const elsewhere = await api('/children', { token })
     assert.equal(elsewhere.status, 401)
   })
