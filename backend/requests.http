@@ -34,8 +34,7 @@ Content-Type: application/json
 }
 
 ###
-@token = {{login.response.body.$.meta.accessToken}}
-@refreshToken = {{login.response.body.$.meta.refreshToken}}
+@token = {{login.response.body.$.meta.sessionToken}}
 
 ### Connexion educateur (perimetre : Les Coquelicots)
 # @name loginEducator
@@ -48,7 +47,7 @@ Content-Type: application/json
 }
 
 ###
-@educatorToken = {{loginEducator.response.body.$.meta.accessToken}}
+@educatorToken = {{loginEducator.response.body.$.meta.sessionToken}}
 
 ### Connexion infirmiere (donnees medicales)
 # @name loginNurse
@@ -61,7 +60,7 @@ Content-Type: application/json
 }
 
 ###
-@nurseToken = {{loginNurse.response.body.$.meta.accessToken}}
+@nurseToken = {{loginNurse.response.body.$.meta.sessionToken}}
 
 ### Connexion famille (lecture seule, son enfant)
 # @name loginFamily
@@ -74,17 +73,11 @@ Content-Type: application/json
 }
 
 ###
-@familyToken = {{loginFamily.response.body.$.meta.accessToken}}
+@familyToken = {{loginFamily.response.body.$.meta.sessionToken}}
 
 ### Profil courant et perimetre
 GET {{baseUrl}}/auth/me
 Authorization: Bearer {{educatorToken}}
-
-### Renouveler l'access token
-POST {{baseUrl}}/auth/refresh
-Content-Type: application/json
-
-{ "refreshToken": "{{refreshToken}}" }
 
 ### Changer son mot de passe
 POST {{baseUrl}}/auth/password
@@ -94,6 +87,37 @@ Content-Type: application/json
 {
   "currentPassword": "Directrice2026!",
   "newPassword": "NouveauSecret2026!"
+}
+
+### -------------------------------------------------------------------------
+### 2 bis. Mot de passe oublie
+### -------------------------------------------------------------------------
+### Le jeton n'est PAS dans la reponse : il part par courriel. En developpement,
+### aucun fournisseur n'etant branche, le lien est ecrit dans les logs du
+### serveur (`npm run dev`) — le copier ici a la place de {{resetToken}}.
+
+### Demander un lien. Repond toujours 200, meme pour une adresse inconnue :
+### ce formulaire ne doit pas permettre de decouvrir qui a un compte.
+POST {{baseUrl}}/auth/password/forgot
+Content-Type: application/json
+
+{ "email": "directrice@papillonbleu.test" }
+
+###
+@resetToken = coller-ici-le-jeton-lu-dans-les-logs
+
+### Verifier le lien avant d'afficher un formulaire (valide ? code exige ?)
+GET {{baseUrl}}/auth/password/reset/{{resetToken}}
+
+### Choisir le nouveau mot de passe.
+### `code` est obligatoire si le compte a la double authentification active :
+### un acces a la boite mail ne doit pas suffire a prendre le compte.
+POST {{baseUrl}}/auth/password/reset/{{resetToken}}
+Content-Type: application/json
+
+{
+  "password": "NouveauSecret2026!",
+  "code": "123456"
 }
 
 ### -------------------------------------------------------------------------

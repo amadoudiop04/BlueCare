@@ -10,7 +10,7 @@ import { requireChildAccess } from './access.service.js'
 import { averageProgress } from './goal.service.js'
 
 /**
- * Series d'evolution destinees aux graphiques.
+ * Series d evolution destinees aux graphiques.
  *
  * Les points viennent des comptes-rendus de seance : chaque evaluation d'un
  * objectif produit un point date. On renvoie aussi une agregation mensuelle,
@@ -52,7 +52,7 @@ function trendOf(points, valueOf) {
 
 export const progressService = {
   /**
-   * Evolution d'un enfant sur N mois : une serie par objectif, plus une
+   * Evolution d un enfant sur N mois : une serie par objectif, plus une
    * serie d'humeur, toutes deux pretes a etre tracees.
    */
   async getChildProgress(childId, query = {}, user) {
@@ -141,7 +141,7 @@ export const progressService = {
     }
   },
 
-  /** Serie d'un seul objectif, pour un graphique isole. */
+  /** Serie d un seul objectif, pour un graphique isole. */
   async getGoalProgress(goalId, query = {}, user) {
     const goal = await goalModel.findById(goalId)
     if (!goal) throw ApiError.notFound('Objectif introuvable')

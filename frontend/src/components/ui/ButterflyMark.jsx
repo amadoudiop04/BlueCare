@@ -1,14 +1,17 @@
+import logo from '/logoPapillonBleu.png'
+
 /**
- * Logo du centre : deux ailes et un corps, composes en CSS.
- * La maquette le dessine avec des `border-radius` asymetriques plutot qu'avec
- * une image, ce qui le garde net a toutes les tailles et suit la couleur du texte.
+ * Logo du centre.
+ *
+ * L image porte ses propres couleurs et sa transparence : le fond colore
+ * n'est donc plus pose par defaut, contrairement au papillon dessine en CSS
+ * qu elle remplace. Les emplacements qui ont besoin d un cadre — un logo bleu
+ * sur un degrade bleu se lit mal — passent explicitement `background`.
+ *
+ * Sans rapport avec le papillon ASCII de l ecran de connexion, qui reste
+ * genere en Three.js (`AsciiButterfly.jsx`).
  */
-function ButterflyMark({ size = 38, radius = 11, background = '#1E5FD8', className }) {
-  const unit = size / 18 // la maquette dessine le papillon sur une base de 18px
-
-  const upperWing = { width: 6 * unit, height: 5.14 * unit, background: '#FFFFFF' }
-  const lowerWing = { width: 4.57 * unit, height: 4 * unit, background: 'rgba(255,255,255,0.78)' }
-
+function ButterflyMark({ size = 38, radius = 11, background, className }) {
   return (
     <div
       className={className}
@@ -16,49 +19,24 @@ function ButterflyMark({ size = 38, radius = 11, background = '#1E5FD8', classNa
         width: size,
         height: size,
         flex: `0 0 ${size}px`,
-        borderRadius: radius,
+        borderRadius: background ? radius : 0,
         background,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        // Un cadre colore a besoin d'air autour du motif ; sans cadre, l image
+        // occupe toute la place disponible.
+        padding: background ? size * 0.14 : 0,
       }}
-      aria-hidden="true"
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 0.72 * unit }}>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 0.4 * unit,
-            alignItems: 'flex-end',
-          }}
-        >
-          <div style={{ ...upperWing, borderRadius: '90% 40% 55% 20%', transform: 'rotate(-12deg)' }} />
-          <div style={{ ...lowerWing, borderRadius: '60% 20% 65% 80%', transform: 'rotate(-6deg)' }} />
-        </div>
-
-        <div
-          style={{
-            width: 0.57 * unit,
-            height: 7.14 * unit,
-            background: '#FFFFFF',
-            borderRadius: '40%',
-            marginTop: 0.86 * unit,
-          }}
-        />
-
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 0.4 * unit,
-            alignItems: 'flex-start',
-          }}
-        >
-          <div style={{ ...upperWing, borderRadius: '40% 90% 20% 55%', transform: 'rotate(12deg)' }} />
-          <div style={{ ...lowerWing, borderRadius: '20% 60% 80% 65%', transform: 'rotate(6deg)' }} />
-        </div>
-      </div>
+      <img
+        src={logo}
+        // Le nom « BlueCare » accompagne toujours le logo en toutes lettres :
+        // le decrire une seconde fois n'apporterait rien a un lecteur d'ecran.
+        alt=""
+        aria-hidden="true"
+        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+      />
     </div>
   )
 }

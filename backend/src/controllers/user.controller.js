@@ -1,3 +1,4 @@
+import { mfaService } from '../services/mfa.service.js'
 import { userService } from '../services/user.service.js'
 
 /** Gestion des comptes, reservee au directeur. */
@@ -25,4 +26,9 @@ export async function resetUserPassword(req, res) {
 
 export async function disableUser(req, res) {
   res.json({ status: 'ok', data: await userService.disable(req.params.userId, req.user) })
+}
+
+/** Telephone perdu : la direction retire le second facteur, l'agent le refait. */
+export async function resetUserMfa(req, res) {
+  res.json({ status: 'ok', data: await mfaService.resetFor(req.params.userId) })
 }

@@ -10,19 +10,23 @@ import {
   Field,
   Skeleton,
 } from '@/components/ui/primitives.jsx'
+import PasswordInput from '@/components/ui/PasswordInput.jsx'
+import AccountDangerZone from '@/features/auth/AccountDangerZone.jsx'
+import MfaCard from '@/features/auth/MfaCard.jsx'
+import SessionsCard from '@/features/auth/SessionsCard.jsx'
 import { changePassword } from '@/api/auth.api.js'
 import { fetchNotifications } from '@/api/tracking.api.js'
 import { useApi } from '@/hooks/useApi.js'
 import { useAuth } from '@/hooks/useAuth.js'
 import { formatDate, initials } from '@/lib/format.js'
 import { permissionsFor, roleLabel } from '@/lib/roles.js'
-import { cx, inputClass } from '@/lib/ui.js'
+import { cx } from '@/lib/ui.js'
 
 /**
- * Profil de l'utilisateur connecte.
+ * Profil de l utilisateur connecte.
  *
  * Les droits affiches sont deduits de la matrice appliquee par le serveur
- * (`lib/roles.js`) : l'ecran ne peut donc pas promettre un acces que l'API
+ * (`lib/roles.js`) : l ecran ne peut donc pas promettre un acces que l API
  * refuserait. Les blocs de la maquette sans equivalent cote backend
  * (terminaux connectes, preferences de notification persistees) ne sont pas
  * repris plutot que d'etre simules.
@@ -121,7 +125,10 @@ function ProfilePage() {
           </div>
 
           <div className="flex flex-col gap-[18px]">
+            <MfaCard />
             <PasswordCard />
+            <SessionsCard />
+            <AccountDangerZone />
 
             <Card className="px-6 py-[22px]">
               <CardHeader
@@ -200,25 +207,25 @@ function PasswordCard() {
 
       <form onSubmit={onSubmit} className="flex flex-col gap-3.5">
         <Field label="Mot de passe actuel">
-          <input
-            type="password"
+          <PasswordInput
             autoComplete="current-password"
             required
             value={currentPassword}
             onChange={(event) => setCurrentPassword(event.target.value)}
-            className={inputClass}
           />
         </Field>
 
-        <Field label="Nouveau mot de passe" error={state.error?.details?.newPassword?.[0]}>
-          <input
-            type="password"
+        <Field
+          label="Nouveau mot de passe"
+          hint={`${newPassword.length} / 10 caracteres minimum`}
+          error={state.error?.details?.newPassword?.[0]}
+        >
+          <PasswordInput
             autoComplete="new-password"
             required
             minLength={10}
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}
-            className={inputClass}
           />
         </Field>
 

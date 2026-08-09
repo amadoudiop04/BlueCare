@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 
 /**
- * Chargement d'une ressource distante.
+ * Chargement d une ressource distante.
  *
  *   const { data, error, loading, reload } = useApi(() => fetchChild(id), [id])
  *
- * `loading` est deduit, jamais pose : l'etat garde la cle de la requete qui
- * l'a produit, et tant qu'elle ne correspond pas a la cle courante on est en
+ * `loading` est deduit, jamais pose : l etat garde la cle de la requete qui
+ * l'a produit, et tant qu elle ne correspond pas a la cle courante on est en
  * chargement. Cela evite un `setState` synchrone dans l'effet — qui
  * declencherait un rendu en cascade a chaque changement de dependance.
  *
- * La reponse d'une requete annulee est ignoree : pas de mise a jour sur un
+ * La reponse d une requete annulee est ignoree : pas de mise a jour sur un
  * composant demonte, et pas de reponse tardive qui ecraserait une plus recente.
  */
 export function useApi(loader, deps = []) {
@@ -35,7 +35,7 @@ export function useApi(loader, deps = []) {
     return () => {
       cancelled = true
     }
-    // `loader` est recree a chaque rendu : c'est `key` qui decrit la requete.
+    // `loader` est recree a chaque rendu : c est `key` qui decrit la requete.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key])
 

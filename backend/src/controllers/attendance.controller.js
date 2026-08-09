@@ -1,6 +1,6 @@
 import { attendanceService } from '../services/attendance.service.js'
 
-/** Presences quotidiennes et alertes d'absences. */
+/** Presences quotidiennes et alertes d absences. */
 
 export async function getDailySheet(req, res) {
   res.json({ status: 'ok', data: await attendanceService.getDailySheet(req.query, req.user) })

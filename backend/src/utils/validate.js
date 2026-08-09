@@ -5,7 +5,7 @@ import { isIsoDate, isTime } from './dates.js'
  * Validation des donnees entrantes, sans dependance externe.
  *
  * Chaque lecteur (`readString`, `readDate`...) renvoie la valeur nettoyee,
- * ou `undefined` s'il a signale une erreur. On accumule toutes les erreurs
+ * ou `undefined` s il a signale une erreur. On accumule toutes les erreurs
  * avant de lancer, pour que le formulaire recoive l'ensemble des champs
  * fautifs en une seule reponse 400 :
  *
@@ -141,7 +141,7 @@ export function readInteger(value, field, errors, { required = false, min, max }
   return parsed
 }
 
-/** Liste de chaines courtes : points d'attention, groupes, horaires... */
+/** Liste de chaines courtes : points d attention, groupes, horaires... */
 export function readStringArray(value, field, errors, { required = false, max = 20, itemMax = 300 } = {}) {
   const list = readArray(value, field, errors, { required, max })
   if (!list) return undefined

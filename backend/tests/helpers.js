@@ -1,6 +1,6 @@
 import { createApp } from '../src/app.js'
 import { childModel } from '../src/models/child.model.js'
-import { resetStore } from '../src/models/store.js'
+import { resetStore } from '../src/models/memory/store.js'
 import { userModel } from '../src/models/user.model.js'
 import { hashPassword } from '../src/utils/password.js'
 
@@ -14,8 +14,10 @@ import { hashPassword } from '../src/utils/password.js'
 const PASSWORD = 'MotDePasse2026!'
 
 export async function startTestServer() {
+  // Les tests tournent sur le pilote memoire : ils ne demandent ni base ni
+  // reseau. `createApp` n'amorce plus rien, on repart simplement d un stock vide.
+  resetStore()
   const app = createApp()
-  resetStore() // on repart d'un stock vide, sans les donnees de demonstration
 
   const server = await new Promise((resolve) => {
     const instance = app.listen(0, () => resolve(instance))
@@ -23,12 +25,15 @@ export async function startTestServer() {
 
   const baseUrl = `http://127.0.0.1:${server.address().port}/api`
 
-  async function api(path, { method = 'GET', body, token, raw = false } = {}) {
+  async function api(path, { method = 'GET', body, token, headers, raw = false } = {}) {
     const response = await fetch(`${baseUrl}${path}`, {
       method,
       headers: {
         ...(body ? { 'Content-Type': 'application/json' } : {}),
+        // Les tests envoient le jeton de session en Bearer : `fetch` n a pas
+        // de gestionnaire de cookies, contrairement au navigateur.
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...headers,
       },
       body: body ? JSON.stringify(body) : undefined,
     })
@@ -43,7 +48,7 @@ export async function startTestServer() {
   return { server, baseUrl, api, close: () => server.close() }
 }
 
-/** Cree un compte et renvoie son jeton d'acces, pret a l'emploi. */
+/** Cree un compte et renvoie son jeton d acces, pret a l'emploi. */
 export async function createUserWithToken(api, { role, groups = [], childIds = [], email }) {
   const address = email ?? `${role}.${Math.random().toString(36).slice(2, 8)}@test.local`
 
@@ -62,7 +67,7 @@ export async function createUserWithToken(api, { role, groups = [], childIds = [
     body: { email: address, password: PASSWORD },
   })
 
-  return { email: address, password: PASSWORD, token: body.meta.accessToken, user: body.data.user }
+  return { email: address, password: PASSWORD, token: body.meta.sessionToken, user: body.data.user }
 }
 
 export const childPayload = (overrides = {}) => ({
@@ -84,7 +89,7 @@ export const childPayload = (overrides = {}) => ({
   ...overrides,
 })
 
-/** Cree un enfant sans passer par l'API : evite d'avoir besoin d'un directeur. */
+/** Cree un enfant sans passer par l API : evite d'avoir besoin d un directeur. */
 export async function createChildDirect(overrides = {}) {
   const { familyContacts, ...rest } = childPayload(overrides)
 

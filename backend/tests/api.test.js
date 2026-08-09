@@ -209,7 +209,7 @@ describe('Presences quotidiennes', () => {
 
     const alerts = await asEducator('/attendance/alerts')
     const entry = alerts.body.data.find((item) => item.child.id === child.id)
-    assert.ok(entry, "l'enfant doit apparaitre dans le tableau des alertes")
+    assert.ok(entry, "l enfant doit apparaitre dans le tableau des alertes")
     assert.equal(entry.summary.absent, 3)
   })
 

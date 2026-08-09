@@ -22,12 +22,12 @@ import { requireSessionAccess } from './session.service.js'
 
 /**
  * Comptes-rendus de seance : humeur, objectifs travailles, observations,
- * points d'attention.
+ * points d attention.
  *
  * Deposer un compte-rendu a deux effets de bord voulus :
  *  - la seance passe en `completed`
- *  - le taux d'avancement de chaque objectif evalue est mis a jour
- * C'est ce qui alimente les courbes d'evolution sans double saisie.
+ *  - le taux d avancement de chaque objectif evalue est mis a jour
+ * C est ce qui alimente les courbes d evolution sans double saisie.
  */
 
 const MOOD_KEYS = keysOf(MOODS)
@@ -72,7 +72,7 @@ function readHealthFlag(value, errors) {
   const nested = errors.nested('healthFlag')
   const flagged = readBoolean(value.flagged, 'flagged', nested) ?? false
   const description = readString(value.description, 'description', nested, {
-    // Signaler sans decrire ne sert a rien a l'infirmiere.
+    // Signaler sans decrire ne sert a rien a l infirmiere.
     required: flagged,
     max: 1000,
   })
@@ -81,7 +81,7 @@ function readHealthFlag(value, errors) {
   return { flagged, description: description ?? null }
 }
 
-/** Un compte-rendu ne peut evaluer que les objectifs de l'enfant concerne. */
+/** Un compte-rendu ne peut evaluer que les objectifs de l enfant concerne. */
 async function assertGoalsBelongToChild(goalProgress = [], childId) {
   if (goalProgress.length === 0) return
 
@@ -140,7 +140,7 @@ function normalizeReportPayload(payload = {}, { partial = false } = {}) {
   return compact(data)
 }
 
-/** Reporte sur les objectifs le taux d'avancement releve pendant la seance. */
+/** Reporte sur les objectifs le taux d avancement releve pendant la seance. */
 async function applyGoalProgress(goalProgress = [], childId) {
   const applied = []
 
@@ -161,7 +161,7 @@ async function applyGoalProgress(goalProgress = [], childId) {
 }
 
 export const reportService = {
-  /** Depot du compte-rendu d'une seance. Un seul par seance. */
+  /** Depot du compte-rendu d une seance. Un seul par seance. */
   async createForSession(sessionId, payload, user) {
     const session = await requireSessionAccess(user, sessionId, { write: true })
 

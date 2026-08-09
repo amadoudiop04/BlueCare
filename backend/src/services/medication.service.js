@@ -22,7 +22,7 @@ import { requireChildAccess, scopedChildIds } from './access.service.js'
 /**
  * Traitements et rappels de medicaments.
  *
- * Donnee medicale : les routes sont reservees a l'infirmiere et a la
+ * Donnee medicale : les routes sont reservees a l infirmiere et a la
  * direction. Chaque prise prevue est tracee, ce qui fait disparaitre le
  * rappel correspondant une fois le medicament donne.
  */
@@ -158,13 +158,13 @@ export const medicationService = {
     const medication = await requireMedication(medicationId)
     await requireChildAccess(user, medication.childId, { write: true })
 
-    // On desactive : l'historique des prises garde son sens.
+    // On desactive : l historique des prises garde son sens.
     return medicationModel.update(medicationId, { active: false })
   },
 
   /**
    * Prises attendues pour une journee, avec leur statut.
-   * C'est la source des rappels de medicaments du fil de notifications.
+   * C est la source des rappels de medicaments du fil de notifications.
    */
   async getDoses(query = {}, user) {
     const errors = createErrors()
@@ -276,5 +276,3 @@ export const medicationService = {
     return administrationModel.findAll(compact({ childId, from, to }))
   },
 }
-
-export { isScheduledOn }

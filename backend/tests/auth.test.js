@@ -2,9 +2,8 @@ import assert from 'node:assert/strict'
 import { after, before, describe, it } from 'node:test'
 
 import { PASSWORD, createChildDirect, createUserWithToken, startTestServer } from './helpers.js'
-import { signRefreshToken } from '../src/utils/jwt.js'
 
-/** Authentification JWT, controle d'acces par role et perimetre des donnees. */
+/** Authentification JWT, controle d acces par role et perimetre des donnees. */
 
 let context
 let api
@@ -37,19 +36,43 @@ before(async () => {
 after(() => context?.close())
 
 describe('Connexion', () => {
-  it('renvoie un access token et un refresh token', async () => {
-    const { status, body } = await api('/auth/login', {
+  it('ouvre une session et pose un cookie httpOnly', async () => {
+    const response = await api('/auth/login', {
       method: 'POST',
       body: { email: director.email, password: PASSWORD },
+      raw: true,
     })
+    const body = await response.json()
 
-    assert.equal(status, 200)
+    assert.equal(response.status, 200)
     assert.equal(body.data.user.role, 'director')
-    assert.ok(body.meta.accessToken)
-    assert.ok(body.meta.refreshToken)
-    assert.equal(body.meta.tokenType, 'Bearer')
+    assert.ok(body.meta.sessionToken)
+
+    const cookie = response.headers.get('set-cookie')
+    assert.ok(cookie, 'la reponse doit poser un cookie de session')
+    assert.match(cookie, /bluecare_session=/)
+    // Les trois attributs qui rendent le cookie inutilisable par un script
+    // ou par un autre site.
+    assert.match(cookie, /HttpOnly/i)
+    assert.match(cookie, /SameSite=Strict/i)
+    assert.match(cookie, /Path=\//i)
+
     // Le hachage ne doit jamais sortir du serveur.
     assert.equal(JSON.stringify(body).includes('passwordHash'), false)
+  })
+
+  it('authentifie a partir du seul cookie, sans en-tete Authorization', async () => {
+    const response = await api('/auth/login', {
+      method: 'POST',
+      body: { email: nurse.email, password: PASSWORD },
+      raw: true,
+    })
+    const cookie = response.headers.get('set-cookie').split(';')[0]
+
+    const { status, body } = await api('/auth/me', { headers: { Cookie: cookie } })
+
+    assert.equal(status, 200)
+    assert.equal(body.data.user.role, 'nurse')
   })
 
   it('refuse un mot de passe errone', async () => {
@@ -83,34 +106,74 @@ describe('Connexion', () => {
     assert.deepEqual(body.data.scope.groups, ['Les Coquelicots'])
   })
 
-  it('echange un refresh token contre un nouvel access token', async () => {
-    const login = await api('/auth/login', {
+  it('refuse un jeton bricole', async () => {
+    const { status } = await api('/auth/me', { token: 'pas-un-jeton-de-session' })
+    assert.equal(status, 401)
+  })
+
+  it('ferme la session a la deconnexion, cote serveur', async () => {
+    const account = await createUserWithToken(api, { role: 'educator' })
+
+    assert.equal((await api('/auth/me', { token: account.token })).status, 200)
+
+    const loggedOut = await api('/auth/logout', { method: 'POST', token: account.token })
+    assert.equal(loggedOut.status, 200)
+
+    // Le jeton n'est plus adosse a aucune ligne : il ne vaut plus rien.
+    assert.equal((await api('/auth/me', { token: account.token })).status, 401)
+  })
+
+  it('liste les appareils connectes et signale la session courante', async () => {
+    const account = await createUserWithToken(api, { role: 'educator' })
+    // Une seconde connexion simule un autre appareil.
+    await api('/auth/login', {
       method: 'POST',
-      body: { email: nurse.email, password: PASSWORD },
+      body: { email: account.email, password: PASSWORD },
     })
 
-    const { status, body } = await api('/auth/refresh', {
-      method: 'POST',
-      body: { refreshToken: login.body.meta.refreshToken },
-    })
+    const { status, body } = await api('/auth/sessions', { token: account.token })
 
     assert.equal(status, 200)
-    assert.ok(body.meta.accessToken)
-
-    const me = await api('/auth/me', { token: body.meta.accessToken })
-    assert.equal(me.status, 200)
+    assert.equal(body.data.length, 2)
+    assert.equal(body.data.filter((session) => session.current).length, 1)
+    // Le hachage du jeton ne doit jamais sortir.
+    assert.equal(JSON.stringify(body).includes('tokenHash'), false)
   })
 
-  it('refuse un refresh token utilise comme access token', async () => {
-    const refreshToken = signRefreshToken({ id: director.user.id })
-    const { status } = await api('/auth/me', { token: refreshToken })
+  it('deconnecte les autres appareils sans toucher au sien', async () => {
+    const account = await createUserWithToken(api, { role: 'educator' })
+    const other = await api('/auth/login', {
+      method: 'POST',
+      body: { email: account.email, password: PASSWORD },
+    })
+    const otherToken = other.body.meta.sessionToken
 
-    assert.equal(status, 401)
+    const revoked = await api('/auth/sessions', { method: 'DELETE', token: account.token })
+    assert.equal(revoked.status, 200)
+    assert.equal(revoked.body.data.revoked, 1)
+
+    assert.equal((await api('/auth/me', { token: account.token })).status, 200)
+    assert.equal((await api('/auth/me', { token: otherToken })).status, 401)
   })
 
-  it('refuse un jeton bricole', async () => {
-    const { status } = await api('/auth/me', { token: 'pas.un.jwt' })
-    assert.equal(status, 401)
+  it('ferme les autres sessions au changement de mot de passe', async () => {
+    const account = await createUserWithToken(api, { role: 'educator' })
+    const other = await api('/auth/login', {
+      method: 'POST',
+      body: { email: account.email, password: PASSWORD },
+    })
+
+    const changed = await api('/auth/password', {
+      method: 'POST',
+      token: account.token,
+      body: { currentPassword: PASSWORD, newPassword: 'NouveauSecret2026!' },
+    })
+
+    assert.equal(changed.status, 200)
+    assert.equal(changed.body.data.otherSessionsClosed, 1)
+    // La session qui a fait le changement reste ouverte, les autres tombent.
+    assert.equal((await api('/auth/me', { token: account.token })).status, 200)
+    assert.equal((await api('/auth/me', { token: other.body.meta.sessionToken })).status, 401)
   })
 
   it('protege les routes metier', async () => {
@@ -120,7 +183,7 @@ describe('Connexion', () => {
     }
   })
 
-  it('bloque un compte desactive', async () => {
+  it('bloque un Compte desactive', async () => {
     const victim = await createUserWithToken(api, { role: 'educator', groups: ['Les Bleuets'] })
 
     await api(`/users/${victim.user.id}`, {
@@ -128,12 +191,12 @@ describe('Connexion', () => {
       token: director.token,
     })
 
-    // Le jeton reste valide cryptographiquement, mais le compte est relu a chaque requete.
+    // La session existe toujours, mais le compte est relu a chaque requete.
     const { status } = await api('/auth/me', { token: victim.token })
     assert.equal(status, 403)
   })
 
-  it('change le mot de passe apres verification de l ancien', async () => {
+  it("change le mot de passe apres verification de l ancien", async () => {
     const user = await createUserWithToken(api, { role: 'educator' })
 
     const wrong = await api('/auth/password', {
@@ -175,7 +238,7 @@ describe('Connexion', () => {
   })
 })
 
-describe('Controle d acces par role', () => {
+describe("Controle d acces par role", () => {
   const cases = [
     { path: '/dashboard', allowed: ['director'], denied: ['educator', 'nurse', 'family'] },
     { path: '/users', allowed: ['director'], denied: ['educator', 'nurse', 'family'] },
@@ -239,13 +302,13 @@ describe('Perimetre des donnees', () => {
     assert.equal(status, 403)
   })
 
-  it('reserve les donnees medicales a l infirmiere et a la direction', async () => {
+  it("reserve les donnees medicales a l infirmiere et a la direction", async () => {
     const forNurse = await api(`/children/${coquelicot.id}`, { token: nurse.token })
     const forEducator = await api(`/children/${coquelicot.id}`, { token: educator.token })
 
     assert.equal(forNurse.body.data.referringDoctor.lastName, 'Dupont')
     assert.equal(forEducator.body.data.referringDoctor, null)
-    // Le handicap reste visible : l'educateur en a besoin pour ses seances.
+    // Le handicap reste visible : l educateur en a besoin pour ses seances.
     assert.equal(forEducator.body.data.disability.type, 'autism')
   })
 })
@@ -265,7 +328,7 @@ describe('Lien de suivi famille', () => {
     assert.equal(shared.status, 200)
     assert.equal(shared.body.meta.child.id, coquelicot.id)
 
-    // Le meme jeton ne doit rien ouvrir d'autre.
+    // Le meme jeton ne doit rien ouvrir d autre.
     const elsewhere = await api('/children', { token })
     assert.equal(elsewhere.status, 401)
   })

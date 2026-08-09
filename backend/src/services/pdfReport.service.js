@@ -15,7 +15,7 @@ import { progressService } from './progress.service.js'
  * sur le disque, donc rien a nettoyer ni a proteger apres coup.
  *
  * Ce rapport sort du centre : il ne contient aucune note interne, aucun nom
- * d'autre enfant, et pas de donnee medicale detaillee.
+ * d autre enfant, et pas de donnee medicale detaillee.
  */
 
 const COLORS = {
@@ -51,7 +51,7 @@ function keyValue(doc, key, value) {
   doc.font('Helvetica').fillColor(COLORS.ink).fontSize(10).text(String(value ?? '-'))
 }
 
-/** Barre de progression : un taux se lit plus vite qu'il ne se compte. */
+/** Barre de progression : un taux se lit plus vite qu il ne se compte. */
 function progressBar(doc, percent) {
   const width = 180
   const height = 8
@@ -77,7 +77,7 @@ function progressBar(doc, percent) {
   doc.x = MARGIN
 }
 
-/** Courbe d'evolution mensuelle, dessinee a la main : aucune dependance graphique. */
+/** Courbe d evolution mensuelle, dessinee a la main : aucune dependance graphique. */
 function sparkline(doc, monthly) {
   const points = monthly.filter((entry) => entry.average !== null)
   if (points.length < 2) return
@@ -141,7 +141,7 @@ export const pdfReportService = {
     const slug = `${child.lastName}-${child.firstName}`
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '') // retire les accents du nom de fichier
+      .replace(/[-]/g, '') // retire les accents du nom de fichier
       .replace(/[^a-z0-9]+/g, '-')
 
     return {
@@ -177,7 +177,7 @@ export const pdfReportService = {
     )
 
     // --- Identite ----------------------------------------------------------
-    heading(doc, "L'enfant")
+    heading(doc, "L enfant")
     keyValue(doc, 'Groupe', child.group)
     if (fullChild) {
       keyValue(doc, 'Age', `${ageInYears(fullChild.birthDate)} ans`)

@@ -1,33 +1,51 @@
 import { env } from '../config/env.js'
+import { DIRECTION_ROLES } from '../constants/roles.js'
 import { childModel } from '../models/child.model.js'
+import { reportModel } from '../models/report.model.js'
+import { sessionModel } from '../models/session.model.js'
 import { userModel, sanitizeUser } from '../models/user.model.js'
 import { ApiError } from '../utils/ApiError.js'
-import {
-  expiresAt,
-  signAccessToken,
-  signFamilyLinkToken,
-  signRefreshToken,
-  verifyRefreshToken,
-} from '../utils/jwt.js'
+import { expiresAt, signFamilyLinkToken, signMfaChallengeToken, verifyMfaChallengeToken } from '../utils/jwt.js'
 import { hashPassword, verifyPassword, wasteTime } from '../utils/password.js'
+import { logger } from '../utils/logger.js'
+import { sendPasswordResetMail } from '../utils/mailer.js'
+import { createSessionToken, hashSessionToken } from '../utils/sessionToken.js'
+import { createThrottle } from '../utils/throttle.js'
 import { createErrors, readEmail, readString } from '../utils/validate.js'
+import { isMfaRequiredFor, verifySecondFactor } from './mfa.service.js'
+import { sessionAuthService } from './session.auth.service.js'
 
-/** Connexion, renouvellement de jeton et liens de suivi famille. */
+/** Connexion, session, compte et liens de suivi famille. */
 
-function issueTokens(user) {
-  const accessToken = signAccessToken(user)
+const isDirectionRole = (role) => DIRECTION_ROLES.includes(role)
 
-  return {
-    accessToken,
-    refreshToken: signRefreshToken(user),
-    expiresAt: expiresAt(accessToken),
-    tokenType: 'Bearer',
-  }
+/*
+ * Quotas de la demande de reinitialisation.
+ *
+ * Par adresse, le seuil est bas : cinq liens en un quart d heure couvrent
+ * largement une personne qui s y reprend a plusieurs fois, et empechent
+ * d'inonder la boite d un collegue.
+ *
+ * Par origine, il est plus large : tout un centre peut partager la meme sortie
+ * internet, et une limite trop basse bloquerait des demandes legitimes. Il
+ * reste assez bas pour rendre penible un balayage de l annuaire.
+ */
+const RESET_WINDOW_MS = 15 * 60_000
+const resetByEmail = createThrottle({ max: 5, windowMs: RESET_WINDOW_MS })
+const resetByOrigin = createThrottle({ max: 60, windowMs: RESET_WINDOW_MS })
+
+/** Combien de comptes de direction actifs subsisteraient sans celui-ci. */
+async function countOtherActiveDirection(excludeId) {
+  const accounts = await Promise.all(
+    DIRECTION_ROLES.map((role) => userModel.findAll({ role, status: 'active' })),
+  )
+
+  return accounts.flat().filter((account) => account.id !== excludeId).length
 }
 
 /**
  * Le mot de passe doit resister a une attaque par dictionnaire : on impose
- * une longueur minimale plutot qu'une composition exotique, plus efficace
+ * une longueur minimale plutot qu une composition exotique, plus efficace
  * et moins pousse-a-la-faute pour les equipes.
  */
 export function assertPasswordPolicy(password, field, errors) {
@@ -46,11 +64,11 @@ export function assertPasswordPolicy(password, field, errors) {
 
 export const authService = {
   /**
-   * Connexion. Le message d'erreur est identique que l'e-mail soit inconnu
+   * Connexion. Le message d erreur est identique que l'e-mail soit inconnu
    * ou le mot de passe faux, et le temps de reponse est aligne : rien ne
    * permet de decouvrir quels comptes existent.
    */
-  async login({ email, password } = {}) {
+  async login({ email, password } = {}, request = {}) {
     const errors = createErrors()
     const normalizedEmail = readEmail(email, 'email', errors, { required: true })
     readString(password, 'password', errors, { required: true, max: 200 })
@@ -67,22 +85,63 @@ export const authService = {
     if (!passwordMatches) throw ApiError.unauthorized('Identifiants incorrects')
     if (user.status !== 'active') throw ApiError.forbidden('Compte desactive')
 
-    await userModel.update(user.id, { lastLoginAt: new Date().toISOString() })
+    /*
+     * Second facteur actif : aucune session n'est ouverte a ce stade, seulement
+     * un jeton de defi de courte duree. Le mot de passe seul ne donne rien.
+     */
+    if (user.totpEnabled) {
+      return {
+        mfaRequired: true,
+        challengeToken: signMfaChallengeToken(user),
+        recoveryAvailable: (user.recoveryCodes ?? []).length > 0,
+      }
+    }
 
-    return { user: sanitizeUser(user), ...issueTokens(user) }
+    return this.openSession(user, request)
   },
 
-  /** Echange un refresh token contre un nouvel access token. */
-  async refresh({ refreshToken } = {}) {
-    if (!refreshToken) throw ApiError.badRequest('Refresh token absent')
+  /**
+   * Seconde etape de la connexion : le code a usage unique.
+   * Le jeton de defi identifie le compte, le code prouve la possession.
+   */
+  async verifyMfa({ challengeToken, code } = {}, request = {}) {
+    if (!challengeToken) throw ApiError.badRequest('Jeton de verification absent')
 
-    const payload = verifyRefreshToken(refreshToken)
-    const user = await userModel.findById(payload.sub)
+    const errors = createErrors()
+    readString(code, 'code', errors, { required: true, min: 6, max: 10 })
+    errors.throwIfAny('Code invalide')
+
+    const payload = verifyMfaChallengeToken(challengeToken)
+    const user = await userModel.findByIdWithSecret(payload.sub)
 
     if (!user) throw ApiError.unauthorized('Compte introuvable')
     if (user.status !== 'active') throw ApiError.forbidden('Compte desactive')
 
-    return { user, ...issueTokens(user) }
+    await verifySecondFactor(user, code)
+
+    return this.openSession(user, request)
+  },
+
+  /** Ouvre la session et rend le jeton, a poser dans le cookie. */
+  async openSession(user, request = {}) {
+    const { token, session } = await sessionAuthService.open(user, request)
+    await userModel.update(user.id, { lastLoginAt: new Date().toISOString() })
+
+    return {
+      user: sanitizeUser(user),
+      token,
+      session,
+      // Le front sait ainsi qu il doit inviter a activer la 2FA.
+      mfaSetupRequired: isMfaRequiredFor(user.role) && !user.totpEnabled,
+    }
+  },
+
+  /** Ferme la session portee par ce jeton. Silencieux si elle n'existe plus. */
+  async logout(token) {
+    const session = await sessionAuthService.resolve(token)
+    if (session) await sessionAuthService.close(session.id)
+
+    return { loggedOut: true }
   },
 
   async me(user) {
@@ -95,12 +154,38 @@ export const authService = {
       user,
       scope: {
         childCount: scope.length,
-        groups: user.role === 'educator' ? (user.groups ?? []) : [...new Set(scope.map((c) => c.group))],
+        groups:
+          user.role === 'educator'
+            ? (user.groups ?? [])
+            : [...new Set(scope.map((child) => child.group))],
       },
     }
   },
 
-  async changePassword(user, { currentPassword, newPassword } = {}) {
+  listSessions: (user, session) => sessionAuthService.list(user.id, session?.id),
+
+  /** Deconnexion d un autre appareil, depuis la page profil. */
+  async revokeSession(user, sessionId, current) {
+    const sessions = await sessionAuthService.list(user.id, current?.id)
+    if (!sessions.some((entry) => entry.id === sessionId)) {
+      throw ApiError.notFound('Session introuvable')
+    }
+
+    await sessionAuthService.close(sessionId)
+    return { sessionId, revoked: true }
+  },
+
+  async revokeOtherSessions(user, current) {
+    const revoked = await sessionAuthService.closeOthers(user.id, current?.id)
+    return { revoked }
+  },
+
+  /**
+   * Changer de mot de passe ferme toutes les autres sessions : si le
+   * changement fait suite a un soupcon de compromission, laisser les autres
+   * appareils connectes viderait le geste de son sens.
+   */
+  async changePassword(user, session, { currentPassword, newPassword } = {}) {
     const errors = createErrors()
     readString(currentPassword, 'currentPassword', errors, { required: true, max: 200 })
     assertPasswordPolicy(newPassword, 'newPassword', errors)
@@ -115,8 +200,230 @@ export const authService = {
     }
 
     await userModel.update(user.id, { passwordHash: await hashPassword(newPassword) })
+    const revoked = await sessionAuthService.closeOthers(user.id, session?.id)
 
-    return { changed: true }
+    return { changed: true, otherSessionsClosed: revoked }
+  },
+
+  /**
+   * Demande de reinitialisation.
+   *
+   * La reponse est toujours la meme, que l'adresse existe ou non : sinon,
+   * ce formulaire deviendrait un moyen de decouvrir qui travaille au centre.
+   * Le temps de reponse est aligne pour la meme raison.
+   */
+  async requestPasswordReset({ email } = {}, request = {}) {
+    const errors = createErrors()
+    const normalizedEmail = readEmail(email, 'email', errors, { required: true })
+    errors.throwIfAny('Adresse invalide')
+
+    // Le quota s'applique avant toute lecture en base : il ne doit pas
+    // dependre de l'existence du compte, sinon il la revelerait.
+    // Les deux compteurs sont evalues, sans court-circuit : chacun doit
+    // enregistrer la tentative, meme si l'autre a deja refuse.
+    const emailAccepted = resetByEmail.accept(normalizedEmail)
+    const originAccepted = resetByOrigin.accept(request.ip ?? 'origine-inconnue')
+
+    if (!emailAccepted || !originAccepted) {
+      throw ApiError.tooManyRequests(
+        'Trop de demandes de reinitialisation. Reessayez dans quelques minutes.',
+      )
+    }
+
+    const user = await userModel.findByEmailWithSecret(normalizedEmail)
+
+    if (!user || user.status !== 'active') {
+      await wasteTime()
+      return { requested: true }
+    }
+
+    const token = createSessionToken()
+
+    // Un seul lien actif : en redemander un invalide le precedent.
+    await userModel.update(user.id, {
+      resetTokenHash: hashSessionToken(token),
+      resetExpiresAt: new Date(Date.now() + env.auth.resetTtlMinutes * 60_000).toISOString(),
+    })
+
+    await sendPasswordResetMail({
+      email: user.email,
+      firstName: user.firstName,
+      token,
+      mfaRequired: Boolean(user.totpEnabled),
+    }).catch((error) => {
+      // L'echec d'envoi ne doit pas reveler l'existence du compte : on le
+      // journalise, la reponse reste identique.
+      logger.error('Envoi du lien de reinitialisation impossible', error.message)
+    })
+
+    return { requested: true }
+  },
+
+  /** Retrouve le compte d'un lien, en verifiant qu'il est encore valable. */
+  async resolveResetToken(token) {
+    if (!token) return null
+
+    const user = await userModel.findByResetTokenHash(hashSessionToken(token))
+    if (!user) return null
+
+    if (!user.resetExpiresAt || new Date(user.resetExpiresAt).getTime() <= Date.now()) {
+      await userModel.update(user.id, { resetTokenHash: null, resetExpiresAt: null })
+      return null
+    }
+
+    return user
+  },
+
+  /** Ce que l'ecran de reinitialisation doit savoir avant d'afficher son formulaire. */
+  async describeResetToken(token) {
+    const user = await this.resolveResetToken(token)
+    if (!user) return { valid: false }
+
+    return {
+      valid: true,
+      // On ne renvoie ni le nom ni l'adresse : le lien peut avoir ete
+      // transfere ou intercepte, il ne doit rien apprendre sur le compte.
+      mfaRequired: Boolean(user.totpEnabled),
+    }
+  },
+
+  /**
+   * Reinitialisation effective.
+   *
+   * Le second facteur reste exige quand il est actif. Sans cela, l'acces a la
+   * boite mail suffirait a prendre le compte, ce qui viderait la double
+   * authentification de son sens — c'est precisement contre ce scenario
+   * qu'elle protege.
+   */
+  async resetPassword({ token, password, code } = {}) {
+    const errors = createErrors()
+    assertPasswordPolicy(password, 'password', errors)
+    errors.throwIfAny('Mot de passe invalide')
+
+    const user = await this.resolveResetToken(token)
+    if (!user) {
+      throw ApiError.badRequest('Ce lien est expire ou a deja ete utilise')
+    }
+
+    if (user.totpEnabled) {
+      const withCode = createErrors()
+      readString(code, 'code', withCode, { required: true, min: 6, max: 10 })
+      withCode.throwIfAny('Code de verification requis')
+
+      await verifySecondFactor(user, code)
+    }
+
+    await userModel.update(user.id, {
+      passwordHash: await hashPassword(password),
+      // Le lien ne sert qu'une fois.
+      resetTokenHash: null,
+      resetExpiresAt: null,
+    })
+
+    // Toutes les sessions tombent : si le compte etait compromis, changer le
+    // mot de passe sans deconnecter l'intrus ne servirait a rien.
+    const revoked = await sessionAuthService.closeAll(user.id)
+
+    return { reset: true, sessionsClosed: revoked }
+  },
+
+  /**
+   * Ce que la suppression du compte entrainerait, avant de la demander.
+   * Affiche dans la boite de confirmation : personne ne doit decouvrir apres
+   * coup que son nom restera attache a des comptes-rendus.
+   */
+  async describeAccountDeletion(user) {
+    const [reports, sessions, remainingAdmins] = await Promise.all([
+      reportModel.findAll({ authorId: user.id }),
+      sessionModel.findAll({ educatorId: user.id }),
+      isDirectionRole(user.role) ? countOtherActiveDirection(user.id) : Promise.resolve(1),
+    ])
+
+    const authored = reports.length + sessions.length
+
+    return {
+      authoredRecords: authored,
+      reports: reports.length,
+      sessions: sessions.length,
+      // Sans travail rattache, la ligne peut disparaitre entierement.
+      mode: authored === 0 ? 'erase' : 'anonymise',
+      lastAdministrator: remainingAdmins === 0,
+    }
+  },
+
+  /**
+   * Suppression de son propre compte.
+   *
+   * Deux issues, selon ce que le compte laisse derriere lui :
+   *
+   *   erase     — aucun compte-rendu ni seance a son nom : la ligne est
+   *               supprimee, il n'en reste rien.
+   *   anonymise — du travail lui est rattache. Les donnees personnelles sont
+   *               effacees (nom, e-mail, telephone, mot de passe, second
+   *               facteur), mais la ligne survit pour que les comptes-rendus
+   *               gardent un auteur identifiable. Supprimer purement casserait
+   *               la tracabilite d un dossier medical et pedagogique, ce qu'on
+   *               n a pas le droit de faire.
+   *
+   * Le mot de passe est exige, et le second facteur s il est actif : un jeton
+   * vole ne doit pas suffire a effacer un compte.
+   */
+  async deleteOwnAccount(user, { password, code } = {}) {
+    const errors = createErrors()
+    readString(password, 'password', errors, { required: true, max: 200 })
+    errors.throwIfAny('Suppression invalide')
+
+    const account = await userModel.findByIdWithSecret(user.id)
+    if (!(await verifyPassword(password, account.passwordHash))) {
+      throw ApiError.unauthorized('Mot de passe incorrect')
+    }
+
+    if (account.totpEnabled) {
+      const withCode = createErrors()
+      readString(code, 'code', withCode, { required: true, min: 6, max: 10 })
+      withCode.throwIfAny('Code de verification requis')
+
+      await verifySecondFactor(account, code)
+    }
+
+    const summary = await this.describeAccountDeletion(user)
+
+    // Un centre sans administrateur actif ne peut plus creer de comptes ni
+    // reinitialiser une double authentification : personne ne pourrait rouvrir.
+    if (summary.lastAdministrator) {
+      throw ApiError.conflict(
+        'Vous etes le dernier compte de direction actif. Nommez un remplacant avant de supprimer le votre.',
+      )
+    }
+
+    await sessionAuthService.closeAll(user.id)
+
+    if (summary.mode === 'erase') {
+      await userModel.remove(user.id)
+      return { deleted: true, mode: 'erase' }
+    }
+
+    await userModel.update(user.id, {
+      // `.invalid` est un domaine reserve : cette adresse ne peut jamais exister.
+      email: `supprime.${user.id}@compte-supprime.invalid`,
+      firstName: 'Compte',
+      lastName: 'supprime',
+      phone: null,
+      // Un hachage sans mot de passe correspondant : la connexion devient impossible.
+      passwordHash: await hashPassword(createSessionToken()),
+      status: 'disabled',
+      groups: [],
+      childIds: [],
+      totpEnabled: false,
+      totpSecret: null,
+      totpConfirmedAt: null,
+      totpLastStep: null,
+      recoveryCodes: [],
+      mfaFailedAttempts: 0,
+      mfaLockedUntil: null,
+    })
+
+    return { deleted: true, mode: 'anonymise', keptRecords: summary.authoredRecords }
   },
 
   /**
@@ -135,7 +442,6 @@ export const authService = {
       token,
       childId: child.id,
       expiresAt: expiresAt(token),
-      // Le front construit l'URL definitive ; on donne le chemin d'API.
       path: `/api/share/${token}/progress`,
     }
   },

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 
+import DeveloperCredit from '@/components/layout/DeveloperCredit.jsx'
 import ButterflyMark from '@/components/ui/ButterflyMark.jsx'
 import { useAuth } from '@/hooks/useAuth.js'
 import { initials } from '@/lib/format.js'
@@ -8,8 +10,17 @@ import { roleLabel } from '@/lib/roles.js'
 import { cx } from '@/lib/ui.js'
 
 function Sidebar({ badges = {} }) {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const items = navigationFor(user.role)
+  const [leaving, setLeaving] = useState(false)
+
+  const onLogout = async () => {
+    setLeaving(true)
+    // `logout` avale ses erreurs : sur un poste partage, se deconnecter doit
+    // aboutir meme si le reseau est tombe. Pas de `finally` pour reactiver le
+    // bouton, l'ecran de connexion remplace la barre dans la foulee.
+    await logout()
+  }
 
   return (
     <aside className="sticky top-0 flex h-screen max-h-screen w-[264px] flex-none flex-col self-start overflow-y-auto bg-navy pb-2">
@@ -66,6 +77,26 @@ function Sidebar({ badges = {} }) {
             <span className="font-mono">{roleLabel(user.role)}</span>
           </span>
         </NavLink>
+
+        {/*
+         * La deconnexion est a portee de main depuis n importe quel ecran.
+         * Sur les postes partages du centre, l'enfouir dans la page Profil
+         * revient a ce que personne ne se deconnecte.
+         */}
+        <button
+          type="button"
+          onClick={onLogout}
+          disabled={leaving}
+          className={cx(
+            'mt-1 flex w-full items-center gap-[11px] rounded-[9px] px-3 py-2.5 text-left text-[13.5px] font-medium',
+            'text-onnavy hover:bg-danger/25 hover:text-white disabled:opacity-60',
+          )}
+        >
+          <span className="inline-block w-4 font-mono text-[11px] opacity-70">{'<-'}</span>
+          <span className="flex-1">{leaving ? 'Deconnexion…' : 'Deconnexion'}</span>
+        </button>
+
+        <DeveloperCredit tone="light" className="mt-3 border-t border-white/[0.08] px-2 pt-3.5" />
       </div>
     </aside>
   )

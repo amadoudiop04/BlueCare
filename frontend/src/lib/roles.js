@@ -5,26 +5,21 @@ export const ROLE_LABELS = {
   nurse: 'Infirmiere',
   director: 'Directeur',
   family: 'Famille',
+  admin: 'Administrateur',
 }
 
-export const ROLE_COLORS = {
-  educator: '#1E5FD8',
-  nurse: '#14866B',
-  director: '#0C1E42',
-  family: '#6C9BF0',
-}
 
 export const roleLabel = (role) => ROLE_LABELS[role] ?? role
 
 export const canWrite = (role) => role !== 'family'
 
-export const canReadMedical = (role) => role === 'nurse' || role === 'director'
+export const canReadMedical = (role) => ['nurse', 'director', 'admin'].includes(role)
 
 /**
  * Droits affiches sur la page profil.
  * Deduits de la matrice appliquee par le backend (`middlewares/authorize.js`
- * et `services/access.service.js`), pour que l'ecran ne mente pas sur ce que
- * l'utilisateur peut reellement faire.
+ * et `services/access.service.js`), pour que l ecran ne mente pas sur ce que
+ * l utilisateur peut reellement faire.
  */
 export function permissionsFor(role) {
   const yes = (label) => ({ label, value: 'Autorise', granted: true })
@@ -58,6 +53,13 @@ export function permissionsFor(role) {
       { label: 'Rapport PDF', value: 'Telechargement', granted: true },
       no('Comptes-rendus detailles'),
       no('Donnees medicales'),
+    ],
+    admin: [
+      yes('Tous les ecrans et toutes les ecritures'),
+      yes('Toutes les fiches, sans restriction de groupe'),
+      yes('Donnees medicales et traitements'),
+      yes('Tableau de bord, exports et gestion des comptes'),
+      { label: 'Double authentification', value: 'Obligatoire', granted: true },
     ],
   }
 

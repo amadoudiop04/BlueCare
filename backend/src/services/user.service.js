@@ -141,7 +141,7 @@ export const userService = {
     return userModel.update(userId, { ...data, ...scope })
   },
 
-  /** Reinitialisation par le directeur : l'ancien mot de passe n'est pas demande. */
+  /** Reinitialisation par le directeur : l ancien mot de passe n est pas demande. */
   async resetPassword(userId, payload = {}) {
     await this.getById(userId)
 

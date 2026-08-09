@@ -22,7 +22,7 @@ router.use('/health', healthRoutes)
 router.use('/auth', authRoutes)
 router.use('/share', shareRoutes)
 
-// Chaque domaine metier pose ensuite ses propres regles d'acces.
+// Chaque domaine metier pose ensuite ses propres regles d acces.
 router.use('/reference', referenceRoutes)
 router.use('/users', userRoutes)
 router.use('/children', childRoutes)

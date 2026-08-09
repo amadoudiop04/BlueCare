@@ -1,21 +1,28 @@
 import { randomUUID } from 'node:crypto'
 
+import { activityModel } from './activity.model.js'
+import { attendanceModel } from './attendance.model.js'
+import { childModel } from './child.model.js'
+import { goalModel } from './goal.model.js'
+import { medicationModel } from './medication.model.js'
+import { reportModel } from './report.model.js'
+import { sessionModel } from './session.model.js'
+import { userModel } from './user.model.js'
 import { addDays, addMonths, isWeekend, today } from '../utils/dates.js'
 import { hashPasswordSync } from '../utils/password.js'
-import { attendanceKey, db, newId, nowIso } from './store.js'
 
 /**
  * Jeu de donnees de demonstration.
  *
- * Il n'existe qu'en developpement (voir `env.seedDemoData`) et sert a ouvrir
- * l'application sur des ecrans deja remplis : des fiches completes, un
- * historique de presences et deux situations qui declenchent des alertes.
+ * Il passe par les modeles, donc il alimente indifferemment le stockage en
+ * memoire ou Supabase — c est ce qui permet de peupler une vraie base avec
+ * `npm run seed`.
  *
- * Les dates sont calculees a partir du jour courant : les alertes restent
- * visibles quelle que soit la date a laquelle on lance le projet.
+ * Les dates sont calculees a partir du jour courant : les alertes et les
+ * courbes restent visibles quelle que soit la date de lancement.
  */
 
-/** Jours d'accueil (hors week-end) des sept dernieres semaines, du plus ancien au plus recent. */
+/** Jours d accueil (hors week-end) des sept dernieres semaines. */
 function openingDays(count = 35) {
   const days = []
 
@@ -48,7 +55,7 @@ const CHILDREN = [
     address: '12 rue des Lilas, Bobo-Dioulasso',
     disability: {
       type: 'autism',
-      details: "Trouble du spectre autistique, communication verbale limitee.",
+      details: 'Trouble du spectre autistique, communication verbale limitee.',
       recognizedAt: '2021-09-01',
       supportPlan: 'Pictogrammes PECS, temps calme apres le repas.',
     },
@@ -208,85 +215,23 @@ const CHILDREN = [
 ]
 
 /**
- * Statut de presence par enfant, en fonction du rang du jour depuis la fin
- * (`0` = dernier jour d'accueil). Deux situations sont volontairement
- * construites pour declencher le moteur d'alertes :
- *  - Malik enchaine 4 absences non justifiees -> absences consecutives + repetees
- *  - Sofia cumule 5 absences non justifiees dispersees -> absences repetees
- */
-const ATTENDANCE_RULES = {
-  lina: (fromEnd) => (fromEnd === 8 ? { status: 'excused', reason: 'Rendez-vous medical' } : { status: 'present' }),
-  malik: (fromEnd) =>
-    fromEnd < 4 ? { status: 'absent' } : { status: 'present' },
-  sofia: (fromEnd) =>
-    [1, 4, 7, 11, 15].includes(fromEnd) ? { status: 'absent' } : { status: 'present' },
-  adam: (fromEnd) =>
-    [3, 4].includes(fromEnd) ? { status: 'excused', reason: 'Varicelle' } : { status: 'present' },
-  elsa: (fromEnd) =>
-    [2, 6].includes(fromEnd)
-      ? { status: 'late', arrivalTime: '09:35', reason: null }
-      : { status: 'present' },
-}
-
-const ACTIVITIES = [
-  {
-    dayOffset: 3,
-    title: 'Atelier peinture aux doigts',
-    category: 'arts',
-    group: 'Les Coquelicots',
-    location: 'Salle bleue',
-    description:
-      "Grande fresque collective sur le theme de la savane. Lina a choisi les couleurs chaudes, Malik a peint l'arbre central et Elsa a signe la fresque en langue des signes.",
-    participants: ['lina', 'malik', 'elsa'],
-    media: [
-      { url: '/media/2026/fresque-savane-1.jpg', caption: 'La fresque terminee' },
-      { url: '/media/2026/fresque-savane-2.jpg', caption: 'Malik devant son arbre' },
-    ],
-  },
-  {
-    dayOffset: 9,
-    title: 'Sortie au jardin botanique',
-    category: 'outing',
-    group: 'Les Bleuets',
-    location: 'Jardin botanique municipal',
-    description:
-      'Parcours sensoriel adapte. Sofia a mene le groupe sur le chemin accessible et Adam a reconnu six plantes sur huit.',
-    participants: ['sofia', 'adam'],
-    media: [{ url: '/media/2026/jardin-botanique.jpg', caption: 'Pause sous le manguier' }],
-  },
-  {
-    dayOffset: 16,
-    title: 'Atelier cuisine : galettes de mil',
-    category: 'cooking',
-    group: null,
-    location: 'Cuisine pedagogique',
-    description:
-      "Preparation en binomes. Adam a dose la farine, Lina a petri la pate, Sofia a decore les galettes et Elsa a mis la table.",
-    participants: ['lina', 'sofia', 'adam', 'elsa'],
-    media: [
-      { url: '/media/2026/galettes-mil-1.jpg', caption: 'Le petrissage' },
-      { url: '/media/2026/galettes-mil-2.jpg', caption: 'Lina et Adam au four' },
-    ],
-  },
-  {
-    dayOffset: 24,
-    title: 'Eveil musical aux percussions',
-    category: 'music',
-    group: 'Les Coquelicots',
-    location: 'Salle de motricite',
-    description:
-      'Decouverte du djembe et du balafon. Malik a tenu le rythme sur tout le morceau, Elsa a suivi les vibrations au sol.',
-    participants: ['malik', 'elsa'],
-    media: [{ url: '/media/2026/eveil-musical.jpg', caption: 'Cercle de percussions' }],
-  },
-]
-
-/**
  * Comptes de demonstration, un par role.
  * Mots de passe en clair ici parce qu'ils ne servent qu'en developpement :
  * `SEED_DEMO_DATA=false` ou `NODE_ENV=production` empeche leur creation.
  */
 const USERS = [
+  {
+    // Compte de recette : perimetre complet, tous les ecrans, toutes les
+    // ecritures. La double authentification n est pas activee d'office pour
+    // qu une premiere connexion reste possible sans telephone ; l ecran
+    // « Mon profil » permet de l'activer et de tester le parcours complet.
+    key: 'admin',
+    email: 'admin@papillonbleu.test',
+    password: 'Admin2026!Test',
+    role: 'admin',
+    firstName: 'Compte',
+    lastName: 'Administrateur',
+  },
   {
     key: 'director',
     email: 'directrice@papillonbleu.test',
@@ -335,17 +280,15 @@ const USERS = [
 /** Objectifs suivis, avec la progression relevee seance apres seance. */
 const GOALS = [
   {
-    key: 'lina-communication',
     childKey: 'lina',
     title: 'Formuler une demande avec un pictogramme',
     domain: 'communication',
-    description: "Utiliser le classeur PECS pour demander un objet ou une activite.",
+    description: 'Utiliser le classeur PECS pour demander un objet ou une activite.',
     baseline: 'Prend la main de l adulte sans support visuel.',
     successCriteria: 'Trois demandes spontanees par seance, sans guidance.',
     progression: [15, 25, 30, 40, 45, 55, 60, 70, 75],
   },
   {
-    key: 'lina-social',
     childKey: 'lina',
     title: 'Rester en atelier collectif dix minutes',
     domain: 'social',
@@ -355,7 +298,6 @@ const GOALS = [
     progression: [10, 20, 25, 35, 40, 50, 55, 60, 65],
   },
   {
-    key: 'malik-language',
     childKey: 'malik',
     title: 'Produire des phrases de trois mots',
     domain: 'communication',
@@ -365,7 +307,6 @@ const GOALS = [
     progression: [20, 30, 35, 45, 50, 55, 65, 70, 80],
   },
   {
-    key: 'sofia-autonomy',
     childKey: 'sofia',
     title: 'Realiser seule les transferts fauteuil / table',
     domain: 'autonomy',
@@ -377,6 +318,79 @@ const GOALS = [
 ]
 
 const MOOD_CYCLE = ['good', 'neutral', 'very-good', 'good', 'difficult', 'good', 'very-good']
+
+/**
+ * Statut de presence par enfant, selon le rang du jour depuis la fin
+ * (`0` = dernier jour d accueil). Deux situations declenchent volontairement
+ * le moteur d alertes : Malik enchaine 4 absences non justifiees, Sofia en
+ * cumule 5 dispersees.
+ */
+const ATTENDANCE_RULES = {
+  lina: (fromEnd) =>
+    fromEnd === 8 ? { status: 'excused', reason: 'Rendez-vous medical' } : { status: 'present' },
+  malik: (fromEnd) => (fromEnd < 4 ? { status: 'absent' } : { status: 'present' }),
+  sofia: (fromEnd) =>
+    [1, 4, 7, 11, 15].includes(fromEnd) ? { status: 'absent' } : { status: 'present' },
+  adam: (fromEnd) =>
+    [3, 4].includes(fromEnd) ? { status: 'excused', reason: 'Varicelle' } : { status: 'present' },
+  elsa: (fromEnd) =>
+    [2, 6].includes(fromEnd)
+      ? { status: 'late', arrivalTime: '09:35' }
+      : { status: 'present' },
+}
+
+const ACTIVITIES = [
+  {
+    dayOffset: 3,
+    title: 'Atelier peinture aux doigts',
+    category: 'arts',
+    group: 'Les Coquelicots',
+    location: 'Salle bleue',
+    description:
+      "Grande fresque collective sur le theme de la savane. Lina a choisi les couleurs chaudes, Malik a peint l arbre central et Elsa a signe la fresque en langue des signes.",
+    participants: ['lina', 'malik', 'elsa'],
+    media: [
+      { url: '/media/2026/fresque-savane-1.jpg', caption: 'La fresque terminee' },
+      { url: '/media/2026/fresque-savane-2.jpg', caption: 'Malik devant son arbre' },
+    ],
+  },
+  {
+    dayOffset: 9,
+    title: 'Sortie au jardin botanique',
+    category: 'outing',
+    group: 'Les Bleuets',
+    location: 'Jardin botanique municipal',
+    description:
+      'Parcours sensoriel adapte. Sofia a mene le groupe sur le chemin accessible et Adam a reconnu six plantes sur huit.',
+    participants: ['sofia', 'adam'],
+    media: [{ url: '/media/2026/jardin-botanique.jpg', caption: 'Pause sous le manguier' }],
+  },
+  {
+    dayOffset: 16,
+    title: 'Atelier cuisine : galettes de mil',
+    category: 'cooking',
+    group: null,
+    location: 'Cuisine pedagogique',
+    description:
+      'Preparation en binomes. Adam a dose la farine, Lina a petri la pate, Sofia a decore les galettes et Elsa a mis la table.',
+    participants: ['lina', 'sofia', 'adam', 'elsa'],
+    media: [
+      { url: '/media/2026/galettes-mil-1.jpg', caption: 'Le petrissage' },
+      { url: '/media/2026/galettes-mil-2.jpg', caption: 'Lina et Adam au four' },
+    ],
+  },
+  {
+    dayOffset: 24,
+    title: 'Eveil musical aux percussions',
+    category: 'music',
+    group: 'Les Coquelicots',
+    location: 'Salle de motricite',
+    description:
+      'Decouverte du djembe et du balafon. Malik a tenu le rythme sur tout le morceau, Elsa a suivi les vibrations au sol.',
+    participants: ['malik', 'elsa'],
+    media: [{ url: '/media/2026/eveil-musical.jpg', caption: 'Cercle de percussions' }],
+  },
+]
 
 const MEDICATIONS = [
   {
@@ -395,42 +409,60 @@ const MEDICATIONS = [
     route: 'inhaled',
     schedule: { times: ['08:30', '16:00'], days: [] },
     prescribedBy: 'Dr Marc Ouedraogo',
-    instructions: "En cas d'effort ou de gene respiratoire.",
+    instructions: "En cas d effort ou de gene respiratoire.",
   },
 ]
 
-export function seedDemoData() {
-  // Idempotent : appeler `createApp()` plusieurs fois ne duplique pas les donnees.
-  if (db.children.size > 0) return { skipped: true }
+/**
+ * Cree le jeu de demonstration s il n'existe pas deja.
+ * Idempotent : relancer la commande ne duplique rien.
+ */
+export async function seedDemoData() {
+  const existing = await childModel.findAll({})
+  if (existing.length > 0) return { skipped: true, reason: 'des enfants existent deja' }
 
-  const timestamp = nowIso()
-  const idsByKey = new Map()
+  const childIds = new Map()
+  const userIds = new Map()
 
+  // 1. Les enfants d'abord : les comptes famille s y rattachent.
   for (const { key, ...data } of CHILDREN) {
-    const child = {
-      id: newId('chd'),
+    const child = await childModel.create({
       ...data,
       status: 'active',
       enrolledAt: addDays(today(), -400),
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    }
-
-    idsByKey.set(key, child.id)
-    db.children.set(child.id, child)
+    })
+    childIds.set(key, child.id)
   }
 
+  // 2. Les comptes : tout le reste reference leur identifiant.
+  for (const { key, password, childKeys = [], groups = [], ...data } of USERS) {
+    const user = await userModel.create({
+      ...data,
+      groups,
+      childIds: childKeys.map((childKey) => childIds.get(childKey)).filter(Boolean),
+      passwordHash: hashPasswordSync(password),
+      status: 'active',
+      phone: null,
+    })
+    userIds.set(key, user.id)
+  }
+
+  const educatorFor = (childKey) =>
+    ['sofia', 'adam'].includes(childKey)
+      ? userIds.get('educatorBleuets')
+      : userIds.get('educatorCoquelicots')
+
+  // 3. Presences.
   const days = openingDays()
 
-  for (const [key, rule] of Object.entries(ATTENDANCE_RULES)) {
-    const childId = idsByKey.get(key)
+  for (const [childKey, rule] of Object.entries(ATTENDANCE_RULES)) {
+    const childId = childIds.get(childKey)
 
-    days.forEach((date, index) => {
+    for (const [index, date] of days.entries()) {
       const fromEnd = days.length - 1 - index
       const { status, reason = null, arrivalTime = null } = rule(fromEnd)
 
-      const record = {
-        id: newId('att'),
+      await attendanceModel.upsert({
         childId,
         date,
         status,
@@ -438,120 +470,35 @@ export function seedDemoData() {
         departureTime: status === 'present' || status === 'late' ? '16:30' : null,
         reason,
         notes: null,
-        recordedBy: 'Educateur referent',
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      }
-
-      db.attendance.set(attendanceKey(childId, date), record)
-    })
-  }
-
-  for (const activity of ACTIVITIES) {
-    const id = newId('act')
-
-    db.activities.set(id, {
-      id,
-      title: activity.title,
-      description: activity.description,
-      category: activity.category,
-      date: addDays(today(), -activity.dayOffset),
-      group: activity.group,
-      location: activity.location,
-      participantIds: activity.participants.map((key) => idsByKey.get(key)),
-      media: activity.media.map((item) => ({ id: randomUUID(), ...item })),
-      createdBy: 'Educateur referent',
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    })
-  }
-
-  const userIdsByKey = seedUsers(idsByKey, timestamp)
-  seedPedagogy(idsByKey, userIdsByKey, timestamp)
-  seedMedications(idsByKey, userIdsByKey, timestamp)
-
-  return {
-    skipped: false,
-    users: db.users.size,
-    children: db.children.size,
-    attendance: db.attendance.size,
-    activities: db.activities.size,
-    goals: db.goals.size,
-    sessions: db.sessions.size,
-    reports: db.reports.size,
-    medications: db.medications.size,
-  }
-}
-
-/** Comptes de demonstration. Exporte a part pour que les tests s'en servent seuls. */
-export function seedUsers(childIdsByKey = new Map(), timestamp = nowIso()) {
-  const userIdsByKey = new Map()
-
-  for (const { key, password, childKeys = [], ...data } of USERS) {
-    const user = {
-      id: newId('usr'),
-      ...data,
-      groups: data.groups ?? [],
-      childIds: childKeys.map((childKey) => childIdsByKey.get(childKey)).filter(Boolean),
-      passwordHash: hashPasswordSync(password),
-      status: 'active',
-      phone: null,
-      lastLoginAt: null,
-      createdAt: timestamp,
-      updatedAt: timestamp,
+        recordedBy: educatorFor(childKey),
+      })
     }
-
-    userIdsByKey.set(key, user.id)
-    db.users.set(user.id, user)
   }
 
-  return userIdsByKey
-}
-
-/**
- * Objectifs, seances et comptes-rendus sur six mois.
- * Une seance toutes les trois semaines environ, avec un taux d'avancement qui
- * monte : les courbes d'evolution ont ainsi de quoi se tracer des le demarrage.
- */
-function seedPedagogy(childIdsByKey, userIdsByKey, timestamp) {
-  const educatorFor = (childKey) =>
-    ['sofia', 'adam'].includes(childKey)
-      ? userIdsByKey.get('educatorBleuets')
-      : userIdsByKey.get('educatorCoquelicots')
-
+  // 4. Objectifs, seances et comptes-rendus sur six mois.
   const start = addMonths(today(), -6)
 
-  for (const goalSpec of GOALS) {
-    const childId = childIdsByKey.get(goalSpec.childKey)
-    const educatorId = educatorFor(goalSpec.childKey)
-    const { progression, childKey, key, ...goalData } = goalSpec
+  for (const { childKey, progression, ...goalData } of GOALS) {
+    const childId = childIds.get(childKey)
+    const educatorId = educatorFor(childKey)
 
-    const goalId = newId('goa')
-    const currentProgress = progression.at(-1)
-
-    db.goals.set(goalId, {
-      id: goalId,
+    const goal = await goalModel.create({
       childId,
       ...goalData,
       startDate: start,
       targetDate: addMonths(today(), 3),
-      status: currentProgress >= 100 ? 'achieved' : 'active',
-      progress: currentProgress,
+      status: 'active',
+      progress: progression.at(-1),
       achievedAt: null,
-      createdBy: userIdsByKey.get('director'),
-      createdAt: timestamp,
-      updatedAt: timestamp,
+      createdBy: userIds.get('director'),
     })
 
     // Une seance tous les ~20 jours, la derniere il y a une semaine.
-    progression.forEach((progress, index) => {
+    for (const [index, progress] of progression.entries()) {
       const date = addDays(today(), -(progression.length - index) * 20 + 13)
-      if (date > today()) return
+      if (date > today()) continue
 
-      const sessionId = newId('ses')
-
-      db.sessions.set(sessionId, {
-        id: sessionId,
+      const session = await sessionModel.create({
         childId,
         educatorId,
         title: goalData.title,
@@ -561,18 +508,14 @@ function seedPedagogy(childIdsByKey, userIdsByKey, timestamp) {
         type: index % 3 === 0 ? 'group' : 'individual',
         location: 'Salle bleue',
         notes: null,
-        goalIds: [goalId],
+        goalIds: [goal.id],
         status: 'completed',
+        cancelReason: null,
         createdBy: educatorId,
-        createdAt: timestamp,
-        updatedAt: timestamp,
       })
 
-      const reportId = newId('rep')
-
-      db.reports.set(reportId, {
-        id: reportId,
-        sessionId,
+      await reportModel.create({
+        sessionId: session.id,
         childId,
         date,
         authorId: educatorId,
@@ -580,7 +523,7 @@ function seedPedagogy(childIdsByKey, userIdsByKey, timestamp) {
         moodComment: null,
         goalProgress: [
           {
-            goalId,
+            goalId: goal.id,
             progress,
             worked: true,
             comment:
@@ -595,21 +538,15 @@ function seedPedagogy(childIdsByKey, userIdsByKey, timestamp) {
         attentionPoints: index % 4 === 0 ? ['Fatigue en fin de seance'] : [],
         nextSteps: 'Reprendre le meme support la prochaine fois.',
         healthFlag: { flagged: false, description: null },
-        submittedAt: timestamp,
-        createdAt: timestamp,
-        updatedAt: timestamp,
+        submittedAt: new Date().toISOString(),
       })
-    })
+    }
   }
 
   // Une seance a venir : elle alimente les rappels de seances planifiees.
-  const linaId = childIdsByKey.get('lina')
-  const plannedId = newId('ses')
-
-  db.sessions.set(plannedId, {
-    id: plannedId,
-    childId: linaId,
-    educatorId: userIdsByKey.get('educatorCoquelicots'),
+  await sessionModel.create({
+    childId: childIds.get('lina'),
+    educatorId: userIds.get('educatorCoquelicots'),
     title: 'Atelier communication',
     date: addDays(today(), 1),
     startTime: '09:30',
@@ -619,26 +556,41 @@ function seedPedagogy(childIdsByKey, userIdsByKey, timestamp) {
     notes: null,
     goalIds: [],
     status: 'planned',
-    createdBy: userIdsByKey.get('educatorCoquelicots'),
-    createdAt: timestamp,
-    updatedAt: timestamp,
+    cancelReason: null,
+    createdBy: userIds.get('educatorCoquelicots'),
   })
-}
 
-function seedMedications(childIdsByKey, userIdsByKey, timestamp) {
+  // 5. Activites.
+  for (const activity of ACTIVITIES) {
+    await activityModel.create({
+      title: activity.title,
+      description: activity.description,
+      category: activity.category,
+      date: addDays(today(), -activity.dayOffset),
+      group: activity.group,
+      location: activity.location,
+      participantIds: activity.participants.map((key) => childIds.get(key)),
+      media: activity.media.map((item) => ({ id: randomUUID(), ...item })),
+      createdBy: userIds.get('educatorCoquelicots'),
+    })
+  }
+
+  // 6. Traitements.
   for (const { childKey, ...data } of MEDICATIONS) {
-    const id = newId('med')
-
-    db.medications.set(id, {
-      id,
-      childId: childIdsByKey.get(childKey),
+    await medicationModel.create({
+      childId: childIds.get(childKey),
       ...data,
       startDate: addDays(today(), -60),
       endDate: null,
       active: true,
-      createdBy: userIdsByKey.get('nurse'),
-      createdAt: timestamp,
-      updatedAt: timestamp,
+      createdBy: userIds.get('nurse'),
     })
+  }
+
+  return {
+    skipped: false,
+    children: childIds.size,
+    users: userIds.size,
+    days: days.length,
   }
 }

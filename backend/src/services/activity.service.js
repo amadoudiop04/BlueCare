@@ -21,8 +21,8 @@ import { assertCanWrite, requireChildAccess, scopedChildIds } from './access.ser
 /**
  * Activites du centre et galerie par enfant.
  *
- * Une activite est collective. Consultee depuis la fiche d'un enfant, elle
- * passe par `anonymizeActivity` : les autres participants n'y apparaissent
+ * Une activite est collective. Consultee depuis la fiche d un enfant, elle
+ * passe par `anonymizeActivity` : les autres participants n y apparaissent
  * que sous un alias, y compris dans les textes libres.
  */
 
@@ -128,7 +128,7 @@ async function normalizeActivityPayload(payload = {}, { partial = false } = {}) 
 /**
  * Charge une activite en verifiant le perimetre : il faut suivre au moins un
  * de ses participants. Sans ce controle, un educateur pourrait modifier
- * l'atelier d'un autre groupe en connaissant simplement son identifiant.
+ * l'atelier d un autre groupe en connaissant simplement son identifiant.
  */
 async function requireActivityAccess(activityId, user, { write = false } = {}) {
   const activity = await activityModel.findById(activityId)
@@ -224,8 +224,8 @@ export const activityService = {
   },
 
   /**
-   * Galerie d'un enfant, anonymisee.
-   * Seul l'enfant dont on ouvre la fiche est nomme ; les autres participants
+   * Galerie d un enfant, anonymisee.
+   * Seul l enfant dont on ouvre la fiche est nomme ; les autres participants
    * sont remplaces par un alias propre a chaque activite.
    */
   async getChildGallery(childId, query = {}, user) {

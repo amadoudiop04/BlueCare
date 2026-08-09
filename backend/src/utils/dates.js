@@ -92,7 +92,7 @@ export function isWeekend(isoDate) {
   return day === 0 || day === 6
 }
 
-/** `2026-08-05` -> `05/08/2026`, pour les messages d'alerte. */
+/** `2026-08-05` -> `05/08/2026`, pour les messages d alerte. */
 export function formatFrench(isoDate) {
   if (!isIsoDate(isoDate)) return ''
   const [year, month, day] = isoDate.split('-')

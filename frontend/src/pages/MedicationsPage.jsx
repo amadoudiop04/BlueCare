@@ -18,7 +18,7 @@ import { formatDate, initials, todayIso } from '@/lib/format.js'
 /**
  * Rappels de medicaments du jour.
  * Tracer une prise fait disparaitre le rappel correspondant du fil de
- * notifications : c'est le meme calcul cote serveur.
+ * notifications : c est le meme calcul cote serveur.
  */
 
 const STATUS_TONE = { given: 'success', refused: 'warn', missed: 'danger', pending: 'neutral' }
@@ -108,9 +108,21 @@ function SummaryTile({ label, value, tone = 'brand' }) {
   )
 }
 
+/** Les trois issues possibles d une prise, dans l'ordre du plus frequent. */
+const ACTIONS = [
+  { value: 'given', label: 'Administre', variant: 'primary' },
+  { value: 'refused', label: 'Refuse', variant: 'secondary' },
+  { value: 'missed', label: 'Non administre', variant: 'secondary' },
+]
+
 function DoseRow({ dose, date, onRecorded }) {
   const [saving, setSaving] = useState(null)
   const [error, setError] = useState(null)
+  // Une prise deja tracee ne montre ses boutons qu'a la demande : la correction
+  // reste possible, sans inviter a modifier un releve valide d un clic distrait.
+  const [correcting, setCorrecting] = useState(false)
+
+  const recorded = dose.status !== 'pending'
 
   const record = async (status) => {
     setSaving(status)
@@ -123,6 +135,7 @@ function DoseRow({ dose, date, onRecorded }) {
         status,
         ...(status === 'given' ? { givenAt: new Date().toTimeString().slice(0, 5) } : {}),
       })
+      setCorrecting(false)
       onRecorded()
     } catch (requestError) {
       setError(requestError)
@@ -154,21 +167,47 @@ function DoseRow({ dose, date, onRecorded }) {
 
       <Badge tone={STATUS_TONE[dose.status]}>{STATUS_LABEL[dose.status]}</Badge>
 
-      {dose.status === 'pending' ? (
-        <div className="flex gap-2">
-          <Button onClick={() => record('given')} disabled={saving !== null} className="px-3 py-2 text-xs">
-            {saving === 'given' ? '…' : 'Administre'}
-          </Button>
+      {!recorded || correcting ? (
+        <div className="flex flex-wrap gap-2">
+          {ACTIONS.map((action) => (
+            <Button
+              key={action.value}
+              variant={dose.status === action.value ? 'soft' : action.variant}
+              onClick={() => record(action.value)}
+              disabled={saving !== null}
+              className="px-3 py-2 text-xs"
+            >
+              {saving === action.value ? '…' : action.label}
+            </Button>
+          ))}
+
+          {correcting ? (
+            <Button
+              variant="ghost"
+              onClick={() => setCorrecting(false)}
+              disabled={saving !== null}
+              className="px-2 py-2 text-xs"
+            >
+              Annuler
+            </Button>
+          ) : null}
+        </div>
+      ) : (
+        <div className="flex items-center gap-3">
+          {dose.administration?.givenAt ? (
+            <span className="font-mono text-[11.5px] text-muted-light">
+              a {dose.administration.givenAt}
+            </span>
+          ) : null}
           <Button
             variant="secondary"
-            onClick={() => record('refused')}
-            disabled={saving !== null}
+            onClick={() => setCorrecting(true)}
             className="px-3 py-2 text-xs"
           >
-            Refuse
+            Corriger
           </Button>
         </div>
-      ) : null}
+      )}
     </div>
   )
 }

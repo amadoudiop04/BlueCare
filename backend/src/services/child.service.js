@@ -100,7 +100,7 @@ function readFamilyContacts(value, errors, { required }) {
 
   if (errors.count > 0) return undefined
 
-  // Un seul contact principal : a defaut d'indication, c'est le premier.
+  // Un seul contact principal : a defaut d'indication, c est le premier.
   const primaryIndex = contacts.findIndex((contact) => contact.isPrimary)
   return contacts.map((contact, index) => ({
     ...contact,
@@ -133,9 +133,9 @@ function readReferringDoctor(value, errors) {
 /**
  * Valide et normalise le corps de la requete.
  * En mode `partial` (PATCH), seuls les champs presents sont controles :
- * un champ absent n'est pas efface.
+ * un champ absent n est pas efface.
  */
-export function normalizeChildPayload(payload = {}, { partial = false } = {}) {
+function normalizeChildPayload(payload = {}, { partial = false } = {}) {
   if (payload === null || typeof payload !== 'object' || Array.isArray(payload)) {
     throw ApiError.badRequest('Corps de requete invalide')
   }
@@ -200,7 +200,7 @@ function withComputed(child) {
 }
 
 /** Recupere un enfant ou leve un 404 : mutualise entre les trois domaines. */
-export async function requireChild(childId) {
+async function requireChild(childId) {
   const child = await childModel.findById(childId)
   if (!child) throw ApiError.notFound('Enfant introuvable')
   return child
@@ -221,7 +221,7 @@ export const childService = {
       search: readString(query.search, 'search', errors, { max: 80 }),
       group: readString(query.group, 'group', errors, { max: 80 }),
       disabilityType: readEnum(query.disabilityType, DISABILITY_KEYS, 'disabilityType', errors),
-      // Le perimetre de l'appelant s'ajoute aux filtres demandes, il ne s'y substitue pas.
+      // Le perimetre de l'appelant s'ajoute aux filtres demandes, il ne s y substitue pas.
       ...scopeFilter(user),
     })
     errors.throwIfAny('Filtres invalides')
@@ -285,8 +285,8 @@ export const childService = {
   },
 
   /**
-   * Sortie d'un enfant : on archive au lieu de supprimer, pour conserver
-   * l'historique de presences et de suivi.
+   * Sortie d un enfant : on archive au lieu de supprimer, pour conserver
+   * l historique de presences et de suivi.
    */
   async archive(childId) {
     await requireChild(childId)
@@ -294,7 +294,7 @@ export const childService = {
   },
 
   /**
-   * Effacement definitif (droit a l'effacement) : la fiche, ses presences
+   * Effacement definitif (droit a l effacement) : la fiche, ses presences
    * et sa participation aux activites disparaissent. Irreversible.
    */
   async purge(childId) {

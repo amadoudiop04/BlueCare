@@ -95,7 +95,7 @@ export function Avatar({ children, color = '#1E5FD8', size = 34, radius = 10, cl
 
 /**
  * Barre de progression. `value` est en pourcentage ; la valeur est bornee pour
- * qu'une donnee aberrante ne deborde pas de la piste.
+ * qu une donnee aberrante ne deborde pas de la piste.
  */
 export function ProgressBar({ value = 0, color = '#1E5FD8', height = 6, animate = true }) {
   const width = Math.max(0, Math.min(100, Number(value) || 0))
@@ -131,7 +131,7 @@ export function Field({ label, hint, error, children }) {
   )
 }
 
-/** Bandeau d'erreur homogene, utilise par tous les ecrans. */
+/** Bandeau d erreur homogene, utilise par tous les ecrans. */
 export function ErrorNotice({ error, onRetry }) {
   if (!error) return null
 

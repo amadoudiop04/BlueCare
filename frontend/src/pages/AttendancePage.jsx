@@ -4,14 +4,18 @@ import PageHeader, { PageBody } from '@/components/layout/PageHeader.jsx'
 import {
   Avatar,
   Badge,
-  Button,
   Card,
   CardHeader,
   EmptyState,
   ErrorNotice,
   Skeleton,
 } from '@/components/ui/primitives.jsx'
-import { fetchAttendanceAlerts, fetchAttendanceSheet, recordAttendance } from '@/api/tracking.api.js'
+import {
+  deleteAttendance,
+  fetchAttendanceAlerts,
+  fetchAttendanceSheet,
+  recordAttendance,
+} from '@/api/tracking.api.js'
 import { useApi } from '@/hooks/useApi.js'
 import { formatDate, initials, todayIso, weekDays } from '@/lib/format.js'
 import { cx } from '@/lib/ui.js'
@@ -19,26 +23,23 @@ import { cx } from '@/lib/ui.js'
 /**
  * Presences de la semaine.
  *
- * L'API sert une journee a la fois (`GET /attendance?date=`) : la grille
- * hebdomadaire de la maquette est reconstituee en interrogeant les cinq jours
- * ouvres en parallele.
+ * L API sert une journee a la fois (`GET /attendance?date=`) : la grille
+ * hebdomadaire est reconstituee en interrogeant les cinq jours ouvres en
+ * parallele. Toute saisie est corrigeable — le serveur remplace la ligne du
+ * jour plutot que d'en creer une seconde.
  */
 
 const DAY_LABELS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven']
 
-const STATUS_COLOR = {
-  present: '#1E5FD8',
-  late: '#F0C98B',
-  absent: '#E7A9B5',
-  excused: '#B9CDF6',
-}
+const STATUSES = [
+  { value: 'present', label: 'Present', color: '#1E5FD8' },
+  { value: 'late', label: 'Retard', color: '#F0C98B' },
+  { value: 'absent', label: 'Absent', color: '#E7A9B5' },
+  { value: 'excused', label: 'Absence justifiee', color: '#B9CDF6' },
+]
 
-const STATUS_LABEL = {
-  present: 'Present',
-  late: 'Retard',
-  absent: 'Absent',
-  excused: 'Absence justifiee',
-}
+const STATUS_COLOR = Object.fromEntries(STATUSES.map((entry) => [entry.value, entry.color]))
+const STATUS_LABEL = Object.fromEntries(STATUSES.map((entry) => [entry.value, entry.label]))
 
 async function loadWeek(reference) {
   const days = weekDays(reference).filter((day) => day <= todayIso())
@@ -67,7 +68,8 @@ async function loadWeek(reference) {
   return {
     days,
     rows: [...rows.values()].map((row) => ({ ...row, alerts: alertByChild.get(row.child.id) ?? [] })),
-    todaySheet: sheets[days.indexOf(todayIso())] ?? null,
+    // La feuille de la date choisie, pas celle du jour : c est elle qu on pointe.
+    sheet: sheets[days.indexOf(reference)] ?? sheets.at(-1) ?? null,
   }
 }
 
@@ -103,22 +105,22 @@ function AttendancePage() {
           />
         ) : (
           <>
-            <TodaySheet sheet={data.todaySheet} onSaved={reload} />
+            <DailySheet sheet={data.sheet} onSaved={reload} />
 
             <Card className="overflow-hidden">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line-soft px-6 pb-4 pt-5">
                 <CardHeader
                   title={`Semaine du ${formatDate(data.days[0])}`}
-                  subtitle="Jours ouvres · les cases vides n ont pas encore ete saisies"
+                  subtitle="Cliquez une case pour pointer ou corriger ce jour"
                 />
                 <div className="flex flex-wrap gap-4 text-xs font-medium text-muted-strong">
-                  {Object.entries(STATUS_LABEL).map(([status, label]) => (
-                    <div key={status} className="flex items-center gap-[7px]">
+                  {STATUSES.map((entry) => (
+                    <div key={entry.value} className="flex items-center gap-[7px]">
                       <span
                         className="h-2.5 w-2.5 rounded-[3px]"
-                        style={{ background: STATUS_COLOR[status] }}
+                        style={{ background: entry.color }}
                       />
-                      {label}
+                      {entry.label}
                     </div>
                   ))}
                 </div>
@@ -152,17 +154,28 @@ function AttendancePage() {
 
                       {DAY_LABELS.map((label, index) => {
                         const record = row.days[index]
+                        const day = data.days[index]
+
                         return (
                           <div key={label} className="flex justify-center">
-                            <span
+                            <button
+                              type="button"
+                              // Cliquer une case selectionne son jour : le pointage
+                              // du haut bascule alors sur cette date.
+                              onClick={() => day && setReference(day)}
+                              disabled={!day}
                               title={
                                 record
-                                  ? `${STATUS_LABEL[record.status]}${record.reason ? ` · ${record.reason}` : ''}`
-                                  : 'Non saisi'
+                                  ? `${STATUS_LABEL[record.status]}${record.reason ? ` · ${record.reason}` : ''} — cliquer pour corriger`
+                                  : day
+                                    ? 'Non saisi — cliquer pour pointer ce jour'
+                                    : 'Jour a venir'
                               }
                               className={cx(
-                                'block h-[22px] w-[22px] rounded-[7px]',
+                                'block h-[22px] w-[22px] rounded-[7px] transition-transform',
+                                day && 'cursor-pointer hover:scale-110',
                                 !record && 'border border-dashed border-line-strong',
+                                day === reference && 'ring-2 ring-brand/40 ring-offset-1',
                               )}
                               style={record ? { background: STATUS_COLOR[record.status] } : undefined}
                             />
@@ -174,7 +187,7 @@ function AttendancePage() {
                         {row.alerts.length > 0 ? (
                           <Badge tone="danger">{row.alerts[0].count} absences</Badge>
                         ) : (
-                          <span className="text-xs text-line-strong">—</span>
+                          <span className="text-xs text-line-strong">—</span>
                         )}
                       </div>
                     </div>
@@ -189,26 +202,23 @@ function AttendancePage() {
   )
 }
 
-/** Pointage du jour : un bouton par statut, enregistre immediatement. */
-function TodaySheet({ sheet, onSaved }) {
+/**
+ * Pointage d une journee : tous les enfants du perimetre, saisis ou non.
+ * Le statut deja enregistre est mis en avant et reste modifiable — une erreur
+ * de pointage se corrige sur place, sans passer par un ecran d'edition.
+ */
+function DailySheet({ sheet, onSaved }) {
   const [saving, setSaving] = useState(null)
   const [error, setError] = useState(null)
 
   if (!sheet) return null
 
-  const mark = async (childId, status) => {
-    setSaving(`${childId}:${status}`)
+  const run = async (key, action) => {
+    setSaving(key)
     setError(null)
 
     try {
-      await recordAttendance({
-        childId,
-        date: sheet.date,
-        status,
-        // Le serveur exige ces champs selon le statut choisi.
-        ...(status === 'late' ? { arrivalTime: new Date().toTimeString().slice(0, 5) } : {}),
-        ...(status === 'excused' ? { reason: 'Absence signalee par la famille' } : {}),
-      })
+      await action()
       onSaved()
     } catch (requestError) {
       setError(requestError)
@@ -217,7 +227,21 @@ function TodaySheet({ sheet, onSaved }) {
     }
   }
 
-  const missing = sheet.entries.filter((entry) => !entry.record)
+  const mark = (childId, status) =>
+    run(`${childId}:${status}`, () =>
+      recordAttendance({
+        childId,
+        date: sheet.date,
+        status,
+        // Le serveur exige ces champs selon le statut choisi.
+        ...(status === 'late' ? { arrivalTime: new Date().toTimeString().slice(0, 5) } : {}),
+        ...(status === 'excused' ? { reason: 'Absence signalee par la famille' } : {}),
+      }),
+    )
+
+  const clear = (childId) => run(`${childId}:clear`, () => deleteAttendance(childId, sheet.date))
+
+  const missing = sheet.entries.filter((entry) => !entry.record).length
 
   return (
     <Card className="px-6 py-[22px]">
@@ -225,46 +249,83 @@ function TodaySheet({ sheet, onSaved }) {
         className="mb-4"
         title={`Pointage du ${formatDate(sheet.date)}`}
         subtitle={
-          missing.length === 0
-            ? 'Tous les enfants sont pointes.'
-            : `${missing.length} enfant${missing.length > 1 ? 's' : ''} sans saisie`
+          missing === 0
+            ? 'Feuille complete · cliquez un statut pour le corriger'
+            : `${missing} enfant${missing > 1 ? 's' : ''} sans saisie`
         }
       />
 
       <ErrorNotice error={error} />
 
-      {missing.length === 0 ? (
-        <div className="rounded-xl bg-success-bg px-4 py-3 text-[12.5px] font-semibold text-success">
-          Feuille complete pour aujourd hui.
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2.5">
-          {missing.map((entry) => (
+      <div className="flex flex-col gap-2.5">
+        {sheet.entries.map((entry) => {
+          const current = entry.record?.status ?? null
+
+          return (
             <div
               key={entry.child.id}
-              className="flex flex-wrap items-center gap-3 rounded-xl border border-line-soft px-4 py-3"
+              className={cx(
+                'flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3',
+                current ? 'border-line-soft' : 'border-dashed border-line-strong bg-[#FCFDFF]',
+              )}
             >
-              <Avatar>{initials(entry.child.firstName, entry.child.lastName)}</Avatar>
-              <div className="min-w-0 flex-1 truncate text-[13.5px] font-semibold">
-                {entry.child.firstName} {entry.child.lastName}
+              <Avatar color={current ? STATUS_COLOR[current] : '#8494AD'}>
+                {initials(entry.child.firstName, entry.child.lastName)}
+              </Avatar>
+
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[13.5px] font-semibold">
+                  {entry.child.firstName} {entry.child.lastName}
+                </div>
+                <div className="mt-0.5 text-[11.5px] text-muted">
+                  {current
+                    ? `${STATUS_LABEL[current]}${entry.record.arrivalTime ? ` · arrivee ${entry.record.arrivalTime}` : ''}${entry.record.reason ? ` · ${entry.record.reason}` : ''}`
+                    : 'Non saisi'}
+                </div>
               </div>
-              <div className="flex gap-2">
-                {['present', 'late', 'absent', 'excused'].map((status) => (
-                  <Button
-                    key={status}
-                    variant="soft"
+
+              <div className="flex flex-wrap gap-2">
+                {STATUSES.map((status) => {
+                  const active = current === status.value
+                  const key = `${entry.child.id}:${status.value}`
+
+                  return (
+                    <button
+                      key={status.value}
+                      type="button"
+                      disabled={saving !== null}
+                      onClick={() => mark(entry.child.id, status.value)}
+                      aria-pressed={active}
+                      className={cx(
+                        'cursor-pointer rounded-lg border px-3 py-2 text-xs font-semibold',
+                        'disabled:cursor-not-allowed disabled:opacity-55',
+                        active
+                          ? 'border-transparent text-white'
+                          : 'border-line bg-white text-muted-strong hover:border-brand hover:text-brand',
+                      )}
+                      style={active ? { background: status.color } : undefined}
+                    >
+                      {saving === key ? '…' : status.label}
+                    </button>
+                  )
+                })}
+
+                {current ? (
+                  <button
+                    type="button"
                     disabled={saving !== null}
-                    onClick={() => mark(entry.child.id, status)}
-                    className="px-3 py-2 text-xs"
+                    onClick={() => clear(entry.child.id)}
+                    title="Annuler la saisie de ce jour"
+                    className="cursor-pointer rounded-lg px-2 py-2 text-xs font-semibold text-muted hover:text-danger disabled:opacity-55"
                   >
-                    {saving === `${entry.child.id}:${status}` ? '…' : STATUS_LABEL[status]}
-                  </Button>
-                ))}
+                    {saving === `${entry.child.id}:clear` ? '…' : 'Effacer'}
+                  </button>
+                ) : null}
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          )
+        })}
+      </div>
     </Card>
   )
 }

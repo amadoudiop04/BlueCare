@@ -10,8 +10,8 @@ import * as THREE from 'three'
  *
  * Ecart avec la version maquette : celle-ci s'appuyait sur `window.THREE`
  * charge par un <script> et sur des globales React. Ici tout est importe,
- * l'animation s'arrete quand le composant disparait ou quand l'onglet passe
- * en arriere-plan, et l'effet est desactive si l'utilisateur a demande a
+ * l'animation s'arrete quand le composant disparait ou quand l onglet passe
+ * en arriere-plan, et l'effet est desactive si l utilisateur a demande a
  * reduire les animations.
  */
 
@@ -47,7 +47,7 @@ void main() {
 const CHARSET = ' .\'`^",:;Il!i~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$'
 const FONT = "'IBM Plex Mono', monospace"
 
-/** Dessine le papillon sur un canvas : c'est la source de la texture. */
+/** Dessine le papillon sur un canvas : c est la source de la texture. */
 function drawButterfly(canvas, color) {
   const ctx = canvas.getContext('2d')
   const { width: w, height: h } = canvas

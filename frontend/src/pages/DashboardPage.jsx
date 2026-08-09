@@ -65,7 +65,7 @@ async function loadDashboard(role) {
       .catch(() => []),
   ])
 
-  // La direction dispose d'un endpoint d'agregation ; les autres non.
+  // La direction dispose d un endpoint d'agregation ; les autres non.
   const overview = role === 'director' ? await fetchDashboard().catch(() => null) : null
   const sheet = await fetchAttendanceSheet({ date: today }).catch(() => null)
   const doses = role === 'nurse' || role === 'director'
@@ -153,7 +153,7 @@ function kpisFor(role, data) {
     },
   ]
 
-  // L'infirmiere n'a pas acces a la progression pedagogique agregee.
+  // L infirmiere n a pas acces a la progression pedagogique agregee.
   if (role === 'nurse') {
     kpis[1] = {
       label: 'Prises a tracer',

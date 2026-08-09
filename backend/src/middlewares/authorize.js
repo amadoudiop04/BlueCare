@@ -1,7 +1,7 @@
 import { ApiError } from '../utils/ApiError.js'
 
 /**
- * Controle d'acces par role (RBAC).
+ * Controle d acces par role (RBAC).
  *
  *   router.post('/', authenticate, authorize('director'), asyncHandler(createUser))
  *

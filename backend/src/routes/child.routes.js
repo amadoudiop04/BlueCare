@@ -1,5 +1,7 @@
 import { Router } from 'express'
 
+import { DIRECTION_ROLES, MEDICAL_ROLES, PEDAGOGY_ROLES, STAFF_ROLES } from '../constants/roles.js'
+
 import {
   getChildAttendance,
   getChildAttendanceAlerts,
@@ -33,16 +35,16 @@ const router = Router()
  */
 router.use(authenticate)
 
-const staff = authorize('educator', 'nurse', 'director')
-const pedagogy = authorize('educator', 'director')
-const medical = authorize('nurse', 'director')
+const staff = authorize(...STAFF_ROLES)
+const pedagogy = authorize(...PEDAGOGY_ROLES)
+const medical = authorize(...MEDICAL_ROLES)
 
 router.get('/', asyncHandler(listChildren))
-router.post('/', authorize('director'), asyncHandler(createChild))
+router.post('/', authorize(...DIRECTION_ROLES), asyncHandler(createChild))
 
 router.get('/:childId', asyncHandler(getChild))
 router.patch('/:childId', medical, asyncHandler(updateChild))
-router.delete('/:childId', authorize('director'), asyncHandler(deleteChild))
+router.delete('/:childId', authorize(...DIRECTION_ROLES), asyncHandler(deleteChild))
 
 // Presences
 router.get('/:childId/attendance', asyncHandler(getChildAttendance))

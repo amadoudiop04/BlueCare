@@ -1,7 +1,7 @@
 import { NOTIFICATION_TYPES, keysOf } from '../constants/domain.js'
 import { env } from '../config/env.js'
 import { childModel } from '../models/child.model.js'
-import { db } from '../models/store.js'
+import { notificationModel } from '../models/notification.model.js'
 import { reportModel } from '../models/report.model.js'
 import { sessionModel } from '../models/session.model.js'
 import { ApiError } from '../utils/ApiError.js'
@@ -15,15 +15,15 @@ import { reportService } from './report.service.js'
 /**
  * Fil de notifications (alertes push).
  *
- * Comme les alertes d'absence, les notifications sont CALCULEES a la demande
- * plutot que stockees : elles refletent toujours l'etat reel des donnees. Un
+ * Comme les alertes d absence, les notifications sont CALCULEES a la demande
+ * plutot que stockees : elles refletent toujours l etat reel des donnees. Un
  * medicament administre, un compte-rendu depose, et la notification disparait
  * d'elle-meme — sans tache de nettoyage.
  *
- * Seul l'acquittement est persiste (`db.notificationReads`), puisqu'il ne se
+ * Seul l'acquittement est persiste (`db.notificationReads`), puisqu il ne se
  * deduit d'aucune donnee metier.
  *
- * L'envoi effectif vers les terminaux (Web Push / FCM) n'est pas branche :
+ * L'envoi effectif vers les terminaux (Web Push / FCM) n est pas branche :
  * `subscribe` conserve les abonnements, `dispatch` reste a ecrire le jour ou
  * un fournisseur sera choisi.
  */
@@ -41,8 +41,6 @@ const AUDIENCE = Object.freeze({
 
 const childRef = (child) =>
   child ? { id: child.id, firstName: child.firstName, lastName: child.lastName, group: child.group } : null
-
-const readKey = (userId, notificationId) => `${userId}:${notificationId}`
 
 async function absenceNotifications(user) {
   const { items } = await attendanceService.listAlerts({}, user)
@@ -175,14 +173,16 @@ export const notificationService = {
       AUDIENCE[entry].includes(user.role),
     )
 
-    const built = await Promise.all(types.map((entry) => BUILDERS[entry](user)))
+    const built = (await Promise.all(types.map((entry) => BUILDERS[entry](user)))).flat()
+
+    // Un seul aller-retour pour savoir ce qui a deja ete acquitte.
+    const readIds = await notificationModel.readIdsFor(
+      user.id,
+      built.map((notification) => notification.id),
+    )
 
     const items = built
-      .flat()
-      .map((notification) => ({
-        ...notification,
-        read: db.notificationReads.has(readKey(user.id, notification.id)),
-      }))
+      .map((notification) => ({ ...notification, read: readIds.has(notification.id) }))
       .filter((notification) => !severity || notification.severity === severity)
       .filter((notification) => !unreadOnly || !notification.read)
       .sort(
@@ -212,14 +212,13 @@ export const notificationService = {
       throw ApiError.badRequest('Identifiant de notification invalide')
     }
 
-    db.notificationReads.add(readKey(user.id, notificationId))
+    await notificationModel.markRead(user.id, notificationId)
     return { notificationId, read: true }
   },
 
   async markAllAsRead(user) {
     const { items } = await this.list({}, user)
-
-    for (const item of items) db.notificationReads.add(readKey(user.id, item.id))
+    await notificationModel.markManyRead(user.id, items.map((item) => item.id))
 
     return { read: items.length }
   },
@@ -239,38 +238,26 @@ export const notificationService = {
     const keys = payload.keys && typeof payload.keys === 'object' ? payload.keys : null
     errors.throwIfAny('Abonnement invalide')
 
-    const existing = [...db.pushSubscriptions.values()].find(
-      (entry) => entry.endpoint === endpoint && entry.userId === user.id,
-    )
+    // Reabonner le meme terminal ne doit pas creer un doublon.
+    const existing = await notificationModel.findSubscription(user.id, endpoint)
     if (existing) return existing
 
-    const subscription = {
-      id: `sub_${db.pushSubscriptions.size + 1}_${Date.now()}`,
+    return notificationModel.createSubscription({
       userId: user.id,
       endpoint,
       platform: platform ?? 'web',
       keys,
-      createdAt: new Date().toISOString(),
-    }
-
-    db.pushSubscriptions.set(subscription.id, subscription)
-    return subscription
+    })
   },
 
   async unsubscribe(subscriptionId, user) {
-    const subscription = db.pushSubscriptions.get(subscriptionId)
+    const removed = await notificationModel.removeSubscription(user.id, subscriptionId)
+    if (!removed) throw ApiError.notFound('Abonnement introuvable')
 
-    if (!subscription || subscription.userId !== user.id) {
-      throw ApiError.notFound('Abonnement introuvable')
-    }
-
-    db.pushSubscriptions.delete(subscriptionId)
     return { subscriptionId, removed: true }
   },
 
   async listSubscriptions(user) {
-    return [...db.pushSubscriptions.values()].filter((entry) => entry.userId === user.id)
+    return notificationModel.listSubscriptions(user.id)
   },
 }
-
-export { AUDIENCE }

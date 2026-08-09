@@ -1,5 +1,7 @@
 import { Router } from 'express'
 
+import { STAFF_ROLES } from '../constants/roles.js'
+
 import {
   deleteAttendance,
   getDailySheet,
@@ -14,7 +16,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 const router = Router()
 
 // La feuille de presence est un outil d'equipe : les familles n'y ont pas acces.
-router.use(authenticate, authorize('educator', 'nurse', 'director'))
+router.use(authenticate, authorize(...STAFF_ROLES))
 
 // `/alerts` est declare avant toute route parametree pour ne pas etre capture.
 router.get('/alerts', asyncHandler(listAttendanceAlerts))

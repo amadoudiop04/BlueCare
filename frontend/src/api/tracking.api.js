@@ -7,10 +7,6 @@ export async function createSession(childId, payload) {
   return body.data
 }
 
-export async function fetchSession(sessionId) {
-  const body = await apiClient.get(`/sessions/${sessionId}`)
-  return body.data
-}
 
 export async function submitReport(sessionId, payload) {
   const body = await apiClient.post(`/sessions/${sessionId}/report`, payload)
@@ -32,6 +28,12 @@ export async function recordAttendance(payload) {
   return { record: body.data, alerts: body.meta.alerts }
 }
 
+/** Annule une saisie de presence (mauvais enfant, mauvais jour). */
+export async function deleteAttendance(childId, date) {
+  const body = await apiClient.delete(`/attendance/${childId}/${date}`)
+  return body.data
+}
+
 export async function fetchAttendanceAlerts(params) {
   const body = await apiClient.get(`/attendance/alerts${query(params)}`)
   return { items: body.data, ...body.meta }
@@ -42,10 +44,6 @@ export async function fetchNotifications(params) {
   return { items: body.data, summary: body.meta.summary }
 }
 
-export async function markNotificationRead(notificationId) {
-  const body = await apiClient.post(`/notifications/${encodeURIComponent(notificationId)}/read`)
-  return body.data
-}
 
 export async function fetchDashboard(params) {
   const body = await apiClient.get(`/dashboard${query(params)}`)

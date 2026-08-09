@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 
+import DeveloperCredit from '@/components/layout/DeveloperCredit.jsx'
 import ButterflyMark from '@/components/ui/ButterflyMark.jsx'
 import { ChartLegend, LineChart } from '@/components/ui/charts.jsx'
 import {
@@ -16,9 +17,9 @@ import { formatDate, monthLabel, percent } from '@/lib/format.js'
 /**
  * Consultation par lien securise, sans compte.
  *
- * Le jeton est dans l'URL : il porte lui-meme sa portee (un enfant, lecture
+ * Le jeton est dans l URL : il porte lui-meme sa portee (un enfant, lecture
  * seule) et expire au bout de sept jours. Aucun element de navigation vers le
- * reste de l'application n'est affiche ici.
+ * reste de l application n'est affiche ici.
  */
 
 const SERIES_COLORS = ['#1E5FD8', '#14866B', '#6C9BF0', '#C77A0A']
@@ -52,6 +53,8 @@ function SharedProgressPage() {
         ) : (
           <SharedContent data={data} />
         )}
+
+        <DeveloperCredit className="mt-8 text-center" />
       </main>
     </div>
   )

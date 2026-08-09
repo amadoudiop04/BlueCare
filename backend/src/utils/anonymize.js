@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto'
 
 /**
- * Anonymisation de la galerie d'activites.
+ * Anonymisation de la galerie d activites.
  *
- * Une activite est collective : la consulter depuis la fiche d'un enfant ne
- * doit pas reveler l'identite des autres enfants presents. Chaque participant
+ * Une activite est collective : la consulter depuis la fiche d un enfant ne
+ * doit pas reveler l identite des autres enfants presents. Chaque participant
  * est donc remplace par un alias, y compris dans les textes libres (titre,
  * description, legendes de photos) ou un educateur a pu ecrire des prenoms.
  */
@@ -12,9 +12,9 @@ import { createHash } from 'node:crypto'
 /**
  * Alias stable pour un enfant DANS une activite donnee.
  *
- * L'identifiant de l'activite entre dans le hachage : un meme enfant n'a pas
- * le meme alias d'une activite a l'autre. Sans cela, il suffirait de recouper
- * deux galeries pour re-identifier quelqu'un par elimination.
+ * L'identifiant de l'activite entre dans le hachage : un meme enfant n a pas
+ * le meme alias d une activite a l'autre. Sans cela, il suffirait de recouper
+ * deux galeries pour re-identifier quelqu un par elimination.
  */
 export function aliasFor(activityId, childId, salt) {
   const digest = createHash('sha256').update(`${salt}:${activityId}:${childId}`).digest('hex')
@@ -43,19 +43,19 @@ function namePatterns(child) {
 
 /**
  * Remplace dans un texte libre les noms des autres enfants par leur alias.
- * Limite connue : deux enfants homonymes recoivent l'alias du premier motif
+ * Limite connue : deux enfants homonymes recoivent l alias du premier motif
  * applique. Le texte reste anonyme, seule l'attribution peut etre imprecise.
  */
-export function scrubNames(text, replacements) {
+function scrubNames(text, replacements) {
   if (typeof text !== 'string' || text === '') return text
 
   return replacements.reduce((scrubbed, { pattern, alias }) => scrubbed.replace(pattern, alias), text)
 }
 
 /**
- * Projette une activite dans la galerie d'un enfant.
+ * Projette une activite dans la galerie d un enfant.
  *
- * L'enfant consulte (`subjectChildId`) garde son nom : l'educateur ouvre sa
+ * L enfant consulte (`subjectChildId`) garde son nom : l educateur ouvre sa
  * fiche, il le connait deja. Tous les autres sont anonymises. Les champs
  * internes (auteur de la saisie, notes pedagogiques) ne sont pas exposes.
  */

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import PageHeader, { HeaderSearch, PageBody } from '@/components/layout/PageHeader.jsx'
 import {
   Avatar,
+  Button,
   Card,
   EmptyState,
   ErrorNotice,
@@ -20,14 +21,14 @@ import { cx } from '@/lib/ui.js'
 /**
  * Liste des enfants accompagnes.
  *
- * La progression affichee sur chaque carte vient d'un unique appel a `/goals`
+ * La progression affichee sur chaque carte vient d un unique appel a `/goals`
  * (tous les objectifs du perimetre), regroupe cote client. Interroger
  * `/children/:id/goals` par carte ferait une requete par enfant.
  */
 
-async function loadChildren() {
+async function loadChildren(status) {
   const [{ items }, goals, reference] = await Promise.all([
-    fetchChildren({ pageSize: 100 }),
+    fetchChildren({ pageSize: 100, status }),
     fetchGoals().catch(() => []),
     fetchReference().catch(() => null),
   ])
@@ -58,7 +59,10 @@ async function loadChildren() {
 function ChildrenPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { data, error, loading, reload } = useApi(loadChildren, [])
+  // `active` par defaut : les fiches archivees ne polluent pas la liste, mais
+  // restent atteignables — sans ce filtre, archiver reviendrait a perdre l enfant.
+  const [status, setStatus] = useState('active')
+  const { data, error, loading, reload } = useApi(() => loadChildren(status), [status])
 
   const [search, setSearch] = useState('')
   const [group, setGroup] = useState(null)
@@ -82,6 +86,12 @@ function ChildrenPage() {
         crumb="Gestion des enfants"
         title="Enfants accompagnes"
         search={<HeaderSearch value={search} onChange={setSearch} />}
+        action={
+          // La creation d une fiche appartient a la direction.
+          ['director', 'admin'].includes(user.role) ? (
+            <Button onClick={() => navigate('/enfants/nouveau')}>+ Nouvel enfant</Button>
+          ) : null
+        }
       />
 
       <PageBody>
@@ -96,6 +106,16 @@ function ChildrenPage() {
               {entry}
             </FilterChip>
           ))}
+
+          <span className="mx-1 h-5 w-px bg-line" aria-hidden="true" />
+
+          <FilterChip
+            active={status === 'archived'}
+            onClick={() => setStatus(status === 'archived' ? 'active' : 'archived')}
+          >
+            Archives
+          </FilterChip>
+
           <div className="flex-1" />
           <span className="text-[12.5px] text-muted">
             {loading ? '…' : `${visible.length} enfant${visible.length > 1 ? 's' : ''}`}
@@ -111,11 +131,13 @@ function ChildrenPage() {
           </div>
         ) : visible.length === 0 ? (
           <EmptyState
-            title="Aucun enfant a afficher"
+            title={status === 'archived' ? 'Aucune fiche archivee' : 'Aucun enfant a afficher'}
             description={
-              search || group
-                ? 'Aucun enfant ne correspond a ce filtre.'
-                : "Votre perimetre ne contient aucun enfant pour l'instant."
+              status === 'archived'
+                ? 'Les fiches des enfants sortis du centre apparaitront ici.'
+                : search || group
+                  ? 'Aucun enfant ne correspond a ce filtre.'
+                  : "Votre perimetre ne contient aucun enfant pour l instant."
             }
           />
         ) : (
@@ -183,6 +205,11 @@ function ChildCard({ child, disabilityLabel, onOpen, index }) {
       </div>
 
       <div className="flex flex-wrap gap-1.5">
+        {child.status === 'archived' ? (
+          <span className="rounded-md bg-canvas px-2.5 py-1 text-[11px] font-semibold text-muted">
+            Archivee
+          </span>
+        ) : null}
         <span className="rounded-md bg-brand-50 px-2.5 py-1 text-[11px] font-semibold text-brand-dark">
           {child.group}
         </span>

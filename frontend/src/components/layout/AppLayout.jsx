@@ -3,9 +3,9 @@ import { Outlet } from 'react-router-dom'
 import Sidebar from '@/components/layout/Sidebar.jsx'
 
 /**
- * Structure de l'application connectee : barre laterale fixe, contenu a droite.
+ * Structure de l application connectee : barre laterale fixe, contenu a droite.
  * Chaque page pose son propre en-tete via <PageHeader>, parce que le titre,
- * le fil d'ariane et l'action principale dependent de l'ecran.
+ * le fil d'ariane et l'action principale dependent de l ecran.
  */
 function AppLayout({ badges }) {
   return (

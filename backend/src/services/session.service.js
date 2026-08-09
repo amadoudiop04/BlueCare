@@ -36,7 +36,7 @@ async function readGoalIds(value, childId, errors) {
   const missing = ids.filter((id) => !goals.some((goal) => goal.id === id))
   if (missing.length > 0) errors.add('goalIds', `Objectifs introuvables : ${missing.join(', ')}`)
 
-  // Un objectif appartient a un enfant : on ne travaille pas celui d'un autre.
+  // Un objectif appartient a un enfant : on ne travaille pas celui d un autre.
   const foreign = goals.filter((goal) => goal.childId !== childId)
   if (foreign.length > 0) {
     errors.add('goalIds', 'Certains objectifs appartiennent a un autre enfant')
@@ -83,7 +83,7 @@ async function normalizeSessionPayload(payload = {}, { partial = false, childId 
   }
 
   if (data.startTime && data.endTime && data.endTime < data.startTime) {
-    errors.add('endTime', "L'heure de fin precede l'heure de debut")
+    errors.add('endTime', "L heure de fin precede l heure de debut")
   }
   if (data.status === 'completed' && data.date && data.date > today()) {
     errors.add('status', 'Une seance a venir ne peut pas etre marquee realisee')
@@ -193,7 +193,7 @@ export const sessionService = {
     return { sessionId }
   },
 
-  /** Historique complet des seances d'un enfant, comptes-rendus inclus. */
+  /** Historique complet des seances d un enfant, comptes-rendus inclus. */
   async getChildHistory(childId, query = {}, user) {
     const child = await requireChildAccess(user, childId)
 

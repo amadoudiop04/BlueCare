@@ -2,7 +2,7 @@ import { ABSENCE_STATUSES } from '../constants/domain.js'
 import { addDays, compareIsoDates, daysBetween, formatFrench, today } from './dates.js'
 
 /**
- * Moteur d'alertes sur les absences repetees.
+ * Moteur d alertes sur les absences repetees.
  *
  * Fonction pure : elle recoit des enregistrements de presence et rend des
  * alertes. Aucune alerte n'est stockee en base — elles sont recalculees a
@@ -10,9 +10,9 @@ import { addDays, compareIsoDates, daysBetween, formatFrench, today } from './da
  * corrige une saisie apres coup.
  *
  * Deux regles :
- *  - `consecutive-absences`  : l'enfant enchaine les absences (justifiees ou non),
- *                              signe d'une rupture d'accueil a traiter vite.
- *  - `repeated-absences`     : trop d'absences NON justifiees sur une fenetre
+ *  - `consecutive-absences`  : l enfant enchaine les absences (justifiees ou non),
+ *                              signe d une rupture d accueil a traiter vite.
+ *  - `repeated-absences`     : trop d absences NON justifiees sur une fenetre
  *                              glissante, meme si elles sont dispersees.
  */
 
@@ -24,7 +24,7 @@ const byDateAsc = (a, b) => compareIsoDates(a.date, b.date)
 const severityFor = (count, threshold) => (count >= threshold * 2 ? 'critical' : 'warning')
 
 /**
- * Serie d'absences en fin d'historique, c'est-a-dire celle qui est encore
+ * Serie d absences en fin d'historique, c'est-a-dire celle qui est encore
  * en cours. Une serie ancienne, deja suivie et cloturee, n'a plus a alerter.
  */
 function trailingAbsenceStreak(sortedRecords) {
@@ -65,7 +65,7 @@ export function evaluateAttendanceAlerts(records = [], options = {}) {
       since: streak[0].date,
       dates: streak.map((record) => record.date),
       message:
-        `Absent sur les ${streak.length} derniers jours d'accueil enregistres, ` +
+        `Absent sur les ${streak.length} derniers jours d accueil enregistres, ` +
         `depuis le ${formatFrench(streak[0].date)} (seuil : ${consecutiveThreshold}).`,
     })
   }
@@ -94,7 +94,7 @@ export function evaluateAttendanceAlerts(records = [], options = {}) {
   return alerts
 }
 
-/** Compteurs affiches sur la fiche de l'enfant, a cote de son historique. */
+/** Compteurs affiches sur la fiche de l enfant, a cote de son historique. */
 export function summarizeAttendance(records = []) {
   const counters = { present: 0, late: 0, absent: 0, excused: 0 }
 

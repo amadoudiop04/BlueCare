@@ -17,7 +17,7 @@ import { useApi } from '@/hooks/useApi.js'
 import { monthLabel, percent } from '@/lib/format.js'
 
 /**
- * Espace famille : progression de l'enfant, en lecture seule.
+ * Espace famille : progression de l enfant, en lecture seule.
  *
  * La famille ne voit ni les observations detaillees des seances, ni les
  * donnees medicales — le serveur ne les lui renvoie pas, et cet ecran ne

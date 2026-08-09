@@ -14,6 +14,7 @@ import {
   ProgressBar,
   Skeleton,
 } from '@/components/ui/primitives.jsx'
+import ChildDangerZone from '@/features/children/ChildDangerZone.jsx'
 import { apiClient } from '@/api/client.js'
 import {
   fetchChild,
@@ -80,7 +81,7 @@ function ChildFilePage() {
       const blob = await response.blob()
       const url = URL.createObjectURL(blob)
 
-      // Le PDF part avec un en-tete d'authentification : il faut passer par un
+      // Le PDF part avec un en-tete d authentification : il faut passer par un
       // blob plutot que par un simple lien, qui n'emporterait pas le jeton.
       const link = document.createElement('a')
       link.href = url
@@ -133,6 +134,18 @@ function ChildFilePage() {
               <GoalsCard goals={data.goals} />
               <EvolutionCard progress={data.progress} />
               <SessionsCard sessions={data.sessions.items} canWrite={canWrite(user.role)} />
+
+              {['director', 'admin'].includes(user.role) ? (
+                <ChildDangerZone
+                  child={data.child}
+                  counts={{
+                    goals: data.goals.items.length,
+                    sessions: data.sessions.items.length,
+                    medications: data.medications?.length ?? 0,
+                  }}
+                  onArchived={reload}
+                />
+              ) : null}
             </div>
           </div>
         ) : null}

@@ -1,5 +1,7 @@
 import { Router } from 'express'
 
+import { STAFF_ROLES } from '../constants/roles.js'
+
 import {
   listNotifications,
   listPushSubscriptions,
@@ -15,7 +17,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 const router = Router()
 
 // Le fil est filtre par role dans le service : chacun ne voit que ce qui le concerne.
-router.use(authenticate, authorize('educator', 'nurse', 'director'))
+router.use(authenticate, authorize(...STAFF_ROLES))
 
 router.get('/', asyncHandler(listNotifications))
 router.post('/read', asyncHandler(markAllNotificationsRead))

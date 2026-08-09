@@ -51,7 +51,7 @@ describe('Tableau de bord', () => {
     assert.equal(body.data.attendance.today.present, 1)
     assert.equal(body.data.progress.averageProgress, 40)
     assert.equal(body.data.progress.activeGoals, 1)
-    // La seance passee n'a pas de compte-rendu : elle doit remonter en attente.
+    // La seance passee n a pas de compte-rendu : elle doit remonter en attente.
     assert.ok(body.data.pendingReports.total >= 1)
   })
 })
@@ -128,7 +128,7 @@ describe('Notifications', () => {
 
     const types = (response) => new Set(response.body.data.map((item) => item.type))
 
-    // Les rappels de medicaments sont medicaux : l'educateur ne les voit pas.
+    // Les rappels de medicaments sont medicaux : l educateur ne les voit pas.
     assert.equal(types(forEducator).has('medication-reminder'), false)
     assert.equal(types(forNurse).has('report-pending'), false)
   })
@@ -145,7 +145,7 @@ describe('Notifications', () => {
       token: educator.token,
       body: {
         mood: 'difficult',
-        observations: 'Seance ecourtee, l enfant se plaint de maux de ventre repetes.',
+        observations: "Seance ecourtee, l enfant se plaint de maux de ventre repetes.",
         healthFlag: { flagged: true, description: 'Douleurs abdominales a surveiller.' },
       },
     })

@@ -12,7 +12,7 @@ import { averageProgress } from './goal.service.js'
 import { reportService } from './report.service.js'
 
 /**
- * Vue globale pour la direction : ce qui se passe aujourd'hui, ce qui derape,
+ * Vue globale pour la direction : ce qui se passe aujourd hui, ce qui derape,
  * ce qui attend une action.
  *
  * Tout est recalcule a la demande a partir des memes services que les ecrans

@@ -15,8 +15,8 @@ import { requireChildAccess, scopedChildIds } from './access.service.js'
 /**
  * Objectifs pedagogiques personnalises.
  *
- * `progress` (0-100) est le taux d'avancement affiche. Il se met a jour de
- * deux facons : a la main sur l'objectif, ou automatiquement a chaque
+ * `progress` (0-100) est le taux d avancement affiche. Il se met a jour de
+ * deux facons : a la main sur l objectif, ou automatiquement a chaque
  * compte-rendu de seance qui evalue cet objectif (voir `report.service.js`).
  */
 
@@ -82,14 +82,14 @@ function reconcileStatusAndProgress(data, current = {}) {
     return { ...data, status: 'achieved', achievedAt: today() }
   }
   if (data.status && data.status !== 'achieved' && current.status === 'achieved') {
-    // Reouverture d'un objectif : on efface la date d'atteinte.
+    // Reouverture d un objectif : on efface la date d'atteinte.
     return { ...data, achievedAt: null, progress: progress === 100 ? 99 : progress }
   }
 
   return data
 }
 
-export async function requireGoalAccess(user, goalId, { write = false } = {}) {
+async function requireGoalAccess(user, goalId, { write = false } = {}) {
   const goal = await goalModel.findById(goalId)
   if (!goal) throw ApiError.notFound('Objectif introuvable')
 

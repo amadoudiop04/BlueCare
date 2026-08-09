@@ -26,14 +26,10 @@ export function initials(firstName = '', lastName = '') {
   return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || '??'
 }
 
-export function fullName(person) {
-  if (!person) return ''
-  return `${person.firstName ?? ''} ${person.lastName ?? ''}`.trim()
-}
 
 export const percent = (value) => (value === null || value === undefined ? '—' : `${Math.round(value)}%`)
 
-/** Couleur d'une barre de progression selon le niveau atteint. */
+/** Couleur d une barre de progression selon le niveau atteint. */
 export function progressTone(value = 0) {
   if (value > 70) return { bar: '#14866B', avatar: '#14866B' }
   if (value > 45) return { bar: '#1E5FD8', avatar: '#1E5FD8' }

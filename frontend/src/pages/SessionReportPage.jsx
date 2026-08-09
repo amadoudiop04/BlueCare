@@ -19,11 +19,11 @@ import { formatDate, initials, percent, todayIso } from '@/lib/format.js'
 import { cx, inputClass } from '@/lib/ui.js'
 
 /**
- * Saisie d'un compte-rendu de seance.
+ * Saisie d un compte-rendu de seance.
  *
  * Le formulaire de la maquette suppose une seance deja creee. Ici on enchaine
  * les deux en une soumission : creation de la seance puis depot du
- * compte-rendu, parce qu'un educateur saisit presque toujours apres coup.
+ * compte-rendu, parce qu un educateur saisit presque toujours apres coup.
  */
 
 const MOODS = [
@@ -82,7 +82,7 @@ function SessionReportPage() {
    * Les valeurs par defaut (premier enfant, premier objectif, taux actuel)
    * sont DEDUITES plutot que posees dans un effet : un `setState` synchrone
    * dans un effet declenche un rendu en cascade a chaque chargement. Un choix
-   * explicite de l'utilisateur (`null` = pas encore choisi) prend le dessus.
+   * explicite de l utilisateur (`null` = pas encore choisi) prend le dessus.
    */
   const [pickedChildId, setPickedChildId] = useState(params.get('enfant'))
   const [pickedGoalId, setPickedGoalId] = useState(null)
@@ -110,7 +110,7 @@ function SessionReportPage() {
   const child = children.find((entry) => entry.id === childId) ?? null
   const selectedGoal = goalItems.find((entry) => entry.id === goalId) ?? null
 
-  // Tant que le curseur n'a pas ete bouge, il affiche le taux actuel de l'objectif.
+  // Tant que le curseur n a pas ete bouge, il affiche le taux actuel de l objectif.
   const goalProgress = pickedProgress ?? selectedGoal?.progress ?? 0
 
   const selectChild = (value) => {

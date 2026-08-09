@@ -31,6 +31,10 @@ export class ApiError extends Error {
     return new ApiError(409, message, details)
   }
 
+  static tooManyRequests(message = 'Trop de requetes') {
+    return new ApiError(429, message)
+  }
+
   static internal(message = 'Erreur interne du serveur') {
     return new ApiError(500, message)
   }

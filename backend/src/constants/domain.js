@@ -44,7 +44,7 @@ export const ATTENDANCE_STATUSES = Object.freeze({
   excused: 'Absence justifiee',
 })
 
-/** Statuts comptes comme une absence par le moteur d'alertes. */
+/** Statuts comptes comme une absence par le moteur d alertes. */
 export const ABSENCE_STATUSES = Object.freeze(['absent', 'excused'])
 
 export const ACTIVITY_CATEGORIES = Object.freeze({
@@ -106,7 +106,7 @@ export const SESSION_STATUSES = Object.freeze({
 
 /**
  * Humeur relevee en fin de seance. L'echelle est ordonnee : le score
- * numerique associe permet de tracer une courbe d'evolution.
+ * numerique associe permet de tracer une courbe d evolution.
  */
 export const MOODS = Object.freeze({
   'very-difficult': 'Tres difficile',

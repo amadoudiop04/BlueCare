@@ -14,7 +14,7 @@ export default defineConfig([
     },
     rules: {
       // `const { passwordHash, ...safe } = user` sert a retirer un champ :
-      // la variable extraite n'a pas vocation a etre utilisee.
+      // la variable extraite n a pas vocation a etre utilisee.
       'no-unused-vars': ['error', { ignoreRestSiblings: true, argsIgnorePattern: '^_' }],
     },
   },

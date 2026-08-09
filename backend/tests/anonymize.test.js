@@ -14,7 +14,7 @@ const CHILDREN = [
 const ACTIVITY = {
   id: 'act_1',
   title: 'Atelier peinture avec Malik Ferrand',
-  description: 'Lina a choisi les couleurs, Malik a peint l arbre et Elsa a signe la fresque.',
+  description: "Lina a choisi les couleurs, Malik a peint l arbre et Elsa a signe la fresque.",
   category: 'arts',
   date: '2026-08-03',
   group: 'Les Coquelicots',
@@ -57,7 +57,7 @@ describe('anonymizeActivity', () => {
     assert.equal(gallery.media[0].caption.includes('Malik'), false)
   })
 
-  it('conserve le nom de l enfant dont on ouvre la fiche', () => {
+  it("conserve le nom de l enfant dont on ouvre la fiche", () => {
     const gallery = anonymize('chd_1')
 
     assert.equal(gallery.description.includes('Lina'), true)
@@ -78,7 +78,7 @@ describe('anonymizeActivity', () => {
     assert.equal(gallery.participantCount, 3)
   })
 
-  it('n expose ni identifiant d enfant ni auteur de la saisie', () => {
+  it("n expose ni identifiant d enfant ni auteur de la saisie", () => {
     const gallery = anonymize('chd_1')
     const serialized = JSON.stringify(gallery)
 
@@ -90,7 +90,7 @@ describe('anonymizeActivity', () => {
     }
   })
 
-  it('donne des aliases differents selon l enfant qui consulte', () => {
+  it("donne des aliases differents selon l enfant qui consulte", () => {
     const fromLina = anonymize('chd_1').participants.map((entry) => entry.alias)
     const fromMalik = anonymize('chd_2').participants.map((entry) => entry.alias)
 

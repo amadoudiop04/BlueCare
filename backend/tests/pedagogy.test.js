@@ -4,7 +4,7 @@ import { after, before, describe, it } from 'node:test'
 import { createChildDirect, createUserWithToken, startTestServer } from './helpers.js'
 import { addDays, addMonths, today } from '../src/utils/dates.js'
 
-/** Objectifs, seances, comptes-rendus et courbes d'evolution. */
+/** Objectifs, seances, comptes-rendus et courbes d evolution. */
 
 let context
 let api
@@ -34,7 +34,7 @@ async function createSession(overrides = {}) {
 
 const reportBody = (overrides = {}) => ({
   mood: 'good',
-  observations: 'Seance calme, l enfant a suivi les consignes proposees sans difficulte.',
+  observations: "Seance calme, l enfant a suivi les consignes proposees sans difficulte.",
   ...overrides,
 })
 
@@ -84,7 +84,7 @@ describe('Objectifs pedagogiques', () => {
     assert.equal(reopened.body.data.achievedAt, null)
   })
 
-  it('valide le domaine et le taux d avancement', async () => {
+  it("valide le domaine et le taux d avancement", async () => {
     const { status, body } = await asEducator(`/children/${child.id}/goals`, {
       method: 'POST',
       body: { title: 'Objectif invalide', domain: 'inconnu', progress: 150 },
@@ -112,7 +112,7 @@ describe('Seances', () => {
     assert.equal(future.status, 'planned')
   })
 
-  it('refuse de rattacher l objectif d un autre enfant', async () => {
+  it("refuse de rattacher l objectif d un autre enfant", async () => {
     const other = await createChildDirect({ lastName: 'Autre', group: 'Les Coquelicots' })
     const created = await asEducator(`/children/${other.id}/goals`, {
       method: 'POST',
@@ -140,7 +140,7 @@ describe('Seances', () => {
     assert.equal(body.data.status, 'cancelled')
   })
 
-  it('rend l historique complet d un enfant', async () => {
+  it("rend l historique complet d un enfant", async () => {
     const { status, body } = await asEducator(`/children/${child.id}/sessions`)
 
     assert.equal(status, 200)
@@ -151,7 +151,7 @@ describe('Seances', () => {
 })
 
 describe('Comptes-rendus de seance', () => {
-  it('enregistre humeur, observations et points d attention', async () => {
+  it("enregistre humeur, observations et points d attention", async () => {
     const session = await createSession()
 
     const { status, body } = await asEducator(`/sessions/${session.id}/report`, {
@@ -169,7 +169,7 @@ describe('Comptes-rendus de seance', () => {
     assert.equal(body.data.authorId, educator.user.id)
   })
 
-  it('reporte le taux d avancement sur l objectif travaille', async () => {
+  it("reporte le taux d avancement sur l objectif travaille", async () => {
     const goal = await createGoal({ title: 'Objectif suivi en seance' })
     const session = await createSession({ goalIds: [goal.id] })
 
@@ -250,7 +250,7 @@ describe('Comptes-rendus de seance', () => {
   })
 })
 
-describe('Courbes d evolution', () => {
+describe("Courbes d evolution", () => {
   it('produit une serie mensuelle et une tendance par objectif', async () => {
     const subject = await createChildDirect({ lastName: 'Courbe', group: 'Les Coquelicots' })
 

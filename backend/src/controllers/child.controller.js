@@ -26,8 +26,8 @@ export async function updateChild(req, res) {
 }
 
 /**
- * Par defaut on archive (l'historique est conserve).
- * `?purge=true` efface definitivement l'enfant et ses donnees liees.
+ * Par defaut on archive (l historique est conserve).
+ * `?purge=true` efface definitivement l enfant et ses donnees liees.
  */
 export async function deleteChild(req, res) {
   if (req.query.purge === 'true') {

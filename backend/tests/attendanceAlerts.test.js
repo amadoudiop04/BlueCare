@@ -18,7 +18,7 @@ const record = (date, status) => ({ date, status })
 const ruleNames = (alerts) => alerts.map((alert) => alert.rule).sort()
 
 describe('evaluateAttendanceAlerts', () => {
-  it('ne signale rien quand l enfant est present', () => {
+  it("ne signale rien quand l enfant est present", () => {
     const alerts = evaluateAttendanceAlerts(
       [record('2026-08-03', 'present'), record('2026-08-04', 'present')],
       OPTIONS,
@@ -27,7 +27,7 @@ describe('evaluateAttendanceAlerts', () => {
     assert.deepEqual(alerts, [])
   })
 
-  it('alerte au seuil d absences consecutives', () => {
+  it("alerte au seuil d absences consecutives", () => {
     const alerts = evaluateAttendanceAlerts(
       [
         record('2026-07-31', 'present'),
@@ -157,7 +157,7 @@ describe('evaluateAttendanceAlerts', () => {
 })
 
 describe('summarizeAttendance', () => {
-  it('compte chaque statut et le taux d absence', () => {
+  it("compte chaque statut et le taux d absence", () => {
     const summary = summarizeAttendance([
       record('2026-08-01', 'present'),
       record('2026-08-02', 'present'),

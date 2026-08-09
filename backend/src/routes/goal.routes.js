@@ -1,5 +1,7 @@
 import { Router } from 'express'
 
+import { DIRECTION_ROLES, PEDAGOGY_ROLES } from '../constants/roles.js'
+
 import {
   deleteGoal,
   getGoal,
@@ -19,8 +21,8 @@ router.get('/', asyncHandler(listGoals))
 router.get('/:goalId', asyncHandler(getGoal))
 router.get('/:goalId/progress', asyncHandler(getGoalProgress))
 
-// Definir et faire evoluer un objectif releve de l'equipe pedagogique.
-router.patch('/:goalId', authorize('educator', 'director'), asyncHandler(updateGoal))
-router.delete('/:goalId', authorize('director'), asyncHandler(deleteGoal))
+// Definir et faire evoluer un objectif releve de l equipe pedagogique.
+router.patch('/:goalId', authorize(...PEDAGOGY_ROLES), asyncHandler(updateGoal))
+router.delete('/:goalId', authorize(...DIRECTION_ROLES), asyncHandler(deleteGoal))
 
 export default router

@@ -3,7 +3,7 @@
  *
  * Les besoins sont modestes — deux formes, des valeurs en pourcentage — et une
  * dependance de graphes pese plus lourd que ces quelques lignes. Les axes sont
- * fixes de 0 a 100 : toutes les series de l'application sont des taux, et une
+ * fixes de 0 a 100 : toutes les series de l application sont des taux, et une
  * echelle qui bouge donnerait l'illusion de progres inegaux.
  */
 
@@ -15,7 +15,7 @@ const toY = (value) => HEIGHT - (Math.max(0, Math.min(100, value)) / 100) * HEIG
 const toX = (index, count) => (count <= 1 ? WIDTH / 2 : (index * WIDTH) / (count - 1))
 
 /**
- * Courbes d'evolution. Chaque serie porte `points: [number | null]` —
+ * Courbes d evolution. Chaque serie porte `points: [number | null]` —
  * `null` signifie « pas de mesure ce mois-la » et coupe le trait plutot que
  * de tracer une ligne droite a travers une periode sans seance.
  */

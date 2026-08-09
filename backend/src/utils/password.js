@@ -26,7 +26,7 @@ export function verifyPassword(plain, hash) {
 
 /**
  * Comparaison a vide, utilisee quand l'e-mail n'existe pas.
- * Le temps de reponse reste celui d'un vrai echec, ce qui evite de reveler
+ * Le temps de reponse reste celui d un vrai echec, ce qui evite de reveler
  * quels comptes existent en mesurant la latence.
  */
 const DUMMY_HASH = bcrypt.hashSync('bluecare-dummy-password', 10)

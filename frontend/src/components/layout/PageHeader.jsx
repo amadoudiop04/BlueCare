@@ -36,7 +36,7 @@ export function HeaderSearch({ value, onChange, placeholder = 'Rechercher un enf
   )
 }
 
-/** Zone de contenu d'un ecran, avec les marges de la maquette. */
+/** Zone de contenu d un ecran, avec les marges de la maquette. */
 export function PageBody({ children, className = '' }) {
   return (
     <div className={`flex flex-col gap-[22px] px-[34px] pb-11 pt-7 ${className}`}>{children}</div>

@@ -18,11 +18,11 @@ import { ApiError } from '../utils/ApiError.js'
  *   famille                : ses propres enfants, en lecture seule
  */
 
-export const hasFullScope = (user) => ROLES_WITH_FULL_SCOPE.includes(user.role)
+const hasFullScope = (user) => ROLES_WITH_FULL_SCOPE.includes(user.role)
 
-export const canReadMedical = (user) => ROLES_WITH_MEDICAL_ACCESS.includes(user.role)
+const canReadMedical = (user) => ROLES_WITH_MEDICAL_ACCESS.includes(user.role)
 
-export const isReadOnly = (user) => READ_ONLY_ROLES.includes(user.role)
+const isReadOnly = (user) => READ_ONLY_ROLES.includes(user.role)
 
 /** Filtre a appliquer aux listes pour n'exposer que le perimetre de l'appelant. */
 export function scopeFilter(user) {
@@ -34,7 +34,7 @@ export function scopeFilter(user) {
 
 /**
  * Identifiants des enfants visibles par l'appelant.
- * `undefined` signifie « aucune restriction » : c'est ce que les modeles
+ * `undefined` signifie « aucune restriction » : c est ce que les modeles
  * attendent pour ignorer le filtre `childIds`.
  */
 export async function scopedChildIds(user) {
@@ -73,14 +73,6 @@ export async function requireChildAccess(user, childId, { write = false } = {}) 
   return child
 }
 
-/** Verifie un perimetre deja charge, sans relire l'enfant. */
-export function assertChildInScope(user, child) {
-  if (!isWithinScope(user, child)) {
-    throw ApiError.forbidden('Cet enfant ne fait pas partie de votre perimetre')
-  }
-  return child
-}
-
 export function assertCanWrite(user) {
   if (isReadOnly(user)) throw ApiError.forbidden('Votre acces est en lecture seule')
 }
@@ -96,7 +88,7 @@ export function redactChild(user, child) {
   const { referringDoctor, notes, ...rest } = child
 
   if (user.role === 'family') {
-    // Une famille voit son enfant, pas les notes internes de l'equipe.
+    // Une famille voit son enfant, pas les notes internes de l equipe.
     return { ...rest, referringDoctor: referringDoctor ?? null }
   }
 

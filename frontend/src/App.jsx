@@ -5,23 +5,26 @@ import RequireAuth from '@/features/auth/RequireAuth.jsx'
 import { AuthProvider } from '@/features/auth/AuthContext.jsx'
 import AttendancePage from '@/pages/AttendancePage.jsx'
 import ChildFilePage from '@/pages/ChildFilePage.jsx'
+import ChildFormPage from '@/pages/ChildFormPage.jsx'
 import ChildrenPage from '@/pages/ChildrenPage.jsx'
 import DashboardPage from '@/pages/DashboardPage.jsx'
 import FamilySpacePage from '@/pages/FamilySpacePage.jsx'
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage.jsx'
 import LoginPage from '@/pages/LoginPage.jsx'
 import MedicationsPage from '@/pages/MedicationsPage.jsx'
 import ProfilePage from '@/pages/ProfilePage.jsx'
+import ResetPasswordPage from '@/pages/ResetPasswordPage.jsx'
 import SessionReportPage from '@/pages/SessionReportPage.jsx'
 import SharedProgressPage from '@/pages/SharedProgressPage.jsx'
 
 /**
- * Routage de l'application.
+ * Routage de l application.
  *
  * `RequireAuth` filtre par role pour eviter d'ouvrir un ecran vide ou un 403.
- * Ce n'est pas la protection : le backend refuse de toute facon les requetes
+ * Ce n est pas la protection : le backend refuse de toute facon les requetes
  * hors perimetre, quel que soit ce que le front affiche.
  */
-const STAFF = ['educator', 'nurse', 'director']
+const STAFF = ['educator', 'nurse', 'director', 'admin']
 
 function App() {
   return (
@@ -29,6 +32,10 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/connexion" element={<LoginPage />} />
+
+          {/* Reinitialisation : accessible sans session, c'est tout l'objet. */}
+          <Route path="/mot-de-passe-oublie" element={<ForgotPasswordPage />} />
+          <Route path="/reinitialisation/:token" element={<ResetPasswordPage />} />
 
           {/* Lien famille : consultable sans compte, la portee est dans le jeton. */}
           <Route path="/suivi/:token" element={<SharedProgressPage />} />
@@ -56,11 +63,20 @@ function App() {
                 </RequireAuth>
               }
             />
+            {/* Avant `:childId`, sinon « nouveau » serait pris pour un identifiant. */}
+            <Route
+              path="enfants/nouveau"
+              element={
+                <RequireAuth roles={['director', 'admin']}>
+                  <ChildFormPage />
+                </RequireAuth>
+              }
+            />
             <Route path="enfants/:childId" element={<ChildFilePage />} />
             <Route
               path="comptes-rendus"
               element={
-                <RequireAuth roles={['educator', 'director']}>
+                <RequireAuth roles={['educator', 'director', 'admin']}>
                   <SessionReportPage />
                 </RequireAuth>
               }
@@ -76,7 +92,7 @@ function App() {
             <Route
               path="medicaments"
               element={
-                <RequireAuth roles={['nurse', 'director']}>
+                <RequireAuth roles={['nurse', 'director', 'admin']}>
                   <MedicationsPage />
                 </RequireAuth>
               }

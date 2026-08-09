@@ -1,5 +1,7 @@
 import { Router } from 'express'
 
+import { PEDAGOGY_ROLES, STAFF_ROLES } from '../constants/roles.js'
+
 import {
   createActivity,
   deleteActivity,
@@ -14,13 +16,13 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 const router = Router()
 
 // La vue non anonymisee reste interne : les familles passent par la galerie.
-router.use(authenticate, authorize('educator', 'nurse', 'director'))
+router.use(authenticate, authorize(...STAFF_ROLES))
 
 router.get('/', asyncHandler(listActivities))
-router.post('/', authorize('educator', 'director'), asyncHandler(createActivity))
+router.post('/', authorize(...PEDAGOGY_ROLES), asyncHandler(createActivity))
 
 router.get('/:activityId', asyncHandler(getActivity))
-router.patch('/:activityId', authorize('educator', 'director'), asyncHandler(updateActivity))
-router.delete('/:activityId', authorize('educator', 'director'), asyncHandler(deleteActivity))
+router.patch('/:activityId', authorize(...PEDAGOGY_ROLES), asyncHandler(updateActivity))
+router.delete('/:activityId', authorize(...PEDAGOGY_ROLES), asyncHandler(deleteActivity))
 
 export default router

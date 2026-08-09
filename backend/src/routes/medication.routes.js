@@ -1,5 +1,7 @@
 import { Router } from 'express'
 
+import { MEDICAL_ROLES } from '../constants/roles.js'
+
 import {
   deleteMedication,
   listDoses,
@@ -13,7 +15,7 @@ import { asyncHandler } from '../utils/asyncHandler.js'
 const router = Router()
 
 // Donnees medicales : infirmiere et direction uniquement.
-router.use(authenticate, authorize('nurse', 'director'))
+router.use(authenticate, authorize(...MEDICAL_ROLES))
 
 // Prises attendues du jour, source des rappels de medicaments.
 router.get('/doses', asyncHandler(listDoses))

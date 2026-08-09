@@ -3,7 +3,7 @@
 /**
  * Tokens repris de la maquette « Suivi Pedagogique ».
  * Les couleurs sont nommees par role (canvas, line, muted, danger...) plutot
- * que par teinte : changer la charte ne demande alors qu'un seul passage ici.
+ * que par teinte : changer la charte ne demande alors qu un seul passage ici.
  */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],

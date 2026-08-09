@@ -21,12 +21,12 @@ import { requireChildAccess, scopeFilter } from './access.service.js'
  *
  * Les alertes ne sont pas stockees : elles sont recalculees a chaque lecture
  * par `evaluateAttendanceAlerts`. Corriger une saisie erronee fait donc
- * disparaitre l'alerte qu'elle avait declenchee, sans traitement de rattrapage.
+ * disparaitre l'alerte qu elle avait declenchee, sans traitement de rattrapage.
  */
 
 const STATUS_KEYS = keysOf(ATTENDANCE_STATUSES)
 
-/** Profondeur d'historique renvoyee par defaut sur la fiche d'un enfant. */
+/** Profondeur d'historique renvoyee par defaut sur la fiche d un enfant. */
 const DEFAULT_HISTORY_DAYS = 60
 
 const alertOptions = (referenceDate = today()) => ({
@@ -51,17 +51,17 @@ function normalizeRecordPayload(payload = {}, errors, { childId, date } = {}) {
     }),
     departureTime: readTime(payload.departureTime, 'departureTime', errors),
     reason: readString(payload.reason, 'reason', errors, {
-      // Une absence justifiee doit porter son motif, c'est ce qui la distingue.
+      // Une absence justifiee doit porter son motif, c est ce qui la distingue.
       required: status === 'excused',
       max: 500,
     }),
     notes: readString(payload.notes, 'notes', errors, { max: 1000 }),
-    // A remplacer par l'utilisateur authentifie quand l'auth sera branchee.
+    // A remplacer par l utilisateur authentifie quand l'auth sera branchee.
     recordedBy: readString(payload.recordedBy, 'recordedBy', errors, { max: 120 }),
   })
 
   if (record.arrivalTime && record.departureTime && record.departureTime < record.arrivalTime) {
-    errors.add('departureTime', "L'heure de depart precede l'heure d'arrivee")
+    errors.add('departureTime', "L heure de depart precede l heure d'arrivee")
   }
 
   return record
@@ -119,9 +119,9 @@ export const attendanceService = {
   },
 
   /**
-   * Saisie d'une presence (creation ou correction).
+   * Saisie d une presence (creation ou correction).
    * Renvoie l'enregistrement et les alertes que cette saisie laisse actives :
-   * l'educateur voit immediatement si l'enfant bascule en absences repetees.
+   * l educateur voit immediatement si l enfant bascule en absences repetees.
    */
   async record(payload = {}, user) {
     const errors = createErrors()
@@ -138,8 +138,8 @@ export const attendanceService = {
   },
 
   /**
-   * Saisie groupee : la feuille d'appel d'un groupe part en une requete.
-   * Rien n'est ecrit tant qu'une ligne est invalide, pour ne pas laisser
+   * Saisie groupee : la feuille d appel d un groupe part en une requete.
+   * Rien n'est ecrit tant qu une ligne est invalide, pour ne pas laisser
    * la feuille a moitie saisie.
    */
   async recordMany(payload = {}, user) {
@@ -199,7 +199,7 @@ export const attendanceService = {
     return { date, records, alerts }
   },
 
-  /** Historique d'un enfant : ses saisies, ses compteurs et ses alertes. */
+  /** Historique d un enfant : ses saisies, ses compteurs et ses alertes. */
   async getChildHistory(childId, query = {}, user) {
     const child = await requireChildAccess(user, childId)
 

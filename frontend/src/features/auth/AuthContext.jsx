@@ -1,41 +1,45 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
-import { fetchMe, login as loginRequest } from '@/api/auth.api.js'
+import {
+  fetchMe,
+  login as loginRequest,
+  logout as logoutRequest,
+  verifyMfa as verifyMfaRequest,
+} from '@/api/auth.api.js'
 import { setSessionExpiredHandler } from '@/api/client.js'
 import { AuthContext } from '@/features/auth/authContext.js'
-import { tokenStore } from '@/lib/tokenStore.js'
 
 /**
- * Session de l'utilisateur connecte.
+ * Session de l utilisateur connecte.
  *
- * Le role et le perimetre ne sont jamais deduits cote client : ils viennent de
- * `GET /auth/me`, relu au demarrage a partir du jeton stocke. Le front s'en
- * sert uniquement pour afficher ou masquer des ecrans — c'est le serveur qui
- * refuse reellement l'acces.
+ * L application ne detient aucun jeton : la session vit dans un cookie
+ * `httpOnly` et dans la base. La seule facon de savoir si l'on est connecte
+ * est donc de le demander au serveur — c est ce que fait `GET /auth/me` au
+ * demarrage.
+ *
+ * Le role et le perimetre viennent de la meme reponse, jamais d une deduction
+ * cote client : le front s en sert pour afficher ou masquer des ecrans, c'est
+ * le serveur qui refuse reellement l acces.
  */
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [scope, setScope] = useState(null)
-  // Sans jeton stocke, inutile de passer par un etat « chargement » : on sait
-  // deja qu'il n'y a pas de session a restaurer.
-  const [status, setStatus] = useState(() => (tokenStore.getAccess() ? 'loading' : 'anonymous'))
+  const [status, setStatus] = useState('loading') // loading | authenticated | anonymous
 
-  const clearSession = useCallback(() => {
-    tokenStore.clear()
+  const forgetSession = useCallback(() => {
     setUser(null)
     setScope(null)
     setStatus('anonymous')
   }, [])
 
-  // Le client HTTP previent quand le renouvellement de jeton a echoue.
+  // Le client HTTP previent quand le serveur a refuse la session.
   useEffect(() => {
-    setSessionExpiredHandler(clearSession)
+    setSessionExpiredHandler(forgetSession)
     return () => setSessionExpiredHandler(() => {})
-  }, [clearSession])
+  }, [forgetSession])
 
+  /** Restaure la session au chargement, a partir du cookie deja pose. */
   useEffect(() => {
-    if (!tokenStore.getAccess()) return undefined
-
     let cancelled = false
 
     fetchMe()
@@ -46,18 +50,15 @@ export function AuthProvider({ children }) {
         setStatus('authenticated')
       })
       .catch(() => {
-        if (!cancelled) clearSession()
+        if (!cancelled) forgetSession()
       })
 
     return () => {
       cancelled = true
     }
-  }, [clearSession])
+  }, [forgetSession])
 
-  const login = useCallback(async (credentials) => {
-    const { user: account, accessToken, refreshToken } = await loginRequest(credentials)
-
-    tokenStore.save({ accessToken, refreshToken })
+  const openSession = useCallback((account) => {
     setUser(account)
     setStatus('authenticated')
 
@@ -69,6 +70,35 @@ export function AuthProvider({ children }) {
     return account
   }, [])
 
+  /**
+   * Premiere etape. Si le compte est protege par un second facteur, rend
+   * `{ mfaRequired, challengeToken }` sans ouvrir de session : c est l ecran
+   * de connexion qui enchaine sur la saisie du code.
+   */
+  const login = useCallback(
+    async (credentials) => {
+      const result = await loginRequest(credentials)
+      if (result.mfaRequired) return result
+
+      return { user: openSession(result.user) }
+    },
+    [openSession],
+  )
+
+  const completeMfa = useCallback(
+    async ({ challengeToken, code }) => {
+      const result = await verifyMfaRequest({ challengeToken, code })
+      return openSession(result.user)
+    },
+    [openSession],
+  )
+
+  /** La deconnexion supprime la session en base ; le cookie tombe avec elle. */
+  const logout = useCallback(async () => {
+    await logoutRequest().catch(() => {})
+    forgetSession()
+  }, [forgetSession])
+
   const value = useMemo(
     () => ({
       user,
@@ -76,9 +106,10 @@ export function AuthProvider({ children }) {
       status,
       isAuthenticated: status === 'authenticated',
       login,
-      logout: clearSession,
+      completeMfa,
+      logout,
     }),
-    [user, scope, status, login, clearSession],
+    [user, scope, status, login, completeMfa, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
