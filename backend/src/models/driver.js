@@ -1,4 +1,4 @@
-import { isProduction } from '../config/env.js'
+import { env, isProduction } from '../config/env.js'
 import { isSupabaseConfigured } from '../config/supabase.js'
 import { logger } from '../utils/logger.js'
 
@@ -26,15 +26,27 @@ if (!usesSupabase) {
    * des comptes-rendus et des présences, et tout disparaîtrait au premier
    * redemarrage — sans le moindre message d'erreur. On refuse de démarrer.
    */
+  /*
+   * Nommer celle qui manque, et non les deux : sur un hebergeur, la cause est
+   * presque toujours une seule variable — oubliee, mal orthographiee, ou posee
+   * sur un autre service. Un message qui les cite toutes les deux laisse
+   * chercher laquelle.
+   */
+  const missing = [
+    !env.supabase.url && 'SUPABASE_URL',
+    !env.supabase.secretKey && 'SUPABASE_SECRET_KEY (ou SUPABASE_SERVICE_ROLE_KEY)',
+  ].filter(Boolean)
+
   if (isProduction) {
     throw new Error(
-      'SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont obligatoires en production : ' +
-        'sans elles les données ne seraient conservées nulle part (voir DEPLOIEMENT.md).',
+      `${missing.join(' et ')} : variable(s) absente(s) de l'environnement. ` +
+        'Obligatoire(s) en production, sans quoi les données ne seraient ' +
+        'conservées nulle part. Voir backend/.env.example.',
     )
   }
 
   logger.warn(
-    'Stockage en mémoire : les données disparaissent au redemarrage. ' +
-      'Renseignez SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY pour persister.',
+    `Stockage en mémoire : les données disparaissent au redemarrage. ${missing.join(' et ')} ` +
+      'a renseigner pour persister.',
   )
 }

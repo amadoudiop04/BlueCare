@@ -20,7 +20,7 @@
 # circule normalement. Sans ce bloc, la connexion echoue silencieusement.
 [[redirects]]
   from = "/api/*"
-  to = "https://REMPLACER-PAR-VOTRE-BACKEND.onrender.com/api/:splat"
+  to = "https://bluecare.onrender.com/api/:splat"
   status = 200
   force = true
 
