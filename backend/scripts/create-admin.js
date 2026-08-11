@@ -50,7 +50,7 @@ if (!DIRECTION_ROLES.includes(role)) {
 if (!usesSupabase) {
   fail(
     'Aucune clef Supabase configuree : le compte serait perdu immediatement. ' +
-      'Renseignez SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY.',
+    'Renseignez SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY.',
   )
 }
 
