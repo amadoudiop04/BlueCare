@@ -116,7 +116,13 @@ function LoginPage() {
 
   return (
     <div className="grid min-h-screen bg-canvas lg:grid-cols-[1.05fr_1fr]">
-      <div className="hidden flex-col bg-gradient-to-br from-[#0C1E42] via-[#14418F] to-[#1E5FD8] px-14 py-[54px] text-white lg:flex">
+      {/*
+        Le panneau bleu s'affiche aussi sur telephone, empile au-dessus du
+        formulaire : c'est la premiere image du centre, la retirer laissait un
+        écran blanc sans identite. Seules les tailles changent — marges, papillon
+        et accroche se resserrent pour que les champs restent atteignables.
+      */}
+      <div className="flex flex-col bg-gradient-to-br from-[#0C1E42] via-[#14418F] to-[#1E5FD8] px-6 py-8 text-white lg:px-14 lg:py-[54px]">
         <div className="flex items-center gap-3">
           <ButterflyMark size={42} radius={12} background="rgba(255,255,255,0.14)" />
           <div className="flex flex-col gap-0.5">
@@ -125,7 +131,7 @@ function LoginPage() {
           </div>
         </div>
 
-        <div className="relative my-[22px] h-[248px]">
+        <div className="relative my-[22px] h-[168px] sm:h-[248px]">
           <Suspense fallback={null}>
             <AsciiButterfly fontSize={7} planeHeight={15} />
           </Suspense>
@@ -135,7 +141,7 @@ function LoginPage() {
           <div className="mb-4 text-[11px] font-bold uppercase tracking-[0.12em] text-onnavy-bright">
             Outil interne sécurisé
           </div>
-          <div className="mb-4 text-[34px] font-bold leading-[1.15] tracking-[-0.03em] text-pretty">
+          <div className="mb-4 text-[25px] font-bold leading-[1.15] tracking-[-0.03em] text-pretty sm:text-[30px] lg:text-[34px]">
             Le suivi pédagogique de chaque enfant, au même endroit.
           </div>
           <div className="text-[14.5px] leading-[1.65] text-onnavy-pale">
@@ -144,7 +150,7 @@ function LoginPage() {
           </div>
         </div>
 
-        <div className="mt-10 flex gap-[34px] border-t border-white/[0.13] pt-[26px]">
+        <div className="mt-8 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/[0.13] pt-6 lg:mt-10 lg:gap-[34px] lg:pt-[26px]">
           {STATS.map((stat) => (
             <div key={stat.label}>
               <div className="text-[21px] font-bold tracking-[-0.02em]">{stat.value}</div>
@@ -156,13 +162,8 @@ function LoginPage() {
         <DeveloperCredit tone="light" className="mt-6" />
       </div>
 
-      <div className="relative flex items-center justify-center px-5 py-10 sm:p-10">
+      <div className="flex items-center justify-center px-5 py-10 sm:p-10">
         <form onSubmit={onSubmit} className="w-full max-w-[372px] animate-up">
-          <div className="mb-2 flex items-center gap-3 lg:hidden">
-            <ButterflyMark size={38} radius={11} />
-            <span className="text-base font-bold">BlueCare</span>
-          </div>
-
           <div className="mb-[7px] text-2xl font-bold tracking-[-0.02em]">
             {challenge ? 'Vérification' : 'Connexion'}
           </div>
@@ -290,9 +291,6 @@ function LoginPage() {
             )}
           </div>
         </form>
-
-        {/* Le panneau bleu est masque sur petit écran : la mention y reste visible. */}
-        <DeveloperCredit className="absolute bottom-6 lg:hidden" />
       </div>
     </div>
   )
