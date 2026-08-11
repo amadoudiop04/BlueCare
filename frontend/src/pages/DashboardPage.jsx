@@ -235,13 +235,23 @@ function DashboardContent({ data, role, navigate }) {
 
   return (
     <>
-      <Card className="flex animate-up items-center gap-[26px] px-6 py-[22px]">
+      {/*
+        Le bouton passe sous le texte en dessous de 640 px : garde-t-il sa place
+        a droite, son `whitespace-nowrap` reduit le titre a une colonne de
+        quelques caracteres sur un telephone.
+      */}
+      <Card className="flex animate-up flex-col items-start gap-4 px-5 py-5 sm:flex-row sm:items-center sm:gap-[26px] sm:px-6 sm:py-[22px]">
         <div className="min-w-0 flex-1">
           <SectionLabel className="mb-2">Votre priorité du jour · {roleLabel(role)}</SectionLabel>
-          <div className="mb-1.5 text-[19px] font-bold tracking-[-0.02em]">{focus.title}</div>
+          <div className="mb-1.5 text-[17px] font-bold tracking-[-0.02em] sm:text-[19px]">
+            {focus.title}
+          </div>
           <div className="max-w-[620px] text-[13.5px] leading-relaxed text-muted-strong">{focus.text}</div>
         </div>
-        <Button onClick={() => navigate(focus.to)} className="whitespace-nowrap px-[18px]">
+        <Button
+          onClick={() => navigate(focus.to)}
+          className="w-full whitespace-nowrap px-[18px] sm:w-auto"
+        >
           {focus.cta}
         </Button>
       </Card>
@@ -264,7 +274,7 @@ function DashboardContent({ data, role, navigate }) {
       </div>
 
       <div className="grid gap-[18px] xl:grid-cols-[1.55fr_1fr] xl:items-start">
-        <Card className="px-6 py-[22px]">
+        <Card className="px-5 py-5 sm:px-6 sm:py-[22px]">
           <CardHeader
             className="mb-[22px]"
             title={role === 'director' ? 'Progression moyenne par groupe' : 'Séances du jour'}
@@ -348,7 +358,7 @@ function DashboardContent({ data, role, navigate }) {
 
       {role === 'director' ? (
         <Card className="overflow-hidden">
-          <div className="flex items-center justify-between border-b border-line-soft px-6 pb-4 pt-5">
+          <div className="flex items-center justify-between border-b border-line-soft px-5 pb-4 pt-5 sm:px-6">
             <CardHeader
               title="Séances du jour"
               subtitle={`${data.sessions.length} séance${data.sessions.length > 1 ? 's' : ''} programmee${data.sessions.length > 1 ? 's' : ''}`}
