@@ -21,6 +21,12 @@ build
 .env.*
 !.env.example
 
+# Documentation interne : reste sur le poste, hors du depot.
+# Deja suivis par git avant cette regle, donc retires de l'index avec
+# `git rm --cached` — sans quoi la ligne ci-dessous n'aurait aucun effet.
+COMPTES-DE-TEST.md
+DEPLOIEMENT.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

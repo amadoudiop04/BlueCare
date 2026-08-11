@@ -1,13 +1,19 @@
-function AppLayout({ children }) {
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <span className="text-xl font-bold text-blue-600">BlueCare</span>
-        </div>
-      </header>
+import { Outlet } from 'react-router-dom'
 
-      <main className="mx-auto max-w-5xl px-6 py-10">{children}</main>
+import Sidebar from '@/components/layout/Sidebar.jsx'
+
+/**
+ * Structure de l'application connectee : barre laterale fixe, contenu a droite.
+ * Chaque page pose son propre en-tête via <PageHeader>, parce que le titre,
+ * le fil d'ariane et l'action principale dépendent de l'écran.
+ */
+function AppLayout({ badges }) {
+  return (
+    <div className="flex min-h-screen w-full bg-canvas">
+      <Sidebar badges={badges} />
+      <main className="flex min-w-0 flex-1 flex-col">
+        <Outlet />
+      </main>
     </div>
   )
 }
