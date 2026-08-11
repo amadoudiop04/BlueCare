@@ -131,6 +131,16 @@ export const userService = {
       status: readEnum(payload.status, STATUS_KEYS, 'status', errors),
     })
 
+    /*
+     * Effacer un telephone, et non le laisser tel quel.
+     *
+     * `readString` rend `undefined` pour une chaine vide, et `compact` retire
+     * les cles `undefined` — ce qui est le comportement voulu pour un PATCH
+     * partiel, mais rend la suppression impossible : vider le champ dans le
+     * formulaire ne changeait rien. On distingue donc « absent » de « vide ».
+     */
+    if (payload.phone === '' || payload.phone === null) data.phone = null
+
     const scope = await readScope(payload, role ?? current.role, errors, { partial: true })
     errors.throwIfAny('Compte invalide')
 

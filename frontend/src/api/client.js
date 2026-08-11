@@ -43,6 +43,28 @@ export function setSessionExpiredHandler(handler) {
   onSessionExpired = handler
 }
 
+/*
+ * Temoin de session.
+ *
+ * Le jeton vit dans un cookie `httpOnly` que JavaScript ne peut pas lire :
+ * l'application est donc incapable de savoir par elle-même si quelqu'un est
+ * connecte. Le serveur pose a côte un second cookie, sans secret, uniquement
+ * pour repondre a cette question. Sans lui, chaque ouverture de l'écran de
+ * connexion appelait `/auth/me` pour rien et laissait un 401 dans la console.
+ *
+ * Ce n'est pas une sécurité : un temoin falsifie ne fait que provoquer l'appel
+ * a `/auth/me`, que le serveur refusera. C'est bien lui qui decide.
+ */
+const SESSION_HINT_COOKIE = 'bluecare_signed_in'
+
+export const hasSessionHint = () =>
+  document.cookie.split('; ').some((entry) => entry.startsWith(`${SESSION_HINT_COOKIE}=`))
+
+/** Session close côté serveur : le temoin doit tomber avec elle. */
+function forgetSessionHint() {
+  document.cookie = `${SESSION_HINT_COOKIE}=; Max-Age=0; path=/; SameSite=Strict`
+}
+
 async function request(path, { method = 'GET', body, headers, signal, raw = false } = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
     method,
@@ -56,9 +78,13 @@ async function request(path, { method = 'GET', body, headers, signal, raw = fals
     signal,
   })
 
-  // Session expiree ou revoquee côté serveur : plus rien a nettoyer localement,
-  // il suffit de ramener l'utilisateur a l'écran de connexion.
-  if (response.status === 401 && !isPublic(path)) onSessionExpired()
+  // Session expiree ou revoquee côté serveur : on retire le temoin, sans quoi
+  // le prochain chargement retenterait `/auth/me` pour rien, et on ramene
+  // l'utilisateur a l'écran de connexion.
+  if (response.status === 401 && !isPublic(path)) {
+    forgetSessionHint()
+    onSessionExpired()
+  }
 
   if (raw) {
     if (!response.ok) {

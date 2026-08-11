@@ -6,7 +6,7 @@ import {
   logout as logoutRequest,
   verifyMfa as verifyMfaRequest,
 } from '@/api/auth.api.js'
-import { setSessionExpiredHandler } from '@/api/client.js'
+import { hasSessionHint, setSessionExpiredHandler } from '@/api/client.js'
 import { AuthContext } from '@/features/auth/authContext.js'
 
 /**
@@ -24,7 +24,15 @@ import { AuthContext } from '@/features/auth/authContext.js'
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [scope, setScope] = useState(null)
-  const [status, setStatus] = useState('loading') // loading | authenticated | anonymous
+  /*
+   * loading | authenticated | anonymous.
+   *
+   * Sans temoin de session, l'état de depart est directement `anonymous` :
+   * il n'y a rien a restaurer, donc pas d'écran d'attente et pas d'appel a
+   * `/auth/me` — c'est cet appel-la qui laissait un 401 dans la console a
+   * chaque ouverture de la page de connexion.
+   */
+  const [status, setStatus] = useState(() => (hasSessionHint() ? 'loading' : 'anonymous'))
 
   const forgetSession = useCallback(() => {
     setUser(null)
@@ -38,8 +46,18 @@ export function AuthProvider({ children }) {
     return () => setSessionExpiredHandler(() => {})
   }, [forgetSession])
 
-  /** Restaure la session au chargement, à partir du cookie déjà pose. */
+  /**
+   * Restaure la session au chargement, à partir du cookie déjà pose.
+   *
+   * Le temoin pose par le serveur (`bluecare_signed_in`) dit s'il y a une
+   * session a restaurer. Sans lui — première visite, déconnexion, session
+   * expiree — on ne demande rien : l'appel serait refuse a coup sur, et le 401
+   * qu'il laissait dans la console ressemblait a une panne alors que c'est le
+   * fonctionnement normal.
+   */
   useEffect(() => {
+    if (!hasSessionHint()) return undefined
+
     let cancelled = false
 
     fetchMe()
@@ -68,6 +86,19 @@ export function AuthProvider({ children }) {
       .catch(() => setScope(null))
 
     return account
+  }, [])
+
+  /**
+   * Relit la session après une modification du compte (profil, périmètre).
+   * Le serveur reste la source : on ne recopie pas localement ce qu'on vient
+   * d'envoyer, on redemande ce qu'il a réellement enregistre.
+   */
+  const refresh = useCallback(async () => {
+    const data = await fetchMe()
+    setUser(data.user)
+    setScope(data.scope)
+
+    return data.user
   }, [])
 
   /**
@@ -108,8 +139,9 @@ export function AuthProvider({ children }) {
       login,
       completeMfa,
       logout,
+      refresh,
     }),
-    [user, scope, status, login, completeMfa, logout],
+    [user, scope, status, login, completeMfa, logout, refresh],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

@@ -28,7 +28,7 @@ export function permissionsFor(role) {
   const matrix = {
     educator: [
       { label: 'Comptes-rendus de séance', value: 'Création', granted: true },
-      { label: 'Fiches des enfants de vos groupes', value: 'Lecture', granted: true },
+      { label: 'Fiches des enfants de vos groupes', value: 'Lecture et création', granted: true },
       { label: 'Objectifs pédagogiques', value: 'Création', granted: true },
       no('Données médicales'),
       no('Tableau de bord et gestion des comptes'),

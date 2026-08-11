@@ -11,7 +11,7 @@ import { logger } from '../utils/logger.js'
 import { sendPasswordResetMail } from '../utils/mailer.js'
 import { createSessionToken, hashSessionToken } from '../utils/sessionToken.js'
 import { createThrottle } from '../utils/throttle.js'
-import { createErrors, readEmail, readString } from '../utils/validate.js'
+import { compact, createErrors, readEmail, readString } from '../utils/validate.js'
 import { isMfaRequiredFor, verifySecondFactor } from './mfa.service.js'
 import { sessionAuthService } from './session.auth.service.js'
 
@@ -160,6 +160,54 @@ export const authService = {
             : [...new Set(scope.map((child) => child.group))],
       },
     }
+  },
+
+  /**
+   * Modification de ses propres informations : nom, prenom, adresse e-mail,
+   * téléphone. Ni le rôle ni le périmètre : personne ne se promeut soi-même,
+   * ces deux champs restent l'affaire de la direction (`user.service.js`).
+   *
+   * Le mot de passe est exige des que l'adresse change, et elle seule : c'est
+   * elle qui recoit les liens de réinitialisation, donc la remplacer depuis
+   * une session volee suffirait a s'emparer du compte. Changer de nom ou de
+   * téléphone n'ouvre rien, et le demander a chaque correction de coquille
+   * n'apporterait qu'une gêne.
+   */
+  async updateProfile(user, payload = {}) {
+    const errors = createErrors()
+
+    const email = readEmail(payload.email, 'email', errors)
+    const data = compact({
+      email,
+      firstName: readString(payload.firstName, 'firstName', errors, { max: 80 }),
+      lastName: readString(payload.lastName, 'lastName', errors, { max: 80 }),
+      phone: readString(payload.phone, 'phone', errors, { max: 40 }),
+    })
+
+    // Vider le champ téléphone, et non le laisser tel quel : `readString` rend
+    // `undefined` sur une chaine vide, que `compact` retire ensuite.
+    if (payload.phone === '' || payload.phone === null) data.phone = null
+
+    const emailChanged = Boolean(email) && email !== user.email
+    if (emailChanged) {
+      readString(payload.currentPassword, 'currentPassword', errors, { required: true, max: 200 })
+    }
+
+    errors.throwIfAny('Profil invalide')
+    if (Object.keys(data).length === 0) throw ApiError.badRequest('Aucune modification demandée')
+
+    if (emailChanged) {
+      const stored = await userModel.findByIdWithSecret(user.id)
+      if (!(await verifyPassword(payload.currentPassword, stored?.passwordHash))) {
+        throw ApiError.unauthorized('Mot de passe incorrect')
+      }
+
+      if (await userModel.emailExists(email, { excludeId: user.id })) {
+        throw ApiError.conflict('Cette adresse e-mail est déjà utilisée')
+      }
+    }
+
+    return { user: await userModel.update(user.id, data), emailChanged }
   },
 
   listSessions: (user, session) => sessionAuthService.list(user.id, session?.id),

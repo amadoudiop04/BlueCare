@@ -315,6 +315,42 @@ const GOALS = [
     successCriteria: 'Transfert avec supervision seule.',
     progression: [10, 15, 25, 30, 35, 45, 50, 55, 60],
   },
+  {
+    childKey: 'adam',
+    title: 'Enchaîner les trois étapes du lavage des mains',
+    domain: 'autonomy',
+    description: 'Mouiller, savonner, rincer sans rappel entre les étapes.',
+    baseline: 'Réalise la première étape puis s\'interrompt.',
+    successCriteria: 'Les trois étapes dans l\'ordre, deux fois de suite.',
+    progression: [15, 20, 30, 35, 45, 50, 60, 65, 70],
+  },
+  {
+    childKey: 'adam',
+    title: 'Trier dix images en deux catégories',
+    domain: 'cognitive',
+    description: 'Séparer animaux et objets du quotidien, consigne donnée une seule fois.',
+    baseline: 'Trie correctement trois images sur dix.',
+    successCriteria: 'Huit images sur dix, sans reformulation de la consigne.',
+    progression: [20, 25, 30, 40, 45, 55, 60, 65, 75],
+  },
+  {
+    childKey: 'elsa',
+    title: 'Signer une phrase de deux signes',
+    domain: 'communication',
+    description: 'Associer deux signes pour formuler une demande en langue des signes.',
+    baseline: 'Signe isolé, souvent répété.',
+    successCriteria: 'Cinq phrases de deux signes dans une séance.',
+    progression: [25, 30, 40, 45, 55, 60, 70, 75, 85],
+  },
+  {
+    childKey: 'elsa',
+    title: 'Solliciter un camarade pendant un atelier',
+    domain: 'social',
+    description: 'Aller vers un autre enfant pour demander un matériel, sans passer par l\'adulte.',
+    baseline: 'Passe systématiquement par l\'adulte.',
+    successCriteria: 'Deux sollicitations directes par atelier.',
+    progression: [10, 15, 20, 30, 35, 40, 50, 55, 60],
+  },
 ]
 
 const MOOD_CYCLE = ['good', 'neutral', 'very-good', 'good', 'difficult', 'good', 'very-good']

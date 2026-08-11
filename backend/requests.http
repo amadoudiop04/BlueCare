@@ -79,6 +79,28 @@ Content-Type: application/json
 GET {{baseUrl}}/auth/me
 Authorization: Bearer {{educatorToken}}
 
+### Modifier ses informations (ni role ni perimetre : ce n'est pas ici)
+PATCH {{baseUrl}}/auth/me
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Awa",
+  "lastName": "Sanou",
+  "phone": "+226 70 55 44 33"
+}
+
+### Changer d'adresse e-mail : le mot de passe courant devient obligatoire,
+### c'est cette adresse qui recoit les liens de reinitialisation.
+PATCH {{baseUrl}}/auth/me
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "email": "awa.sanou@papillonbleu.test",
+  "currentPassword": "Educateur2026!"
+}
+
 ### Changer son mot de passe
 POST {{baseUrl}}/auth/password
 Authorization: Bearer {{token}}
@@ -175,7 +197,7 @@ Authorization: Bearer {{token}}
 GET {{baseUrl}}/children/{{childId}}
 Authorization: Bearer {{token}}
 
-### Creer une fiche (directeur uniquement)
+### Creer une fiche (direction, ou educateur dans un de ses groupes)
 # @name createChild
 POST {{baseUrl}}/children
 Authorization: Bearer {{token}}
@@ -215,6 +237,23 @@ Content-Type: application/json
 
 ###
 @newChildId = {{createChild.response.body.$.data.id}}
+
+### L'educateur inscrit dans SES groupes. Le meme corps avec
+### "group": "Les Bleuets" -> 403 pour l'educateur des Coquelicots.
+POST {{baseUrl}}/children
+Authorization: Bearer {{educatorToken}}
+Content-Type: application/json
+
+{
+  "firstName": "Nour",
+  "lastName": "Sawadogo",
+  "birthDate": "2018-03-14",
+  "group": "Les Coquelicots",
+  "disability": { "type": "language" },
+  "familyContacts": [
+    { "lastName": "Sawadogo", "relationship": "mother", "phone": "+226 70 55 44 33" }
+  ]
+}
 
 ### Erreurs de validation : tous les champs fautifs en une reponse 400
 POST {{baseUrl}}/children

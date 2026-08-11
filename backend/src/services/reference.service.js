@@ -28,6 +28,11 @@ export const referenceService = {
       alertRules: toOptions(ALERT_RULES),
       alertSeverities: toOptions(ALERT_SEVERITIES),
       groups: await childModel.listGroups(),
+      // Le formulaire de creation de compte annonce la regle avant la saisie
+      // plutot que de la faire decouvrir par un refus du serveur. La valeur
+      // vient d'ici pour qu'un changement de `MIN_PASSWORD_LENGTH` n'ait pas a
+      // etre reporte a la main dans le front.
+      passwordPolicy: { minLength: env.auth.minPasswordLength },
       attendanceAlertRules: {
         consecutiveThreshold: env.attendance.consecutiveThreshold,
         windowDays: env.attendance.windowDays,

@@ -77,6 +77,42 @@ export async function fetchGoals(params) {
 }
 
 /** Chemin du rapport PDF. Le cookie de session part avec la requête. */
-export function progressReportPath(childId, months = 6) {
+function progressReportPath(childId, months = 6) {
   return `/children/${childId}/progress.pdf${query({ months })}`
+}
+
+/** Nom de fichier annonce par le serveur, s'il a pu traverser le navigateur. */
+function filenameFrom(response, fallback) {
+  const header = response.headers.get('content-disposition') ?? ''
+  const match = /filename="?([^"';]+)"?/i.exec(header)
+
+  return match ? match[1] : fallback
+}
+
+/**
+ * Telecharge le rapport de progression d'un enfant.
+ *
+ * Le PDF est servi par une route authentifiee : un simple lien `href`
+ * n'emporterait pas le cookie de session dans tous les navigateurs, d'ou le
+ * passage par un blob. Le nom du fichier est celui annonce par le serveur —
+ * `progression-nom-prenom-2026-08-11.pdf` — plutôt qu'un nom réinvente ici,
+ * qui divergerait a la première correction côté API.
+ */
+export async function downloadProgressReport(child, months = 6) {
+  const response = await apiClient.raw(progressReportPath(child.id, months))
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filenameFrom(
+    response,
+    `progression-${child.lastName ?? 'enfant'}-${child.firstName ?? ''}.pdf`
+      .toLowerCase()
+      .replace(/\s+/g, '-'),
+  )
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
 }

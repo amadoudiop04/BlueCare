@@ -15,15 +15,14 @@ import {
   Skeleton,
 } from '@/components/ui/primitives.jsx'
 import ChildDangerZone from '@/features/children/ChildDangerZone.jsx'
-import { apiClient } from '@/api/client.js'
 import {
+  downloadProgressReport,
   fetchChild,
   fetchChildGallery,
   fetchChildGoals,
   fetchChildMedications,
   fetchChildProgress,
   fetchChildSessions,
-  progressReportPath,
 } from '@/api/children.api.js'
 import { fetchReference } from '@/api/tracking.api.js'
 import { useApi } from '@/hooks/useApi.js'
@@ -73,23 +72,16 @@ function ChildFilePage() {
   )
 
   const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState(null)
 
   const downloadReport = async () => {
     setExporting(true)
-    try {
-      const response = await apiClient.raw(progressReportPath(childId, 6))
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
+    setExportError(null)
 
-      // Le PDF part avec un en-tête d'authentification : il faut passer par un
-      // blob plutôt que par un simple lien, qui n'emporterait pas le jeton.
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `progression-${data?.child?.lastName ?? 'enfant'}.pdf`.toLowerCase()
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      URL.revokeObjectURL(url)
+    try {
+      await downloadProgressReport(data.child, 6)
+    } catch (requestError) {
+      setExportError(requestError)
     } finally {
       setExporting(false)
     }
@@ -116,6 +108,7 @@ function ChildFilePage() {
 
       <PageBody>
         <ErrorNotice error={error} onRetry={reload} />
+        <ErrorNotice error={exportError} onRetry={downloadReport} />
 
         {loading ? (
           <div className="grid gap-[18px] xl:grid-cols-[320px_1fr]">

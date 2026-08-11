@@ -249,7 +249,7 @@ function LoginPage() {
                     required
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="prenom.nom@papillonbleu.test"
+                    placeholder="vous@exemple.fr"
                     className={inputClass}
                   />
                 </Field>
@@ -260,6 +260,7 @@ function LoginPage() {
                     required
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
+                    placeholder="Votre mot de passe"
                   />
                 </Field>
 

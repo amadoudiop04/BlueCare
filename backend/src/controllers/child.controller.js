@@ -15,7 +15,7 @@ export async function getChild(req, res) {
 }
 
 export async function createChild(req, res) {
-  res.status(201).json({ status: 'ok', data: await childService.create(req.body) })
+  res.status(201).json({ status: 'ok', data: await childService.create(req.body, req.user) })
 }
 
 export async function updateChild(req, res) {

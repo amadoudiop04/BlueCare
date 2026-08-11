@@ -78,6 +78,16 @@ export async function fetchMe() {
   return body.data
 }
 
+/**
+ * Ses propres informations. `currentPassword` n'est exige par le serveur que
+ * si l'adresse e-mail change : le formulaire ne le demande donc qu'a ce
+ * moment-la.
+ */
+export async function updateProfile(payload) {
+  const body = await apiClient.patch('/auth/me', payload)
+  return body.data
+}
+
 export async function changePassword({ currentPassword, newPassword }) {
   const body = await apiClient.post('/auth/password', { currentPassword, newPassword })
   return body.data

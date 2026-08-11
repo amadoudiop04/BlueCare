@@ -79,6 +79,14 @@ create table if not exists public.users (
   constraint users_totp_needs_secret check (not totp_enabled or totp_secret is not null)
 );
 
+-- Rattrape les bases creees avant la reinitialisation de mot de passe : le
+-- `create table if not exists` ci-dessus laisse intacte une table deja presente,
+-- si bien qu'une base plus ancienne resterait sans ces deux colonnes et que
+-- toute demande de reinitialisation echouerait en erreur 500.
+alter table public.users
+  add column if not exists reset_token_hash text,
+  add column if not exists reset_expires_at timestamptz;
+
 create index if not exists users_active_role_idx on public.users (role) where status = 'active';
 
 -- =============================================================================
@@ -100,8 +108,18 @@ create table if not exists public.auth_sessions (
   created_at   timestamptz not null default now(),
   last_seen_at timestamptz not null default now(),
   expires_at   timestamptz not null,
+  -- Borne absolue : `expires_at` glisse a chaque requete, si bien qu'un poste
+  -- utilise en continu ne se fermerait jamais. Colonne nullable, parce que les
+  -- bases anterieures a son ajout contiennent des lignes sans valeur et que
+  -- `session.auth.service.js` traite l'absence comme « pas de borne ».
+  absolute_expires_at timestamptz,
   updated_at   timestamptz not null default now()
 );
+
+-- Rattrape les bases creees avant l'ajout de la borne absolue : `create table
+-- if not exists` ci-dessus ne touche pas une table deja presente.
+alter table public.auth_sessions
+  add column if not exists absolute_expires_at timestamptz;
 
 create index if not exists auth_sessions_user_idx on public.auth_sessions (user_id);
 -- Le menage des sessions expirees passe par cet index.

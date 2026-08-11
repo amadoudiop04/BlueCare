@@ -16,6 +16,9 @@ import ProfilePage from '@/pages/ProfilePage.jsx'
 import ResetPasswordPage from '@/pages/ResetPasswordPage.jsx'
 import SessionReportPage from '@/pages/SessionReportPage.jsx'
 import SharedProgressPage from '@/pages/SharedProgressPage.jsx'
+import UserEditPage from '@/pages/UserEditPage.jsx'
+import UserFormPage from '@/pages/UserFormPage.jsx'
+import UsersPage from '@/pages/UsersPage.jsx'
 
 /**
  * Routage de l'application.
@@ -63,11 +66,13 @@ function App() {
                 </RequireAuth>
               }
             />
-            {/* Avant `:childId`, sinon « nouveau » serait pris pour un identifiant. */}
+            {/* Avant `:childId`, sinon « nouveau » serait pris pour un identifiant.
+                Un éducateur y a accès depuis qu'il inscrit les enfants de ses
+                groupes ; le serveur borne le groupe possible. */}
             <Route
               path="enfants/nouveau"
               element={
-                <RequireAuth roles={['director', 'admin']}>
+                <RequireAuth roles={['educator', 'director', 'admin']}>
                   <ChildFormPage />
                 </RequireAuth>
               }
@@ -94,6 +99,33 @@ function App() {
               element={
                 <RequireAuth roles={['nurse', 'director', 'admin']}>
                   <MedicationsPage />
+                </RequireAuth>
+              }
+            />
+            {/* Comptes : meme perimetre que `user.routes.js`, qui reserve tout
+                le routeur a la direction. */}
+            <Route
+              path="comptes"
+              element={
+                <RequireAuth roles={['director', 'admin']}>
+                  <UsersPage />
+                </RequireAuth>
+              }
+            />
+            {/* Avant `:userId`, sinon « nouveau » serait pris pour un identifiant. */}
+            <Route
+              path="comptes/nouveau"
+              element={
+                <RequireAuth roles={['director', 'admin']}>
+                  <UserFormPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="comptes/:userId"
+              element={
+                <RequireAuth roles={['director', 'admin']}>
+                  <UserEditPage />
                 </RequireAuth>
               }
             />

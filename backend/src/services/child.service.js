@@ -15,7 +15,14 @@ import { medicationModel } from '../models/medication.model.js'
 import { reportModel } from '../models/report.model.js'
 import { sessionModel } from '../models/session.model.js'
 import { userModel } from '../models/user.model.js'
-import { redactChild, redactChildren, requireChildAccess, scopeFilter } from './access.service.js'
+import {
+  assertGroupWithinScope,
+  hasMedicalAccess,
+  redactChild,
+  redactChildren,
+  requireChildAccess,
+  scopeFilter,
+} from './access.service.js'
 import { ApiError } from '../utils/ApiError.js'
 import { ageInYears, today } from '../utils/dates.js'
 import {
@@ -245,8 +252,19 @@ export const childService = {
     return redactChild(user, withComputed(await requireChildAccess(user, childId)))
   },
 
-  async create(payload) {
+  /**
+   * Création d'une fiche.
+   *
+   * Ouverte aux éducateurs depuis qu'ils inscrivent eux-mêmes les enfants
+   * qu'ils accompagnent, mais le groupe reste borne a leur périmètre — et le
+   * médecin référent, qu'ils n'ont pas le droit de relire, est ignore plutôt
+   * qu'enregistre a l'aveugle.
+   */
+  async create(payload, user) {
     const data = normalizeChildPayload(payload)
+    assertGroupWithinScope(user, data.group)
+
+    if (!hasMedicalAccess(user)) delete data.referringDoctor
 
     const duplicate = await childModel.findDuplicate(data)
     if (duplicate) {
@@ -262,7 +280,7 @@ export const childService = {
       ...data,
     })
 
-    return withComputed(child)
+    return redactChild(user, withComputed(child))
   },
 
   async update(childId, payload, user) {

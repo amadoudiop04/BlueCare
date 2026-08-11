@@ -23,7 +23,19 @@ export function createApp() {
    * sans lui, le navigateur ne l'enverrait pas. En contrepartie l'origine doit
    * être explicite — le joker `*` est interdit avec des identifiants.
    */
-  app.use(cors({ origin: env.corsOrigin, credentials: true }))
+  /*
+   * `exposedHeaders` : sans elle, le navigateur cache `Content-Disposition` a
+   * l'interface, qui telechargerait alors les rapports PDF sous un nom
+   * invente côté client. En local l'API passe par le proxy Vite et la question
+   * ne se pose pas ; en ligne, front et API sont sur deux domaines.
+   */
+  app.use(
+    cors({
+      origin: env.corsOrigin,
+      credentials: true,
+      exposedHeaders: ['Content-Disposition'],
+    }),
+  )
 
   // Le cookie de session est `sameSite: strict` : le navigateur ne l'attache a
   // aucune requête venue d'un autre site, ce qui coupe les attaques CSRF.

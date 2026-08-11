@@ -102,6 +102,101 @@ describe('Changer son mot de passe', () => {
   })
 })
 
+describe('Modifier son profil', () => {
+  const patchProfile = (account, body) =>
+    api('/auth/me', { method: 'PATCH', token: account.token, body })
+
+  it('change nom, prenom et telephone sans demander le mot de passe', async () => {
+    const account = await createUserWithToken(api, { role: 'educator' })
+
+    const { status, body } = await patchProfile(account, {
+      firstName: 'Awa',
+      lastName: 'Sanou',
+      phone: '+226 70 55 44 33',
+    })
+
+    assert.equal(status, 200, JSON.stringify(body))
+    assert.equal(body.data.user.firstName, 'Awa')
+    assert.equal(body.data.user.phone, '+226 70 55 44 33')
+    assert.equal(body.data.emailChanged, false)
+
+    const me = await api('/auth/me', { token: account.token })
+    assert.equal(me.body.data.user.lastName, 'Sanou')
+  })
+
+  it('efface le telephone quand le champ est vide', async () => {
+    const account = await createUserWithToken(api, { role: 'educator' })
+    await patchProfile(account, { phone: '+226 70 11 22 33' })
+
+    const { status, body } = await patchProfile(account, { phone: '' })
+
+    assert.equal(status, 200)
+    assert.equal(body.data.user.phone, null)
+  })
+
+  it("exige le mot de passe pour changer d adresse e-mail", async () => {
+    const account = await createUserWithToken(api, { role: 'educator' })
+
+    const missing = await patchProfile(account, { email: 'nouvelle.adresse@test.local' })
+    assert.equal(missing.status, 400)
+    assert.ok(missing.body.details.currentPassword)
+
+    const wrong = await patchProfile(account, {
+      email: 'nouvelle.adresse@test.local',
+      currentPassword: 'pas-le-bon',
+    })
+    assert.equal(wrong.status, 401)
+
+    // Rien n'a bouge : les deux refus doivent laisser l'adresse d'origine.
+    const me = await api('/auth/me', { token: account.token })
+    assert.equal(me.body.data.user.email, account.email)
+  })
+
+  it('remplace l adresse de connexion une fois le mot de passe confirme', async () => {
+    const account = await createUserWithToken(api, { role: 'educator' })
+    const nouvelle = `change.${Math.random().toString(36).slice(2, 8)}@test.local`
+
+    const { status, body } = await patchProfile(account, {
+      email: nouvelle,
+      currentPassword: PASSWORD,
+    })
+
+    assert.equal(status, 200, JSON.stringify(body))
+    assert.equal(body.data.emailChanged, true)
+
+    assert.equal((await loginWith(nouvelle)).status, 200)
+    assert.equal((await loginWith(account.email)).status, 401)
+  })
+
+  it('refuse une adresse deja prise par un autre compte', async () => {
+    const account = await createUserWithToken(api, { role: 'educator' })
+    const autre = await createUserWithToken(api, { role: 'educator' })
+
+    const { status } = await patchProfile(account, {
+      email: autre.email,
+      currentPassword: PASSWORD,
+    })
+
+    assert.equal(status, 409)
+  })
+
+  it('ignore un role ou un perimetre glisse dans le corps', async () => {
+    const account = await createUserWithToken(api, { role: 'educator', groups: ['Les Bleuets'] })
+
+    const { status, body } = await patchProfile(account, {
+      firstName: 'Awa',
+      role: 'admin',
+      groups: ['Les Coquelicots'],
+      status: 'disabled',
+    })
+
+    assert.equal(status, 200)
+    assert.equal(body.data.user.role, 'educator')
+    assert.deepEqual(body.data.user.groups, ['Les Bleuets'])
+    assert.equal(body.data.user.status, 'active')
+  })
+})
+
 describe('Supprimer son compte', () => {
   it('annonce ce qui sera efface avant de le faire', async () => {
     const account = await createUserWithToken(api, {

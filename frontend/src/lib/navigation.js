@@ -15,6 +15,7 @@ const ALL_ITEMS = [
   { to: '/comptes-rendus', label: 'Comptes-rendus', roles: ['educator', 'director', 'admin'] },
   { to: '/presences', label: 'Présences', roles: STAFF },
   { to: '/medicaments', label: 'Médicaments', roles: ['nurse', 'director', 'admin'] },
+  { to: '/comptes', label: 'Comptes', roles: ['director', 'admin'] },
   { to: '/espace-famille', label: 'Espace famille', roles: ['family', 'admin'] },
   { to: '/profil', label: 'Mon profil', roles: [...STAFF, 'family'] },
 ]

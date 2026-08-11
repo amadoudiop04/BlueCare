@@ -13,6 +13,7 @@ import {
 import PasswordInput from '@/components/ui/PasswordInput.jsx'
 import AccountDangerZone from '@/features/auth/AccountDangerZone.jsx'
 import MfaCard from '@/features/auth/MfaCard.jsx'
+import ProfileInfoCard from '@/features/auth/ProfileInfoCard.jsx'
 import SessionsCard from '@/features/auth/SessionsCard.jsx'
 import { changePassword } from '@/api/auth.api.js'
 import { fetchNotifications } from '@/api/tracking.api.js'
@@ -37,9 +38,11 @@ function ProfilePage() {
 
   const permissions = permissionsFor(user.role)
 
+  // Ce que l'utilisateur ne peut pas changer lui-même : son rôle et son
+  // périmètre viennent de la direction, les dates du serveur. Le reste
+  // (identité, adresse e-mail, téléphone) se modifie dans `ProfileInfoCard`.
   const infos = [
     { key: 'Fonction', value: roleLabel(user.role) },
-    { key: 'Adresse e-mail', value: user.email },
     {
       key: user.role === 'family' ? 'Enfants rattaches' : 'Groupes assignes',
       value:
@@ -83,8 +86,14 @@ function ProfilePage() {
 
         <div className="grid items-start gap-[18px] xl:grid-cols-2">
           <div className="flex flex-col gap-[18px]">
+            <ProfileInfoCard />
+
             <Card className="px-6 py-[22px]">
-              <CardHeader className="mb-4" title="Informations professionnelles" />
+              <CardHeader
+                className="mb-4"
+                title="Rôle et périmètre"
+                subtitle="Definis par la direction · non modifiables ici"
+              />
               {infos.map((info) => (
                 <div
                   key={info.key}

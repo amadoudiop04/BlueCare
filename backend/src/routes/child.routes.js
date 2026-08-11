@@ -40,7 +40,9 @@ const pedagogy = authorize(...PEDAGOGY_ROLES)
 const medical = authorize(...MEDICAL_ROLES)
 
 router.get('/', asyncHandler(listChildren))
-router.post('/', authorize(...DIRECTION_ROLES), asyncHandler(createChild))
+// Un éducateur inscrit un enfant dans ses propres groupes : le rôle ouvre la
+// route, `assertGroupWithinScope` (access.service) borne le groupe possible.
+router.post('/', pedagogy, asyncHandler(createChild))
 
 router.get('/:childId', asyncHandler(getChild))
 router.patch('/:childId', medical, asyncHandler(updateChild))

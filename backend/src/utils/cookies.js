@@ -17,6 +17,21 @@ import { isProduction } from '../config/env.js'
 
 export const SESSION_COOKIE = 'bluecare_session'
 
+/**
+ * Temoin de session, lisible par l'interface.
+ *
+ * Il ne contient aucun secret — seulement « une session existe » — et sert a
+ * une seule chose : permettre au navigateur de savoir s'il vaut la peine
+ * d'appeler `GET /auth/me` au démarrage. Sans lui, l'application interrogeait
+ * le serveur a chaque ouverture de l'écran de connexion et récoltait un 401
+ * parfaitement normal, mais affiche en rouge dans la console — de quoi faire
+ * chercher une panne inexistante.
+ *
+ * Il expire avec la session qu'il annonce. Le jeton, lui, reste `httpOnly` :
+ * c'est bien ce cookie-ci qu'un script peut lire, et il n'ouvre rien.
+ */
+export const SESSION_HINT_COOKIE = 'bluecare_signed_in'
+
 const baseOptions = () => ({
   httpOnly: true,
   sameSite: 'strict',
@@ -24,15 +39,19 @@ const baseOptions = () => ({
   path: '/',
 })
 
+const hintOptions = () => ({ ...baseOptions(), httpOnly: false })
+
 export function setSessionCookie(res, token, expiresAt) {
-  res.cookie(SESSION_COOKIE, token, {
-    ...baseOptions(),
-    expires: new Date(expiresAt),
-  })
+  const expires = new Date(expiresAt)
+
+  // Le jeton d'abord : des clients lisent le premier cookie de la réponse.
+  res.cookie(SESSION_COOKIE, token, { ...baseOptions(), expires })
+  res.cookie(SESSION_HINT_COOKIE, '1', { ...hintOptions(), expires })
 }
 
 export function clearSessionCookie(res) {
   res.clearCookie(SESSION_COOKIE, baseOptions())
+  res.clearCookie(SESSION_HINT_COOKIE, hintOptions())
 }
 
 /** Lit un cookie dans l'en-tête `Cookie` de la requête. */

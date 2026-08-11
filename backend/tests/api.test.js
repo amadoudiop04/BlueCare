@@ -132,6 +132,57 @@ describe('Fiches enfants', () => {
   it('repond 404 sur un enfant inconnu', async () => {
     assert.equal((await asDirector('/children/chd_inconnu')).status, 404)
   })
+
+  it('laisse un educateur inscrire un enfant dans son groupe', async () => {
+    const { status, body } = await api('/children', {
+      method: 'POST',
+      token: educator.token,
+      body: childPayload({ lastName: 'Inscrit', group: 'Les Coquelicots' }),
+    })
+
+    assert.equal(status, 201, JSON.stringify(body))
+    assert.equal(body.data.group, 'Les Coquelicots')
+
+    // La fiche tombe bien dans son perimetre : il la relit sans 403.
+    const relu = await api(`/children/${body.data.id}`, { token: educator.token })
+    assert.equal(relu.status, 200)
+  })
+
+  it('refuse a un educateur un groupe hors de son perimetre', async () => {
+    const { status } = await api('/children', {
+      method: 'POST',
+      token: educator.token,
+      body: childPayload({ lastName: 'HorsPerimetre', group: 'Les Tournesols' }),
+    })
+
+    assert.equal(status, 403)
+  })
+
+  it('ignore le medecin referent saisi par un educateur', async () => {
+    const created = await api('/children', {
+      method: 'POST',
+      token: educator.token,
+      body: childPayload({ lastName: 'SansMedecin', group: 'Les Coquelicots' }),
+    })
+    assert.equal(created.status, 201)
+    assert.equal(created.body.data.referringDoctor, null)
+
+    // Ni enregistre en base : la direction ne doit pas heriter d une donnee
+    // medicale saisie par quelqu un qui ne peut pas la relire.
+    const parDirection = await asDirector(`/children/${created.body.data.id}`)
+    assert.equal(parDirection.body.data.referringDoctor, null)
+  })
+
+  it('refuse la creation a l infirmiere', async () => {
+    const nurse = await createUserWithToken(api, { role: 'nurse' })
+    const { status } = await api('/children', {
+      method: 'POST',
+      token: nurse.token,
+      body: childPayload({ lastName: 'ParInfirmiere' }),
+    })
+
+    assert.equal(status, 403)
+  })
 })
 
 describe('Presences quotidiennes', () => {

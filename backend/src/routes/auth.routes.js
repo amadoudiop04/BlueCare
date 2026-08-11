@@ -17,6 +17,7 @@ import {
   revokeOtherSessions,
   revokeSession,
   startMfaEnrollment,
+  updateProfile,
   verifyMfa,
 } from '../controllers/auth.controller.js'
 import { authenticate } from '../middlewares/authenticate.js'
@@ -47,6 +48,9 @@ router.post('/password/reset/:token', asyncHandler(resetPassword))
 router.post('/logout', asyncHandler(logout))
 
 router.get('/me', authenticate, asyncHandler(me))
+// Ses propres informations. Le rôle et le périmètre n'y figurent pas : ils
+// restent la prerogative de la direction (`/api/users/:id`).
+router.patch('/me', authenticate, asyncHandler(updateProfile))
 router.post('/password', authenticate, asyncHandler(changePassword))
 
 // Suppression de son propre compte. `GET` decrit d'abord ce qui sera efface

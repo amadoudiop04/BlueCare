@@ -6,6 +6,7 @@ import {
   Button,
   Card,
   CardHeader,
+  EmptyState,
   ErrorNotice,
   Field,
   Skeleton,
@@ -13,7 +14,9 @@ import {
 import { createChild } from '@/api/children.api.js'
 import { fetchReference } from '@/api/tracking.api.js'
 import { useApi } from '@/hooks/useApi.js'
+import { useAuth } from '@/hooks/useAuth.js'
 import { todayIso } from '@/lib/format.js'
+import { canReadMedical } from '@/lib/roles.js'
 import { cx, inputClass } from '@/lib/ui.js'
 
 /**
@@ -22,6 +25,11 @@ import { cx, inputClass } from '@/lib/ui.js'
  * Les listes de valeurs (types de handicap, relations, groupes existants)
  * viennent de `/api/reference` : aucune n'est écrite en dur ici, elles suivent
  * le vocabulaire du serveur.
+ *
+ * Un éducateur inscrit lui-même les enfants qu'il accompagne, mais seulement
+ * dans ses groupes : le champ devient une liste fermee, et le serveur applique
+ * la même règle (`access.service.js`). Le médecin référent lui est masque —
+ * c'est une donnée médicale, qu'il ne pourrait pas relire ensuite.
  */
 
 const emptyContact = () => ({
@@ -35,7 +43,13 @@ const emptyContact = () => ({
 
 function ChildFormPage() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const { data: reference, loading } = useApi(fetchReference, [])
+
+  // Un éducateur ne choisit pas son groupe librement : il est borne au sien.
+  // Les autres rôles écrivent le groupe qu'ils veulent, y compris un nouveau.
+  const ownGroups = user.role === 'educator' ? (user.groups ?? []) : null
+  const showDoctor = canReadMedical(user.role)
 
   const [identity, setIdentity] = useState({
     firstName: '',
@@ -43,7 +57,8 @@ function ChildFormPage() {
     birthDate: '',
     gender: '',
     address: '',
-    group: '',
+    // Un seul groupe : autant le poser d'emblée, il n'y a rien a choisir.
+    group: ownGroups?.length === 1 ? ownGroups[0] : '',
     enrolledAt: todayIso(),
   })
   const [disability, setDisability] = useState({ type: '', details: '', supportPlan: '' })
@@ -85,7 +100,7 @@ function ChildFormPage() {
         ...clean(identity),
         disability: clean(disability),
         familyContacts: contacts.map((contact) => clean(contact)),
-        ...(doctor.lastName ? { referringDoctor: clean(doctor) } : {}),
+        ...(showDoctor && doctor.lastName ? { referringDoctor: clean(doctor) } : {}),
       })
 
       navigate(`/enfants/${child.id}`)
@@ -104,6 +119,27 @@ function ChildFormPage() {
         <PageHeader crumb="Gestion des enfants" title="Nouvelle fiche" />
         <PageBody>
           <Skeleton height={520} className="rounded-2xl" />
+        </PageBody>
+      </>
+    )
+  }
+
+  // Sans groupe, un éducateur créerait une fiche qui lui deviendrait invisible
+  // aussitôt : le serveur la refuse, autant le dire avant la saisie.
+  if (ownGroups?.length === 0) {
+    return (
+      <>
+        <PageHeader crumb="Gestion des enfants" title="Nouvelle fiche enfant" />
+        <PageBody>
+          <EmptyState
+            title="Aucun groupe ne vous est assigne"
+            description="La direction doit vous rattacher a un groupe avant que vous puissiez y inscrire un enfant."
+            action={
+              <Button variant="secondary" onClick={() => navigate('/enfants')}>
+                Retour aux enfants
+              </Button>
+            }
+          />
         </PageBody>
       </>
     )
@@ -167,21 +203,45 @@ function ChildFormPage() {
 
               <Field
                 label="Groupe"
-                hint="Choisissez un groupe existant ou saisissez-en un nouveau"
+                hint={
+                  ownGroups
+                    ? ownGroups.length === 1
+                      ? 'Votre groupe'
+                      : 'Parmi les groupes qui vous sont assignes'
+                    : 'Choisissez un groupe existant ou saisissez-en un nouveau'
+                }
                 error={errorFor('group')}
               >
-                <input
-                  required
-                  list="groupes-existants"
-                  value={identity.group}
-                  onChange={(event) => setIdentity({ ...identity, group: event.target.value })}
-                  className={inputClass}
-                />
-                <datalist id="groupes-existants">
-                  {reference.groups.map((group) => (
-                    <option key={group} value={group} />
-                  ))}
-                </datalist>
+                {ownGroups ? (
+                  <select
+                    required
+                    value={identity.group}
+                    onChange={(event) => setIdentity({ ...identity, group: event.target.value })}
+                    className={cx(inputClass, 'cursor-pointer')}
+                  >
+                    {ownGroups.length > 1 ? <option value="">Choisir…</option> : null}
+                    {ownGroups.map((group) => (
+                      <option key={group} value={group}>
+                        {group}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <>
+                    <input
+                      required
+                      list="groupes-existants"
+                      value={identity.group}
+                      onChange={(event) => setIdentity({ ...identity, group: event.target.value })}
+                      className={inputClass}
+                    />
+                    <datalist id="groupes-existants">
+                      {reference.groups.map((group) => (
+                        <option key={group} value={group} />
+                      ))}
+                    </datalist>
+                  </>
+                )}
               </Field>
 
               <Field label="Date d'entree" error={errorFor('enrolledAt')}>
@@ -366,39 +426,41 @@ function ChildFormPage() {
             </div>
           </Card>
 
-          <Card className="px-6 py-[22px]">
-            <CardHeader
-              className="mb-4"
-              title="Médecin référent (optionnel)"
-              subtitle="Visible par l'infirmière et la direction uniquement"
-            />
+          {showDoctor ? (
+            <Card className="px-6 py-[22px]">
+              <CardHeader
+                className="mb-4"
+                title="Médecin référent (optionnel)"
+                subtitle="Visible par l'infirmière et la direction uniquement"
+              />
 
-            <div className="grid gap-3 sm:grid-cols-3">
-              <Field label="Nom" error={errorFor('referringDoctor.lastName')}>
-                <input
-                  value={doctor.lastName}
-                  onChange={(event) => setDoctor({ ...doctor, lastName: event.target.value })}
-                  className={inputClass}
-                />
-              </Field>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <Field label="Nom" error={errorFor('referringDoctor.lastName')}>
+                  <input
+                    value={doctor.lastName}
+                    onChange={(event) => setDoctor({ ...doctor, lastName: event.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
 
-              <Field label="Specialite">
-                <input
-                  value={doctor.specialty}
-                  onChange={(event) => setDoctor({ ...doctor, specialty: event.target.value })}
-                  className={inputClass}
-                />
-              </Field>
+                <Field label="Specialite">
+                  <input
+                    value={doctor.specialty}
+                    onChange={(event) => setDoctor({ ...doctor, specialty: event.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
 
-              <Field label="Téléphone" error={errorFor('referringDoctor.phone')}>
-                <input
-                  value={doctor.phone}
-                  onChange={(event) => setDoctor({ ...doctor, phone: event.target.value })}
-                  className={inputClass}
-                />
-              </Field>
-            </div>
-          </Card>
+                <Field label="Téléphone" error={errorFor('referringDoctor.phone')}>
+                  <input
+                    value={doctor.phone}
+                    onChange={(event) => setDoctor({ ...doctor, phone: event.target.value })}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+            </Card>
+          ) : null}
 
           <div className="flex items-center gap-2.5">
             <Button type="submit" disabled={submitting} className="px-[22px] py-3.5 text-[13.5px]">

@@ -56,6 +56,11 @@ async function loadChildren(status) {
   }
 }
 
+/*
+ * La direction inscrit dans n'importe quel groupe, l'éducateur dans les siens
+ * (le serveur borne le groupe, voir `access.service.js`). L'infirmière ne cree
+ * pas de fiche : elle suit les traitements de celles qui existent.
+ */
 function ChildrenPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -79,6 +84,7 @@ function ChildrenPage() {
   }, [data, search, group])
 
   const groups = data?.groups ?? []
+  const canCreate = ['educator', 'director', 'admin'].includes(user.role)
 
   return (
     <>
@@ -87,8 +93,7 @@ function ChildrenPage() {
         title="Enfants accompagnés"
         search={<HeaderSearch value={search} onChange={setSearch} />}
         action={
-          // La création d'une fiche appartient a la direction.
-          ['director', 'admin'].includes(user.role) ? (
+          canCreate ? (
             <Button onClick={() => navigate('/enfants/nouveau')}>+ Nouvel enfant</Button>
           ) : null
         }
@@ -97,6 +102,13 @@ function ChildrenPage() {
       <PageBody>
         <ErrorNotice error={error} onRetry={reload} />
 
+        {/*
+          Deux filtres independants — le groupe et le statut — d'ou deux lignes
+          distinctes. Melanges sur une seule, « Archives » passait pour un
+          groupe de plus : on cliquait ensuite sur « Les Bleuets » en croyant
+          revenir aux fiches actives, et la liste restait dans les archives sans
+          que rien ne l'explique.
+        */}
         <div className="flex flex-wrap items-center gap-2.5">
           <FilterChip active={group === null} onClick={() => setGroup(null)}>
             Tous les groupes
@@ -107,20 +119,22 @@ function ChildrenPage() {
             </FilterChip>
           ))}
 
-          <span className="mx-1 h-5 w-px bg-line" aria-hidden="true" />
-
-          <FilterChip
-            active={status === 'archived'}
-            onClick={() => setStatus(status === 'archived' ? 'active' : 'archived')}
-          >
-            Archives
-          </FilterChip>
-
           <div className="flex-1" />
           <span className="text-[12.5px] text-muted">
             {loading ? '…' : `${visible.length} enfant${visible.length > 1 ? 's' : ''}`}
             {user.role === 'educator' ? ' dans vos groupes' : ' accompagnés'}
+            {status === 'archived' ? ' · archives' : ''}
           </span>
+        </div>
+
+        <div className="-mt-2.5 flex flex-wrap items-center gap-2.5">
+          <span className="text-[12.5px] font-semibold text-muted">Statut</span>
+          <FilterChip active={status === 'active'} onClick={() => setStatus('active')}>
+            Fiches actives
+          </FilterChip>
+          <FilterChip active={status === 'archived'} onClick={() => setStatus('archived')}>
+            Archives
+          </FilterChip>
         </div>
 
         {loading ? (
@@ -131,13 +145,36 @@ function ChildrenPage() {
           </div>
         ) : visible.length === 0 ? (
           <EmptyState
-            title={status === 'archived' ? 'Aucune fiche archivee' : 'Aucun enfant a afficher'}
+            title={
+              status === 'archived'
+                ? group
+                  ? `Aucune fiche archivee dans ${group}`
+                  : 'Aucune fiche archivee'
+                : 'Aucun enfant a afficher'
+            }
             description={
               status === 'archived'
-                ? 'Les fiches des enfants sortis du centre apparaitront ici.'
+                ? 'Les fiches des enfants sortis du centre apparaissent ici. Les fiches en cours sont sous « Fiches actives ».'
                 : search || group
                   ? 'Aucun enfant ne correspond a ce filtre.'
                   : "Votre périmètre ne contient aucun enfant pour l'instant."
+            }
+            /*
+             * Une liste vide sans rien a faire est une impasse. Depuis les
+             * archives, la sortie est de revenir aux fiches actives — c'est ce
+             * que cherche quiconque atterrit ici par erreur. Ailleurs, et quand
+             * le rôle le permet, c'est la création qui part d'ici.
+             */
+            action={
+              status === 'archived' ? (
+                <Button onClick={() => setStatus('active')}>
+                  {group ? `Voir les fiches actives de ${group}` : 'Voir les fiches actives'}
+                </Button>
+              ) : canCreate && !search && !group ? (
+                <Button onClick={() => navigate('/enfants/nouveau')}>
+                  Créer la première fiche
+                </Button>
+              ) : null
             }
           />
         ) : (

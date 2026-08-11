@@ -24,6 +24,9 @@ const canReadMedical = (user) => ROLES_WITH_MEDICAL_ACCESS.includes(user.role)
 
 const isReadOnly = (user) => READ_ONLY_ROLES.includes(user.role)
 
+/** Exporte pour les services qui doivent decider s'ils acceptent un champ medical. */
+export const hasMedicalAccess = canReadMedical
+
 /** Filtre a appliquer aux listes pour n'exposer que le périmètre de l'appelant. */
 export function scopeFilter(user) {
   if (hasFullScope(user)) return {}
@@ -75,6 +78,29 @@ export async function requireChildAccess(user, childId, { write = false } = {}) 
 
 export function assertCanWrite(user) {
   if (isReadOnly(user)) throw ApiError.forbidden('Votre accès\'est en lecture seule')
+}
+
+/**
+ * Vérifie qu'un groupe appartient au périmètre de l'appelant.
+ *
+ * Appele a la création d'une fiche : un éducateur peut désormais inscrire un
+ * enfant, mais seulement dans un de ses groupes. Sans ce contrôle, la route
+ * lui permettrait de créer une fiche dans un groupe qu'il n'a pas le droit de
+ * consulter — elle disparaitrait de sa vue a la seconde ou elle est écrite.
+ */
+export function assertGroupWithinScope(user, group) {
+  if (hasFullScope(user)) return
+
+  const groups = user.groups ?? []
+
+  if (groups.length === 0) {
+    throw ApiError.forbidden('Aucun groupe ne vous est assigne : demandez a la direction')
+  }
+  if (!groups.includes(group)) {
+    throw ApiError.forbidden(
+      `Vous ne pouvez créer une fiche que dans vos groupes : ${groups.join(', ')}`,
+    )
+  }
 }
 
 /**

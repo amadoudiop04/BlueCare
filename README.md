@@ -127,6 +127,7 @@ jeton dans `meta.sessionToken` et l envoient en `Authorization: Bearer <jeton>`.
 | `POST`   | `/api/auth/mfa/verify`              | `{ challengeToken, code }` -> ouvre la session            |
 | `POST`   | `/api/auth/logout`                  | Ferme la session courante et efface le cookie             |
 | `GET`    | `/api/auth/me`                      | Profil courant et perimetre (groupes, nombre d enfants)   |
+| `PATCH`  | `/api/auth/me`                      | Ses informations : nom, prenom, e-mail, telephone         |
 | `POST`   | `/api/auth/password`                | Change son mot de passe (ancien exige)                    |
 | `GET`    | `/api/auth/sessions`                | Appareils connectes                                       |
 | `DELETE` | `/api/auth/sessions/:id`            | Revoque une session a distance                            |
@@ -141,6 +142,18 @@ effet immediatement.
 
 Il reste deux jetons JWT, tous deux sans etat et de portee etroite : le lien de suivi
 famille et le defi de double authentification.
+
+`PATCH /api/auth/me` ne touche ni au role ni au perimetre : personne ne se promeut
+soi-meme, ces deux champs restent dans la gestion des comptes. Le mot de passe courant
+est exige **des que l adresse e-mail change**, et elle seule : c est elle qui recoit les
+liens de reinitialisation, donc la remplacer depuis une session volee suffirait a
+s emparer du compte.
+
+A cote du cookie de session — `httpOnly`, invisible pour JavaScript — le serveur pose un
+temoin `bluecare_signed_in`, lisible celui-la, sans aucun secret et de meme duree. Il ne
+sert qu a repondre a une question que l interface ne peut pas se poser autrement : y
+a-t-il une session a restaurer ? Sans lui, chaque ouverture de l ecran de connexion
+appelait `/auth/me` pour rien et laissait un `401` dans la console.
 
 #### Mot de passe oublie
 
@@ -192,7 +205,7 @@ Un educateur a le droit d'ouvrir une fiche enfant, mais pas n'importe laquelle.
 
 | Role         | Perimetre                   | Peut                                                                  |
 | ------------ | --------------------------- | --------------------------------------------------------------------- |
-| `educator`   | les enfants de ses groupes  | presences, activites, objectifs, seances, comptes-rendus              |
+| `educator`   | les enfants de ses groupes  | inscrire un enfant dans ses groupes, presences, activites, objectifs, seances, comptes-rendus |
 | `nurse`      | tout le centre              | donnees medicales, traitements, rappels, alertes de sante             |
 | `director`   | tout le centre              | tout, plus le tableau de bord, les exports et la gestion des comptes  |
 | `family`     | ses propres enfants         | **lecture seule** : progression, objectifs, galerie, export PDF       |
@@ -214,7 +227,7 @@ Sa portee s'arrete la : presente sur une autre route, il est refuse.
 | Methode  | URL                              | Effet                                                     |
 | -------- | -------------------------------- | --------------------------------------------------------- |
 | `GET`    | `/api/children`                  | Liste. Filtres : `search`, `group`, `disabilityType`, `status` (`all` inclut les archives), `page`, `pageSize` |
-| `POST`   | `/api/children`                  | Cree une fiche (409 si l enfant existe deja) — `director`  |
+| `POST`   | `/api/children`                  | Cree une fiche (409 si l enfant existe deja) — `educator` (dans ses groupes), `director` |
 | `GET`    | `/api/children/:id`              | Fiche individuelle complete (+ `age`, `displayName`)      |
 | `PATCH`  | `/api/children/:id`              | Mise a jour partielle — `nurse`, `director`               |
 | `DELETE` | `/api/children/:id`              | Archive la fiche ; `?purge=true` efface definitivement — `director` |
@@ -222,6 +235,11 @@ Sa portee s'arrete la : presente sur une autre route, il est refuse.
 La fiche porte : identite (`firstName`, `lastName`, `birthDate`, `gender`, `address`), `group`,
 `disability` (`type`, `details`, `recognizedAt`, `supportPlan`), `familyContacts[]`
 (`relationship`, `phone`, `email`, `isPrimary`...), `referringDoctor` et `notes`.
+
+Un educateur cree une fiche **dans ses groupes uniquement** (403 ailleurs) : autrement il
+inscrirait un enfant dans un groupe qu il n a pas le droit de consulter, et la fiche
+disparaitrait de sa vue a la seconde ou elle est ecrite. Le `referringDoctor` qu il
+enverrait est ignore — c est une donnee medicale, qu il ne pourrait pas relire.
 
 ### Presences
 
@@ -474,4 +492,4 @@ de l y copier.
 6. `frontend/src/pages/PatientsPage.jsx` — la vue
 
 admin@papillonbleu.test
-Admin2026!Test
+Admin2026!Test 

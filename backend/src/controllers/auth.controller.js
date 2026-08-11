@@ -69,6 +69,10 @@ export async function me(req, res) {
   res.json({ status: 'ok', data: await authService.me(req.user) })
 }
 
+export async function updateProfile(req, res) {
+  res.json({ status: 'ok', data: await authService.updateProfile(req.user, req.body) })
+}
+
 export async function changePassword(req, res) {
   const data = await authService.changePassword(req.user, req.session, req.body)
   res.json({ status: 'ok', data })
