@@ -156,7 +156,7 @@ function LoginPage() {
         <DeveloperCredit tone="light" className="mt-6" />
       </div>
 
-      <div className="relative flex items-center justify-center p-10">
+      <div className="relative flex items-center justify-center px-5 py-10 sm:p-10">
         <form onSubmit={onSubmit} className="w-full max-w-[372px] animate-up">
           <div className="mb-2 flex items-center gap-3 lg:hidden">
             <ButterflyMark size={38} radius={11} />

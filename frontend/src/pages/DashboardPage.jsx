@@ -373,38 +373,49 @@ function SessionsTable({ sessions, navigate, flush = false }) {
 
   return (
     <div className={flush ? '' : 'mt-2 overflow-hidden rounded-xl border border-line-soft'}>
-      <div className="grid grid-cols-[1.4fr_1fr_1fr_0.9fr] bg-[#FAFBFE] px-6 py-[11px] text-[10.5px] font-bold uppercase tracking-[0.07em] text-muted">
-        <div>Enfant</div>
-        <div>Type</div>
-        <div>Objectif travaille</div>
-        <div>Statut</div>
-      </div>
+      {/*
+        Quatre colonnes ne se compriment pas sous 620 px sans devenir
+        illisibles : le tableau defile horizontalement plutôt que d'ecraser
+        chaque cellule sur trois lignes.
+      */}
+      <div className="overflow-x-auto">
+        <div className="min-w-[620px]">
+          <div className="grid grid-cols-[1.4fr_1fr_1fr_0.9fr] bg-[#FAFBFE] px-6 py-[11px] text-[10.5px] font-bold uppercase tracking-[0.07em] text-muted">
+            <div>Enfant</div>
+            <div>Type</div>
+            <div>Objectif travaille</div>
+            <div>Statut</div>
+          </div>
 
-      {sessions.map((session) => (
-        <button
-          key={session.id}
-          type="button"
-          onClick={() => navigate(`/enfants/${session.childId}`)}
-          className="grid w-full grid-cols-[1.4fr_1fr_1fr_0.9fr] items-center border-t border-line-soft px-6 py-3.5 text-left hover:bg-[#FAFBFE]"
-        >
-          <div className="flex items-center gap-[11px]">
-            <Avatar color="#1E5FD8">{session.title?.slice(0, 2).toUpperCase() ?? 'SE'}</Avatar>
-            <div className="min-w-0">
-              <div className="truncate text-[13.5px] font-semibold">{session.title ?? 'Séance'}</div>
-              <div className="font-mono text-[11px] text-muted-light">
-                {session.startTime ?? '—'}
+          {sessions.map((session) => (
+            <button
+              key={session.id}
+              type="button"
+              onClick={() => navigate(`/enfants/${session.childId}`)}
+              className="grid w-full grid-cols-[1.4fr_1fr_1fr_0.9fr] items-center border-t border-line-soft px-6 py-3.5 text-left hover:bg-[#FAFBFE]"
+            >
+              <div className="flex items-center gap-[11px]">
+                <Avatar color="#1E5FD8">{session.title?.slice(0, 2).toUpperCase() ?? 'SE'}</Avatar>
+                <div className="min-w-0">
+                  <div className="truncate text-[13.5px] font-semibold">
+                    {session.title ?? 'Séance'}
+                  </div>
+                  <div className="font-mono text-[11px] text-muted-light">
+                    {session.startTime ?? '—'}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-          <div className="text-[13px] text-muted-strong">{session.type}</div>
-          <div className="text-[13px] text-muted-strong">
-            {session.goalIds?.length ? `${session.goalIds.length} objectif(s)` : '—'}
-          </div>
-          <div>
-            <Badge tone={STATUS_TONE[session.status]}>{STATUS_LABEL[session.status]}</Badge>
-          </div>
-        </button>
-      ))}
+              <div className="text-[13px] text-muted-strong">{session.type}</div>
+              <div className="text-[13px] text-muted-strong">
+                {session.goalIds?.length ? `${session.goalIds.length} objectif(s)` : '—'}
+              </div>
+              <div>
+                <Badge tone={STATUS_TONE[session.status]}>{STATUS_LABEL[session.status]}</Badge>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
