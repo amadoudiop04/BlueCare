@@ -136,6 +136,15 @@ export const env = {
 
   /** Jeu de données de démonstration, jamais charge en production. */
   seedDemoData: (process.env.SEED_DEMO_DATA ?? 'true') !== 'false',
+
+  /**
+   * Mot de passe des six comptes de démonstration.
+   *
+   * Volontairement sans valeur par défaut : un identifiant écrit dans le dépôt
+   * finit toujours par être essaye ailleurs. Absent, l'amorçage en tire un au
+   * hasard et l'affiche une fois dans la console (`models/seed.js`).
+   */
+  seedPassword: process.env.SEED_PASSWORD || null,
 }
 
 export const isProduction = inProduction

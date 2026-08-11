@@ -1,4 +1,4 @@
-### =========================================================================
+﻿### =========================================================================
 ### BlueCare - requetes d'exemple
 ### =========================================================================
 ### Ouvrir ce fichier dans VS Code avec l'extension « REST Client »
@@ -12,6 +12,11 @@
 ### =========================================================================
 
 @baseUrl = http://localhost:3000/api
+
+### Mot de passe des six comptes de demonstration. Il n'est PAS dans le depot :
+### c'est celui de SEED_PASSWORD (backend/.env), ou celui affiche une fois dans
+### la console au moment de l'amorcage. Le coller ici avant de commencer.
+@seedPassword = a-coller-depuis-backend/.env
 
 ### -------------------------------------------------------------------------
 ### 1. Sonde de sante (seule route ouverte sans jeton)
@@ -30,7 +35,7 @@ Content-Type: application/json
 
 {
   "email": "directrice@papillonbleu.test",
-  "password": "Directrice2026!"
+  "password": "{{seedPassword}}"
 }
 
 ###
@@ -43,7 +48,7 @@ Content-Type: application/json
 
 {
   "email": "educateur.coquelicots@papillonbleu.test",
-  "password": "Educateur2026!"
+  "password": "{{seedPassword}}"
 }
 
 ###
@@ -56,7 +61,7 @@ Content-Type: application/json
 
 {
   "email": "infirmiere@papillonbleu.test",
-  "password": "Infirmiere2026!"
+  "password": "{{seedPassword}}"
 }
 
 ###
@@ -69,7 +74,7 @@ Content-Type: application/json
 
 {
   "email": "famille.bakayoko@papillonbleu.test",
-  "password": "Famille2026!"
+  "password": "{{seedPassword}}"
 }
 
 ###
@@ -98,7 +103,7 @@ Content-Type: application/json
 
 {
   "email": "awa.sanou@papillonbleu.test",
-  "currentPassword": "Educateur2026!"
+  "currentPassword": "{{seedPassword}}"
 }
 
 ### Changer son mot de passe
@@ -107,7 +112,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "currentPassword": "Directrice2026!",
+  "currentPassword": "{{seedPassword}}",
   "newPassword": "NouveauSecret2026!"
 }
 

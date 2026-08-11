@@ -442,18 +442,25 @@ doit jamais etre exposee au navigateur.
 
 ### Jeu de demonstration
 
-Cinq comptes (un par role), cinq enfants, sept semaines de presences, quatre activites, six
+Six comptes (un par role, deux educateurs), cinq enfants, sept semaines de presences, quatre activites, six
 mois d objectifs et de comptes-rendus, deux traitements — de quoi voir les alertes, les
 courbes et les rappels des le premier demarrage. En memoire il est recharge a chaque
 demarrage ; avec Supabase il est ecrit une fois par `npm run seed`.
 
-| Compte de demonstration                        | Mot de passe       | Role                        |
-| ---------------------------------------------- | ------------------ | --------------------------- |
-| `directrice@papillonbleu.test`                 | `Directrice2026!`  | directeur                   |
-| `infirmiere@papillonbleu.test`                 | `Infirmiere2026!`  | infirmiere                  |
-| `educateur.coquelicots@papillonbleu.test`      | `Educateur2026!`   | educateur (Les Coquelicots) |
-| `educateur.bleuets@papillonbleu.test`          | `Educateur2026!`   | educateur (Les Bleuets)     |
-| `famille.bakayoko@papillonbleu.test`           | `Famille2026!`     | famille (Lina)              |
+| Compte de demonstration                        | Role                        |
+| ---------------------------------------------- | --------------------------- |
+| `admin@papillonbleu.test`                      | administrateur              |
+| `directrice@papillonbleu.test`                 | directeur                   |
+| `infirmiere@papillonbleu.test`                 | infirmiere                  |
+| `educateur.coquelicots@papillonbleu.test`      | educateur (Les Coquelicots) |
+| `educateur.bleuets@papillonbleu.test`          | educateur (Les Bleuets)     |
+| `famille.bakayoko@papillonbleu.test`           | famille (Lina)              |
+
+**Aucun mot de passe n est ecrit dans le depot.** Les six comptes partagent celui de
+`SEED_PASSWORD` (`backend/.env`, hors depot). Laisse vide, l amorcage en tire un au hasard
+et l affiche **une seule fois** dans la console — seul son hachage est conserve, donc le
+relire ensuite est impossible. En stockage memoire, le jeu etant recharge a chaque
+demarrage, un `SEED_PASSWORD` fixe evite d aller rechercher la valeur dans les journaux.
 
 ## Tests
 
@@ -490,6 +497,3 @@ de l y copier.
 4. `backend/src/routes/patient.routes.js` — puis monter la route dans `routes/index.js`
 5. `frontend/src/api/patient.api.js` — appels via `apiClient`
 6. `frontend/src/pages/PatientsPage.jsx` — la vue
-
-admin@papillonbleu.test
-Admin2026!Test 

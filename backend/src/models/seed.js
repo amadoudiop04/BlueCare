@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
 
 import { activityModel } from './activity.model.js'
 import { attendanceModel } from './attendance.model.js'
@@ -8,6 +8,7 @@ import { medicationModel } from './medication.model.js'
 import { reportModel } from './report.model.js'
 import { sessionModel } from './session.model.js'
 import { userModel } from './user.model.js'
+import { env } from '../config/env.js'
 import { addDays, addMonths, isWeekend, today } from '../utils/dates.js'
 import { hashPasswordSync } from '../utils/password.js'
 
@@ -216,8 +217,13 @@ const CHILDREN = [
 
 /**
  * Comptes de démonstration, un par rôle.
- * Mots de passe en clair ici parce qu'ils ne servent qu'en développement :
- * `SEED_DEMO_DATA=false` ou `NODE_ENV=production` empêche leur création.
+ *
+ * Aucun mot de passe n'est écrit ici : un identifiant en clair dans le dépôt
+ * finit toujours par être essaye ailleurs, et la personne qui reprend le
+ * projet n'a aucun moyen de savoir s'il a été change. Les six comptes
+ * partagent celui de `SEED_PASSWORD` (`backend/.env`, hors dépôt), ou a
+ * défaut un mot de passe tire au hasard a chaque amorçage, affiche une fois
+ * dans la console.
  */
 const USERS = [
   {
@@ -227,7 +233,6 @@ const USERS = [
     // « Mon profil » permet de l'activer et de tester le parcours complet.
     key: 'admin',
     email: 'admin@papillonbleu.test',
-    password: 'Admin2026!Test',
     role: 'admin',
     firstName: 'Compte',
     lastName: 'Administrateur',
@@ -235,7 +240,6 @@ const USERS = [
   {
     key: 'director',
     email: 'directrice@papillonbleu.test',
-    password: 'Directrice2026!',
     role: 'director',
     firstName: 'Nadia',
     lastName: 'Compaore',
@@ -243,7 +247,6 @@ const USERS = [
   {
     key: 'nurse',
     email: 'infirmiere@papillonbleu.test',
-    password: 'Infirmiere2026!',
     role: 'nurse',
     firstName: 'Sarah',
     lastName: 'Zongo',
@@ -251,7 +254,6 @@ const USERS = [
   {
     key: 'educatorCoquelicots',
     email: 'educateur.coquelicots@papillonbleu.test',
-    password: 'Educateur2026!',
     role: 'educator',
     firstName: 'Yacouba',
     lastName: 'Sawadogo',
@@ -260,7 +262,6 @@ const USERS = [
   {
     key: 'educatorBleuets',
     email: 'educateur.bleuets@papillonbleu.test',
-    password: 'Educateur2026!',
     role: 'educator',
     firstName: 'Mariam',
     lastName: 'Kone',
@@ -269,13 +270,26 @@ const USERS = [
   {
     key: 'family',
     email: 'famille.bakayoko@papillonbleu.test',
-    password: 'Famille2026!',
     role: 'family',
     firstName: 'Aminata',
     lastName: 'Bakayoko',
     childKeys: ['lina'],
   },
 ]
+
+/**
+ * Mot de passe commun aux six comptes.
+ *
+ * `SEED_PASSWORD` s'il est renseigne — c'est le confort de qui developpe tous
+ * les jours, avec un mot de passe stable d'un amorçage a l'autre. Sinon, un
+ * tirage aleatoire : la valeur est rendue a l'appelant, qui l'affiche. Ainsi
+ * un depot fraichement clone n'a aucun identifiant valable écrit nulle part.
+ */
+function demoPassword() {
+  if (env.seedPassword) return { password: env.seedPassword, generated: false }
+
+  return { password: `demo-${randomBytes(9).toString('base64url')}`, generated: true }
+}
 
 /** Objectifs suivis, avec la progression relevee séance après séance. */
 const GOALS = [
@@ -470,8 +484,11 @@ export async function seedDemoData() {
     childIds.set(key, child.id)
   }
 
-  // 2. Les comptes : tout le reste référence leur identifiant.
-  for (const { key, password, childKeys = [], groups = [], ...data } of USERS) {
+  // 2. Les comptes : tout le reste référence leur identifiant. Les six
+  // partagent le même mot de passe, chacun avec son propre sel.
+  const { password, generated } = demoPassword()
+
+  for (const { key, childKeys = [], groups = [], ...data } of USERS) {
     const user = await userModel.create({
       ...data,
       groups,
@@ -628,5 +645,9 @@ export async function seedDemoData() {
     children: childIds.size,
     users: userIds.size,
     days: days.length,
+    // Rendu a l'appelant plutôt qu'affiche ici : c'est la commande qui sait
+    // ou elle ecrit. Le mot de passe n'est montre que s'il a été tire au sort,
+    // celui d'un `.env` n'a pas a repasser par les journaux.
+    password: generated ? password : null,
   }
 }

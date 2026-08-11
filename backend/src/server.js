@@ -14,7 +14,16 @@ async function bootstrap() {
   if (env.seedDemoData && !isProduction && !usesSupabase) {
     try {
       const result = await seedDemoData()
-      if (!result.skipped) logger.info('Données de démonstration chargees (stockage en mémoire)')
+
+      if (!result.skipped) {
+        logger.info('Données de démonstration chargees (stockage en mémoire)')
+
+        // Le stockage en mémoire repart de zéro à chaque démarrage : sans
+        // `SEED_PASSWORD` dans `backend/.env`, le mot de passe change ici aussi.
+        if (result.password) {
+          logger.info(`Comptes de demonstration, mot de passe : ${result.password}`)
+        }
+      }
     } catch (error) {
       logger.error("Échec de l'amorçage des données de démonstration", error.message)
     }
