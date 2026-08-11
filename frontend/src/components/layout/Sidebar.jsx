@@ -9,7 +9,18 @@ import { navigationFor } from '@/lib/navigation.js'
 import { roleLabel } from '@/lib/roles.js'
 import { cx } from '@/lib/ui.js'
 
-function Sidebar({ badges = {} }) {
+/**
+ * Navigation principale.
+ *
+ * Tiroir coulissant sous 1024 px, colonne fixe au-dela. `invisible` quand il
+ * est ferme, et non seulement decale : une barre poussee hors de l'écran reste
+ * atteignable au clavier, et l'on tabulerait dans un menu qu'on ne voit pas.
+ *
+ * Chaque lien referme le tiroir en partant : sur telephone il recouvre l'écran,
+ * le laisser ouvert masquerait la page qu'on vient de demander. Le voile bloque
+ * le reste de l'interface, ces liens sont donc les seuls départs possibles.
+ */
+function Sidebar({ badges = {}, open = false, onClose }) {
   const { user, logout } = useAuth()
   const items = navigationFor(user.role)
   const [leaving, setLeaving] = useState(false)
@@ -23,7 +34,13 @@ function Sidebar({ badges = {} }) {
   }
 
   return (
-    <aside className="sticky top-0 flex h-screen max-h-screen w-[264px] flex-none flex-col self-start overflow-y-auto bg-navy pb-2">
+    <aside
+      className={cx(
+        'fixed inset-y-0 left-0 z-40 flex w-[264px] max-w-[85vw] flex-none flex-col overflow-y-auto bg-navy pb-2 transition-transform duration-200',
+        'lg:sticky lg:top-0 lg:z-auto lg:h-screen lg:max-h-screen lg:max-w-none lg:translate-x-0 lg:visible lg:self-start lg:transition-none',
+        open ? 'translate-x-0' : 'invisible -translate-x-full',
+      )}
+    >
       <div className="flex items-center gap-3 border-b border-white/10 px-[22px] pb-5 pt-6">
         <ButterflyMark size={38} radius={11} />
         <div className="flex flex-col gap-0.5">
@@ -32,6 +49,15 @@ function Sidebar({ badges = {} }) {
             Centre Papillon Bleu
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fermer le menu"
+          className="ml-auto flex h-9 w-9 flex-none cursor-pointer items-center justify-center rounded-lg text-[18px] leading-none text-onnavy hover:bg-white/10 hover:text-white lg:hidden"
+        >
+          ×
+        </button>
       </div>
 
       <nav className="flex flex-col gap-[3px] px-3 py-[18px]">
@@ -44,6 +70,7 @@ function Sidebar({ badges = {} }) {
             key={item.to}
             to={item.to}
             end={item.end}
+            onClick={onClose}
             className={({ isActive }) =>
               cx(
                 'flex w-full items-center gap-[11px] rounded-[9px] px-3 py-2.5 text-left text-[13.5px]',
@@ -67,6 +94,7 @@ function Sidebar({ badges = {} }) {
       <div className="mt-auto px-3 pb-[18px] pt-3.5">
         <NavLink
           to="/profil"
+          onClick={onClose}
           className="flex items-center gap-2.5 rounded-[9px] px-2 py-3 text-[11.5px] text-onnavy-dim hover:text-white"
         >
           <span className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full bg-brand text-[10.5px] font-bold text-white">
