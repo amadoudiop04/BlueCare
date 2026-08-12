@@ -44,7 +44,9 @@ function UsersPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
-  const { data, error, loading, reload } = useApi(() => fetchUsers({ pageSize: 100 }), [])
+  const { data, error, loading, reload } = useApi(() => fetchUsers({ pageSize: 100 }), [], {
+    cache: 'users',
+  })
 
   const [search, setSearch] = useState('')
   const [role, setRole] = useState(null)

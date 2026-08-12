@@ -33,7 +33,7 @@ import { cx } from '@/lib/ui.js'
  * repris plutôt que d'être simules.
  */
 function ProfilePage() {
-  const { user, scope, logout } = useAuth()
+  const { user, scope } = useAuth()
   const notifications = useApi(() => fetchNotifications().catch(() => ({ items: [], summary: null })), [])
 
   const permissions = permissionsFor(user.role)
@@ -63,24 +63,32 @@ function ProfilePage() {
       <PageHeader crumb="Compte utilisateur" title="Mon profil" />
 
       <PageBody>
-        <Card className="animate-up overflow-hidden">
-          <div className="h-24 bg-gradient-to-r from-[#0C1E42] via-[#14418F] to-[#1E5FD8]" />
-          <div className="-mt-[34px] flex flex-wrap items-end gap-5 px-7 pb-6">
-            <div className="flex h-[84px] w-[84px] flex-none items-center justify-center rounded-3xl border-4 border-white bg-brand text-[26px] font-bold tracking-[-0.02em] text-white shadow-lift">
-              {initials(user.firstName, user.lastName)}
+        {/*
+         * Bandeau d'identite : on doit voir de qui est le compte ouvert avant
+         * de toucher aux formulaires en dessous. Sur les postes partages du
+         * centre, c'est aussi le rappel qu'on n'est pas dans la session d'un
+         * collègue. La déconnexion, elle, reste en bas de la barre laterale,
+         * atteignable depuis n'importe quel écran plutôt que d'ici seulement.
+         *
+         * Les initiales tiennent lieu de photo : l'application n'en stocke
+         * aucune, et un enfant du centre n'a rien a faire dans un avatar.
+         */}
+        <Card className="mb-[18px] flex items-center gap-4 px-6 py-5 sm:gap-5">
+          <span
+            className="flex h-[60px] w-[60px] flex-none items-center justify-center rounded-full bg-canvas text-[19px] font-bold tracking-[0.02em] text-muted-strong sm:h-[68px] sm:w-[68px] sm:text-[21px]"
+            aria-hidden="true"
+          >
+            {initials(user.firstName, user.lastName)}
+          </span>
+
+          <div className="min-w-0">
+            <h2 className="truncate text-[19px] font-bold tracking-[-0.015em] text-ink sm:text-[22px]">
+              {user.firstName} {user.lastName}
+            </h2>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
+              <Badge tone="brand">{roleLabel(user.role)}</Badge>
+              <span className="min-w-0 truncate text-[12.5px] text-muted">{user.email}</span>
             </div>
-            <div className="min-w-0 flex-1 pb-1">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <div className="text-[21px] font-bold tracking-[-0.02em]">
-                  {user.firstName} {user.lastName}
-                </div>
-                <Badge tone="brand">{roleLabel(user.role)}</Badge>
-              </div>
-              <div className="mt-1 text-[13px] text-muted">{user.email}</div>
-            </div>
-            <Button variant="secondary" onClick={logout} className="mb-1">
-              Se déconnecter
-            </Button>
           </div>
         </Card>
 

@@ -1,4 +1,5 @@
 import express from 'express'
+import compression from 'compression'
 import cors from 'cors'
 import morgan from 'morgan'
 
@@ -36,6 +37,21 @@ export function createApp() {
       exposedHeaders: ['Content-Disposition'],
     }),
   )
+
+  /*
+   * Compression des réponses.
+   *
+   * Le JSON de cette API se compresse très bien : les mêmes noms de champs se
+   * repetent a chaque ligne. La feuille de présence hebdomadaire, la liste des
+   * objectifs du périmètre ou l'agregation du tableau de bord passent de
+   * quelques centaines de kilo-octets a quelques dizaines — la difference se
+   * voit sur la connexion mobile d'un educateur en sortie.
+   *
+   * Le rapport PDF, lui, est déjà comprime : `compression` le laisse passer
+   * tel quel, son `content-type` n'etant pas dans la liste des types
+   * compressibles.
+   */
+  app.use(compression())
 
   // Le cookie de session est `sameSite: strict` : le navigateur ne l'attache a
   // aucune requête venue d'un autre site, ce qui coupe les attaques CSRF.

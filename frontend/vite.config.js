@@ -27,6 +27,25 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: mode !== 'production',
+      rollupOptions: {
+        output: {
+          /*
+           * React et le routeur dans leur propre fichier.
+           *
+           * Ils ne changent qu'aux montees de version, alors que le code de
+           * l'application change a chaque deploiement. Separes, le navigateur
+           * garde la partie stable en cache : une correction sur un ecran ne
+           * fait plus retelecharger 150 Ko de bibliotheque.
+           */
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined
+            if (/node_modules[/\\](react|react-dom|react-router|scheduler)/.test(id)) {
+              return 'react'
+            }
+            return undefined
+          },
+        },
+      },
     },
   }
 })

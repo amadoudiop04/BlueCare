@@ -16,6 +16,7 @@ import { fetchReference } from '@/api/tracking.api.js'
 import { useApi } from '@/hooks/useApi.js'
 import { useAuth } from '@/hooks/useAuth.js'
 import { formatDate, initials, percent, progressTone } from '@/lib/format.js'
+import { prefetchPath } from '@/lib/routes.js'
 import { cx } from '@/lib/ui.js'
 
 /**
@@ -67,7 +68,9 @@ function ChildrenPage() {
   // `active` par défaut : les fiches archivees ne polluent pas la liste, mais
   // restent atteignables — sans ce filtre, archiver reviendrait a perdre l'enfant.
   const [status, setStatus] = useState('active')
-  const { data, error, loading, reload } = useApi(() => loadChildren(status), [status])
+  const { data, error, loading, reload } = useApi(() => loadChildren(status), [status], {
+    cache: 'children',
+  })
 
   const [search, setSearch] = useState('')
   const [group, setGroup] = useState(null)
@@ -94,7 +97,12 @@ function ChildrenPage() {
         search={<HeaderSearch value={search} onChange={setSearch} />}
         action={
           canCreate ? (
-            <Button onClick={() => navigate('/enfants/nouveau')}>+ Nouvel enfant</Button>
+            <Button
+              onClick={() => navigate('/enfants/nouveau')}
+              onMouseEnter={() => prefetchPath('/enfants/nouveau')}
+            >
+              + Nouvel enfant
+            </Button>
           ) : null
         }
       />
@@ -218,6 +226,10 @@ function ChildCard({ child, disabilityLabel, onOpen, index }) {
       role="button"
       tabIndex={0}
       onClick={onOpen}
+      // Toutes les fiches partagent le même fichier : survoler une carte suffit
+      // a le telecharger, et les suivantes s'ouvrent alors sans attente.
+      onMouseEnter={() => prefetchPath(`/enfants/${child.id}`)}
+      onFocus={() => prefetchPath(`/enfants/${child.id}`)}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()

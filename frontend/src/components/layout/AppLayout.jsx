@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Suspense, useEffect, useState } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 
+import CommandPalette from '@/components/layout/CommandPalette.jsx'
+import RouteProgress from '@/components/layout/RouteProgress.jsx'
 import Sidebar from '@/components/layout/Sidebar.jsx'
 import ButterflyMark from '@/components/ui/ButterflyMark.jsx'
 
@@ -16,6 +18,7 @@ import ButterflyMark from '@/components/ui/ButterflyMark.jsx'
  */
 function AppLayout({ badges }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const { pathname } = useLocation()
 
   useEffect(() => {
     if (!menuOpen) return undefined
@@ -28,8 +31,47 @@ function AppLayout({ badges }) {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [menuOpen])
 
+  /*
+   * Le tiroir recouvre l'écran sur telephone. Sans ce verrou, le doigt qui
+   * glisse dessus fait defiler la page en dessous : on referme le menu pour
+   * retrouver un écran qui n'est plus au même endroit qu'on l'a laisse.
+   */
+  useEffect(() => {
+    if (!menuOpen) return undefined
+
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [menuOpen])
+
+  /*
+   * Remise a zero du defilement d'un écran a l'autre.
+   *
+   * Une application monopage ne rechargeant rien, la position de defilement
+   * survit a la navigation : depuis le bas d'une longue fiche enfant, ouvrir
+   * les présences les affichait au milieu du tableau, sans en-tête ni titre —
+   * l'écran semblait avoir mal charge.
+   */
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
   return (
     <div className="flex min-h-screen w-full bg-canvas">
+      {/*
+       * Premier arrêt de la tabulation : sans lui, atteindre le contenu au
+       * clavier demande de traverser les huit liens de la barre laterale a
+       * chaque changement d'écran.
+       */}
+      <a
+        href="#contenu"
+        className="sr-only z-50 focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-[13px] focus:font-semibold focus:text-brand focus:shadow-lift"
+      >
+        Aller au contenu
+      </a>
+
       <Sidebar badges={badges} open={menuOpen} onClose={() => setMenuOpen(false)} />
 
       {menuOpen ? (
@@ -41,10 +83,19 @@ function AppLayout({ badges }) {
         />
       ) : null}
 
-      <main className="flex min-w-0 flex-1 flex-col">
+      <main id="contenu" className="flex min-w-0 flex-1 flex-col">
         <MobileTopBar onOpen={() => setMenuOpen(true)} />
-        <Outlet />
+        {/*
+         * Frontière d'attente posee ici, et non autour de toute l'application :
+         * pendant qu'un écran se telecharge, la barre laterale et la barre du
+         * telephone restent en place. Seule la zone de contenu attend.
+         */}
+        <Suspense fallback={<RouteProgress />}>
+          <Outlet />
+        </Suspense>
       </main>
+
+      <CommandPalette />
     </div>
   )
 }
