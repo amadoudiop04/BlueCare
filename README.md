@@ -222,9 +222,9 @@ rôle pour décider qu'un enfant est accessible.
 
 ## Rapidité et confort d'usage
 
-Le centre travaille sur des postes partagés et des téléphones, souvent en connexion
-médiocre. Ce qui suit n'est pas de l'optimisation gratuite : c'est ce qui sépare une
-application qu'on utilise d'une application qu'on subit.
+Le centre travaille sur des postes partagés et des téléphones, avec un réseau souvent lent
+et instable. Les choix qui suivent visent tous la même chose : que l'application reste
+utilisable dans ces conditions, et pas seulement sur un poste de développement.
 
 **Ce qui est téléchargé**
 
@@ -645,11 +645,9 @@ même code métier.
    (*Project Settings → Data API*).
 4. `npm run seed --workspace backend` — crée les comptes et le jeu de démonstration.
    La commande est idempotente : la relancer ne duplique rien.
-
-> [!WARNING]
-> Pour une base **de production**, sauter l'étape 4 : le seed y créerait des comptes de
-> démonstration. Utiliser `npm run create-admin --workspace backend` à la place, qui crée
-> un unique compte de direction avec vos identifiants.
+   Sur une base **de production**, sauter cette étape : elle y créerait des comptes de
+   démonstration. Lancer `npm run create-admin --workspace backend` à la place, qui crée
+   un unique compte de direction avec vos identifiants.
 
 Au démarrage, le serveur annonce le pilote retenu : `stockage : supabase` ou `stockage : memory`.
 
@@ -660,19 +658,11 @@ seconde barrière si l'interface parlait un jour directement à Supabase.
 
 ### Jeu de démonstration
 
-Six comptes (un par rôle, deux éducateurs), cinq enfants, sept semaines de présences, quatre
-activités, six mois d'objectifs et de comptes rendus, deux traitements — de quoi voir les
-alertes, les courbes et les rappels dès le premier démarrage. En mémoire il est rechargé à
-chaque démarrage ; avec Supabase il est écrit une fois par `npm run seed`.
-
-| Compte de démonstration | Rôle |
-| --- | --- |
-| `admin@papillonbleu.test` | administrateur |
-| `directrice@papillonbleu.test` | directrice |
-| `infirmiere@papillonbleu.test` | infirmière |
-| `educateur.coquelicots@papillonbleu.test` | éducateur (Les Coquelicots) |
-| `educateur.bleuets@papillonbleu.test` | éducateur (Les Bleuets) |
-| `famille.bakayoko@papillonbleu.test` | famille (Lina) |
+Six comptes couvrant les quatre rôles (deux éducateurs, un par groupe), cinq enfants, sept
+semaines de présences, quatre activités, six mois d'objectifs et de comptes rendus, deux
+traitements — de quoi voir les alertes, les courbes et les rappels dès le premier
+démarrage. En mémoire il est rechargé à chaque démarrage ; avec Supabase il est écrit une
+fois par `npm run seed`.
 
 **Aucun mot de passe n'est écrit dans le dépôt.** Les six comptes partagent celui de
 `SEED_PASSWORD` (`backend/.env`, hors dépôt). Laissé vide, l'amorçage en tire un au hasard
@@ -680,7 +670,8 @@ et l'affiche **une seule fois** dans la console — seul son hachage est conserv
 relire ensuite est impossible. En stockage mémoire, le jeu étant rechargé à chaque
 démarrage, un `SEED_PASSWORD` fixe évite d'aller rechercher la valeur dans les journaux.
 
-Détail complet du jeu de données : [COMPTES-DE-TEST.md](COMPTES-DE-TEST.md).
+Adresses de connexion et détail complet du jeu de données :
+[COMPTES-DE-TEST.md](COMPTES-DE-TEST.md).
 
 ---
 
@@ -712,7 +703,7 @@ REST Client (`humao.rest-client`) et cliquer sur « Send Request ». Les requêt
 chaînent : lancer « Connexion » en premier, les suivantes réutilisent le jeton.
 
 Cela suppose l'API démarrée (`npm run dev`) et utilise les comptes de démonstration
-ci-dessus.
+([COMPTES-DE-TEST.md](COMPTES-DE-TEST.md)).
 
 Pour la réinitialisation de mot de passe, le jeton n'arrive pas dans la réponse mais par
 courriel : en développement, le lien est écrit dans les logs de `npm run dev`, il suffit
