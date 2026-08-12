@@ -33,10 +33,19 @@ import { cx } from '@/lib/ui.js'
  * repris plutôt que d'être simules.
  */
 function ProfilePage() {
-  const { user, scope } = useAuth()
+  const { user, scope, logout } = useAuth()
   const notifications = useApi(() => fetchNotifications().catch(() => ({ items: [], summary: null })), [])
+  const [leaving, setLeaving] = useState(false)
 
   const permissions = permissionsFor(user.role)
+
+  const onLogout = async () => {
+    setLeaving(true)
+    // `logout` avale ses erreurs : sur un poste partagé, se déconnecter doit
+    // aboutir même si le réseau est tombé. Pas de `finally` pour réactiver le
+    // bouton, l'écran de connexion remplace la page dans la foulée.
+    await logout()
+  }
 
   // Ce que l'utilisateur ne peut pas changer lui-même : son rôle et son
   // périmètre viennent de la direction, les dates du serveur. Le reste
@@ -67,13 +76,15 @@ function ProfilePage() {
          * Bandeau d'identite : on doit voir de qui est le compte ouvert avant
          * de toucher aux formulaires en dessous. Sur les postes partages du
          * centre, c'est aussi le rappel qu'on n'est pas dans la session d'un
-         * collègue. La déconnexion, elle, reste en bas de la barre laterale,
-         * atteignable depuis n'importe quel écran plutôt que d'ici seulement.
+         * collègue — d'où le bouton de déconnexion juste à côté du nom, là où
+         * on vient justement vérifier de qui est la session ouverte. Il double
+         * celui de la barre latérale, qui reste le raccourci disponible depuis
+         * n'importe quel écran.
          *
          * Les initiales tiennent lieu de photo : l'application n'en stocke
          * aucune, et un enfant du centre n'a rien a faire dans un avatar.
          */}
-        <Card className="mb-[18px] flex items-center gap-4 px-6 py-5 sm:gap-5">
+        <Card className="mb-[18px] flex flex-wrap items-center gap-4 px-6 py-5 sm:gap-5">
           <span
             className="flex h-[60px] w-[60px] flex-none items-center justify-center rounded-full bg-canvas text-[19px] font-bold tracking-[0.02em] text-muted-strong sm:h-[68px] sm:w-[68px] sm:text-[21px]"
             aria-hidden="true"
@@ -90,6 +101,15 @@ function ProfilePage() {
               <span className="min-w-0 truncate text-[12.5px] text-muted">{user.email}</span>
             </div>
           </div>
+
+          <Button
+            variant="danger"
+            onClick={onLogout}
+            disabled={leaving}
+            className="ml-auto flex-none"
+          >
+            {leaving ? 'Déconnexion…' : 'Déconnexion'}
+          </Button>
         </Card>
 
         <div className="grid items-start gap-[18px] xl:grid-cols-2">
