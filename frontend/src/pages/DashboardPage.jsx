@@ -51,26 +51,37 @@ const STATUS_LABEL = {
   cancelled: 'Annulée',
 }
 
+/*
+ * Les six requêtes du tableau de bord partent **ensemble**.
+ *
+ * Elles etaient enchainees : la vue direction attendait le récapitulatif, puis
+ * la feuille de présence, puis les prises de médicaments — trois allers-retours
+ * bout a bout alors qu'aucun ne depend du precedent. C'est le premier écran
+ * après la connexion, donc celui sur lequel se juge la rapidite de
+ * l'application ; il ne coute plus que le plus lent des six appels.
+ *
+ * Chaque requête absorbe son erreur : un bloc indisponible laisse un trou dans
+ * la page, il n'emporte pas le tableau de bord entier.
+ */
 async function loadDashboard(role) {
   const today = todayIso()
+  const isDirector = role === 'director'
+  const isNurse = role === 'nurse'
 
-  const [notifications, pending, sessions] = await Promise.all([
+  const [notifications, pending, sessions, overview, sheet, doses] = await Promise.all([
     fetchNotifications().catch(() => ({ items: [], summary: null })),
-    role === 'nurse'
-      ? Promise.resolve({ items: [], summary: { total: 0, overdue: 0 } })
+    isNurse
+      ? { items: [], summary: { total: 0, overdue: 0 } }
       : fetchPendingReports().catch(() => ({ items: [], summary: { total: 0, overdue: 0 } })),
     apiClient
       .get(`/sessions${query({ from: today, to: today })}`)
       .then((body) => body.data)
       .catch(() => []),
+    // La direction dispose d'un endpoint d'agregation ; les autres non.
+    isDirector ? fetchDashboard().catch(() => null) : null,
+    fetchAttendanceSheet({ date: today }).catch(() => null),
+    isNurse || isDirector ? fetchMedicationDoses({ date: today }).catch(() => null) : null,
   ])
-
-  // La direction dispose d'un endpoint d'agregation ; les autres non.
-  const overview = role === 'director' ? await fetchDashboard().catch(() => null) : null
-  const sheet = await fetchAttendanceSheet({ date: today }).catch(() => null)
-  const doses = role === 'nurse' || role === 'director'
-    ? await fetchMedicationDoses({ date: today }).catch(() => null)
-    : null
 
   return { notifications, pending, sessions, overview, sheet, doses }
 }
@@ -179,7 +190,9 @@ function kpisFor(role, data) {
 function DashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { data, error, loading, reload } = useApi(() => loadDashboard(user.role), [user.role])
+  const { data, error, loading, reload } = useApi(() => loadDashboard(user.role), [user.role], {
+    cache: 'dashboard',
+  })
 
   const crumb = { educator: 'Mes séances', nurse: 'Suivi santé', director: 'Vue direction' }[user.role]
   const title = { educator: 'Ma journee', nurse: 'Tableau de bord santé', director: 'Tableau de bord' }[user.role]

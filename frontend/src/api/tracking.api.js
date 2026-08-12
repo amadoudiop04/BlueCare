@@ -1,4 +1,5 @@
 import { apiClient, query } from '@/api/client.js'
+import { dedupe, readCache, writeCache } from '@/lib/cache.js'
 
 /** Séances, comptes-rendus, présences, notifications et tableau de bord. */
 
@@ -50,9 +51,29 @@ export async function fetchDashboard(params) {
   return body.data
 }
 
+/**
+ * Listes de valeurs du référentiel : types de handicap, statuts, groupes,
+ * humeurs, seuils d'alerte.
+ *
+ * Presque tous les écrans en ont besoin, et la réponse ne bouge pas d'une
+ * minute a l'autre. Elle est donc mémorisée : la liste des enfants, la fiche
+ * individuelle et les deux formulaires la partagent au lieu de la redemander
+ * chacun de leur côte. Comme le reste du cache, elle expire d'elle-même et
+ * disparait a la déconnexion — les groupes existants font partie du périmètre,
+ * ils n'ont rien a faire dans la session du suivant.
+ */
+const REFERENCE_KEY = 'reference:[]'
+
 export async function fetchReference() {
-  const body = await apiClient.get('/reference')
-  return body.data
+  const cached = readCache(REFERENCE_KEY)
+  if (cached) return cached.data
+
+  // `dedupe` couvre le cas de deux écrans montes ensemble : un seul appel part.
+  return dedupe(REFERENCE_KEY, async () => {
+    const body = await apiClient.get('/reference')
+    writeCache(REFERENCE_KEY, body.data)
+    return body.data
+  })
 }
 
 export async function fetchMedicationDoses(params) {

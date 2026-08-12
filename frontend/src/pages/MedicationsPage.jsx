@@ -31,7 +31,9 @@ const STATUS_LABEL = {
 
 function MedicationsPage() {
   const [date, setDate] = useState(todayIso())
-  const { data, error, loading, reload } = useApi(() => fetchMedicationDoses({ date }), [date])
+  const { data, error, loading, reload } = useApi(() => fetchMedicationDoses({ date }), [date], {
+    cache: 'medication-doses',
+  })
 
   return (
     <>
@@ -52,9 +54,11 @@ function MedicationsPage() {
       <PageBody>
         <ErrorNotice error={error} onRetry={reload} />
 
+        {/* `data` peut manquer sans que l'on charge : c'est le cas d'une requête
+            en erreur, ou le bandeau ci-dessus porte deja l'explication. */}
         {loading ? (
           <Skeleton height={320} className="rounded-2xl" />
-        ) : (
+        ) : data ? (
           <>
             <div className="grid gap-4 sm:grid-cols-3">
               <SummaryTile label="Prises prévues" value={data.summary.total} />
@@ -89,7 +93,7 @@ function MedicationsPage() {
               )}
             </Card>
           </>
-        )}
+        ) : null}
       </PageBody>
     </>
   )

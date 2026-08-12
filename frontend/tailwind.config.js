@@ -72,11 +72,18 @@ export default {
           '50%': { boxShadow: '0 0 0 6px rgba(192,64,90,0)' },
         },
         omDraw: { from: { strokeDashoffset: '900' }, to: { strokeDashoffset: '0' } },
+        // Barre de chargement indeterminee : on ne sait pas combien de temps
+        // dure le telechargement d'un ecran, seulement qu'il est en cours.
+        omSweep: {
+          from: { transform: 'translateX(-100%)' },
+          to: { transform: 'translateX(400%)' },
+        },
       },
 
       animation: {
         up: 'omUp .55s cubic-bezier(.2,.8,.2,1) both',
         fade: 'omFade .5s ease both',
+        sweep: 'omSweep 1.1s cubic-bezier(.4,0,.2,1) infinite',
         grow: 'omGrow .85s cubic-bezier(.2,.85,.25,1) both',
         growY: 'omGrowY .7s cubic-bezier(.2,.85,.25,1) both',
         pulseRing: 'omPulse 2.4s ease-in-out infinite',

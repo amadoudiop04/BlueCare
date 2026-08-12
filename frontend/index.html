@@ -9,10 +9,28 @@
     <meta name="theme-color" content="#0C1E42" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Les polices ne bloquent pas le premier affichage.
+
+      Une feuille de style classique retarde le rendu jusqu'a son arrivee : sur
+      une connexion lente, l'ecran restait blanc en attendant Google Fonts, un
+      serveur sur lequel nous n'avons aucune prise. Chargee en `print` puis
+      basculee en `all` une fois recue, elle n'est plus sur le chemin critique :
+      l'interface s'affiche tout de suite avec la police de repli, et les
+      caracteres definitifs prennent la place a l'arrivee (`display=swap`).
+    -->
     <link
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <title>BlueCare · Centre Papillon Bleu</title>
   </head>
   <body>

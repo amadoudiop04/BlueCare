@@ -42,21 +42,25 @@ const MOOD_TONE = {
   'very-difficult': 'danger',
 }
 
+/*
+ * Sept requêtes, un seul aller-retour de bout en bout.
+ *
+ * Les traitements attendaient que les six autres soient revenues avant de
+ * partir, sans en dependre : la fiche s'affichait donc en deux temps pour
+ * l'infirmiere et la direction, les seules a les voir.
+ */
 async function loadChildFile(childId, role) {
-  const [child, goals, progress, sessions, gallery, reference] = await Promise.all([
+  const [child, goals, progress, sessions, gallery, reference, medications] = await Promise.all([
     fetchChild(childId),
     fetchChildGoals(childId),
     fetchChildProgress(childId, { months: 6 }),
     canWrite(role) || role === 'nurse'
       ? fetchChildSessions(childId).catch(() => ({ items: [], summary: null }))
-      : Promise.resolve({ items: [], summary: null }),
+      : { items: [], summary: null },
     fetchChildGallery(childId).catch(() => ({ items: [] })),
     fetchReference().catch(() => null),
+    canReadMedical(role) ? fetchChildMedications(childId).catch(() => []) : null,
   ])
-
-  const medications = canReadMedical(role)
-    ? await fetchChildMedications(childId).catch(() => [])
-    : null
 
   return { child, goals, progress, sessions, gallery, medications, reference }
 }
@@ -69,6 +73,7 @@ function ChildFilePage() {
   const { data, error, loading, reload } = useApi(
     () => loadChildFile(childId, user.role),
     [childId, user.role],
+    { cache: 'child-file' },
   )
 
   const [exporting, setExporting] = useState(false)

@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth.js'
 import { initials } from '@/lib/format.js'
 import { navigationFor } from '@/lib/navigation.js'
 import { roleLabel } from '@/lib/roles.js'
+import { prefetchPath } from '@/lib/routes.js'
 import { cx } from '@/lib/ui.js'
 
 /**
@@ -19,6 +20,11 @@ import { cx } from '@/lib/ui.js'
  * Chaque lien referme le tiroir en partant : sur telephone il recouvre l'écran,
  * le laisser ouvert masquerait la page qu'on vient de demander. Le voile bloque
  * le reste de l'interface, ces liens sont donc les seuls départs possibles.
+ *
+ * Chaque lien precharge aussi son écran des le survol ou le focus clavier.
+ * Entre le moment ou le curseur s'arrête sur un lien et celui du clic, il
+ * s'ecoule assez de temps pour telecharger le fichier : la page est en général
+ * déjà la quand on la demande.
  */
 function Sidebar({ badges = {}, open = false, onClose }) {
   const { user, logout } = useAuth()
@@ -60,7 +66,7 @@ function Sidebar({ badges = {}, open = false, onClose }) {
         </button>
       </div>
 
-      <nav className="flex flex-col gap-[3px] px-3 py-[18px]">
+      <nav className="flex flex-col gap-[3px] px-3 pb-[18px] pt-[18px]">
         <div className="px-2.5 pb-2 pt-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-onnavy-faint">
           Navigation
         </div>
@@ -71,6 +77,9 @@ function Sidebar({ badges = {}, open = false, onClose }) {
             to={item.to}
             end={item.end}
             onClick={onClose}
+            onMouseEnter={() => prefetchPath(item.to)}
+            onFocus={() => prefetchPath(item.to)}
+            onTouchStart={() => prefetchPath(item.to)}
             className={({ isActive }) =>
               cx(
                 'flex w-full items-center gap-[11px] rounded-[9px] px-3 py-2.5 text-left text-[13.5px]',
@@ -95,9 +104,13 @@ function Sidebar({ badges = {}, open = false, onClose }) {
         <NavLink
           to="/profil"
           onClick={onClose}
+          onMouseEnter={() => prefetchPath('/profil')}
+          onFocus={() => prefetchPath('/profil')}
           className="flex items-center gap-2.5 rounded-[9px] px-2 py-3 text-[11.5px] text-onnavy-dim hover:text-white"
         >
-          <span className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full bg-brand text-[10.5px] font-bold text-white">
+          {/* Pastille grise, et non bleue : le bleu de la marque signale ce qui
+              est actif ou cliquable, pas l'identite de celui qui regarde. */}
+          <span className="flex h-[26px] w-[26px] flex-none items-center justify-center rounded-full bg-white/[0.14] text-[10.5px] font-bold text-onnavy-pale">
             {initials(user.firstName, user.lastName)}
           </span>
           <span className="min-w-0 truncate">

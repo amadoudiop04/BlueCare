@@ -75,7 +75,9 @@ async function loadWeek(reference) {
 
 function AttendancePage() {
   const [reference, setReference] = useState(todayIso())
-  const { data, error, loading, reload } = useApi(() => loadWeek(reference), [reference])
+  const { data, error, loading, reload } = useApi(() => loadWeek(reference), [reference], {
+    cache: 'attendance-week',
+  })
 
   return (
     <>

@@ -8,6 +8,7 @@ import {
 } from '@/api/auth.api.js'
 import { hasSessionHint, setSessionExpiredHandler } from '@/api/client.js'
 import { AuthContext } from '@/features/auth/authContext.js'
+import { clearCache } from '@/lib/cache.js'
 
 /**
  * Session de l'utilisateur connecte.
@@ -35,6 +36,10 @@ export function AuthProvider({ children }) {
   const [status, setStatus] = useState(() => (hasSessionHint() ? 'loading' : 'anonymous'))
 
   const forgetSession = useCallback(() => {
+    // Les écrans mémorisent leurs réponses pour revenir en arrière sans
+    // recharger. Sur les postes partagés du centre, ce cache ne doit pas
+    // traverser une déconnexion : le suivant verrait les fiches du précédent.
+    clearCache()
     setUser(null)
     setScope(null)
     setStatus('anonymous')
@@ -77,6 +82,10 @@ export function AuthProvider({ children }) {
   }, [forgetSession])
 
   const openSession = useCallback((account) => {
+    // Même précaution a l'ouverture qu'a la fermeture : une session qui s'est
+    // terminee sans passer par « Déconnexion » (onglet ferme, expiration)
+    // aurait pu laisser ses réponses derrière elle.
+    clearCache()
     setUser(account)
     setStatus('authenticated')
 
